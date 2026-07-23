@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Animated, Easing, ViewStyle } from 'react-native';
+import { useEffect, useRef, useState } from "react";
+import { AccessibilityInfo, Animated, Easing, ViewStyle } from "react-native";
 
-import { colors } from '@/theme';
+import { colors } from "@/theme";
 
-import { styles } from './LoadingSpinner.styles';
+import { styles } from "./LoadingSpinner.styles";
 
 export type LoadingSpinnerProps = {
   size?: number;
@@ -16,7 +16,7 @@ export function LoadingSpinner({
   size = 112,
   strokeWidth = 5,
   color = colors.startupSpinner,
-  accessibilityLabel = 'Loading application',
+  accessibilityLabel = "Loading application",
 }: LoadingSpinnerProps) {
   const rotation = useRef(new Animated.Value(0)).current;
   const [reduceMotionEnabled, setReduceMotionEnabled] = useState(false);
@@ -30,7 +30,10 @@ export function LoadingSpinner({
       }
     });
 
-    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotionEnabled);
+    const subscription = AccessibilityInfo.addEventListener(
+      "reduceMotionChanged",
+      setReduceMotionEnabled,
+    );
 
     return () => {
       mounted = false;
@@ -66,12 +69,12 @@ export function LoadingSpinner({
     borderRadius: size / 2,
     borderWidth: strokeWidth,
     borderColor: color,
-    borderLeftColor: 'transparent',
+    borderLeftColor: "transparent",
     transform: [
       {
         rotate: rotation.interpolate({
           inputRange: [0, 1],
-          outputRange: ['0deg', '360deg'],
+          outputRange: ["0deg", "360deg"],
         }),
       },
     ],
