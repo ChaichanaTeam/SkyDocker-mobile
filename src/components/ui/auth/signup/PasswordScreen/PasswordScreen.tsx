@@ -1,7 +1,7 @@
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { PasswordRequirementList } from "@/components/ui/auth/signup/PasswordScreen/features/PasswordRequirementsList";
 import { isPasswordValid } from "@/validators/password.schema";
-import { icons } from "assets/icons";
+import { icons } from "../../../../../../assets/icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {

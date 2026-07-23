@@ -1,7 +1,7 @@
 import { SocialButton } from "@/components/shared/auth/SocialButton";
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { Ionicons } from "@expo/vector-icons";
-import { icons } from "assets/icons";
+import { icons } from "../../../../../../assets/icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {

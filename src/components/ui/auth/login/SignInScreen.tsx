@@ -1,7 +1,6 @@
 import { SocialButton } from "@/components/shared/auth/SocialButton";
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { Ionicons } from "@expo/vector-icons";
-import { icons } from "assets/icons";
 import { Link } from "expo-router";
 import { useState } from "react";
 import {
@@ -13,6 +12,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { icons } from "../../../../../assets/icons";
 
 const REGIONS = [
   { name: "Belarus", dialCode: "+375" },
