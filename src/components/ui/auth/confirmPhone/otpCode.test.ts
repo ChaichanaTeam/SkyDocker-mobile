@@ -37,6 +37,17 @@ describe("otpCode", () => {
     ]);
   });
 
+  it("clears the selected box when its input is emptied", () => {
+    expect(applyOtpInput(["6", "a", "1", "", "", ""], 1, "")).toEqual([
+      "6",
+      "",
+      "1",
+      "",
+      "",
+      "",
+    ]);
+  });
+
   it("moves to the previous input when backspacing an empty box", () => {
     expect(getPreviousOtpIndex(3)).toBe(2);
     expect(getPreviousOtpIndex(0)).toBe(0);
@@ -45,6 +56,11 @@ describe("otpCode", () => {
   it("moves to the next empty input after typed input", () => {
     expect(getNextOtpIndex(0, "6", 6)).toBe(1);
     expect(getNextOtpIndex(0, "6a1f4d", 6)).toBe(5);
+  });
+
+  it("keeps the selected input for empty or invalid-only values", () => {
+    expect(getNextOtpIndex(2, "", 6)).toBe(2);
+    expect(getNextOtpIndex(2, "- ", 6)).toBe(2);
   });
 
   it("reports completion only when every box has a character", () => {

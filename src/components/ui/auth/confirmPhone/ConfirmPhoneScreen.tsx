@@ -25,6 +25,7 @@ export const ConfirmPhoneScreen = () => {
   const router = useRouter();
   const inputRefs = useRef<(TextInput | null)[]>([]);
   const [code, setCode] = useState(() => createEmptyOtpCode(CODE_LENGTH));
+  const codeRef = useRef(code);
   const isComplete = isOtpCodeComplete(code);
 
   useEffect(() => {
@@ -39,13 +40,20 @@ export const ConfirmPhoneScreen = () => {
     inputRefs.current[index]?.focus();
   };
 
-  const handleCodeChange = (index: number, value: string) => {
-    const nextCode = applyOtpInput(code, index, value);
-
+  const updateCode = (nextCode: string[]) => {
+    codeRef.current = nextCode;
     setCode(nextCode);
+  };
 
-    if (value.length > 0) {
-      focusInput(getNextOtpIndex(index, value, CODE_LENGTH));
+  const handleCodeChange = (index: number, value: string) => {
+    const nextCode = applyOtpInput(codeRef.current, index, value);
+
+    updateCode(nextCode);
+
+    const nextIndex = getNextOtpIndex(index, value, CODE_LENGTH);
+
+    if (nextIndex !== index) {
+      focusInput(nextIndex);
     }
   };
 
@@ -53,8 +61,17 @@ export const ConfirmPhoneScreen = () => {
     index: number,
     event: NativeSyntheticEvent<TextInputKeyPressEventData>
   ) => {
-    if (event.nativeEvent.key === "Backspace" && code[index] === "") {
-      focusInput(getPreviousOtpIndex(index));
+    if (event.nativeEvent.key !== "Backspace") {
+      return;
+    }
+
+    const previousIndex = getPreviousOtpIndex(index);
+    const clearIndex = codeRef.current[index] === "" ? previousIndex : index;
+
+    updateCode(applyOtpInput(codeRef.current, clearIndex, ""));
+
+    if (previousIndex !== index) {
+      focusInput(previousIndex);
     }
   };
 
@@ -96,7 +113,7 @@ export const ConfirmPhoneScreen = () => {
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="default"
-              selectTextOnFocus
+              selectTextOnFocus={false}
               textContentType="oneTimeCode"
               testID={`confirm-phone-code-input-${index}`}
             />

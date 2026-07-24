@@ -12,6 +12,11 @@ export const applyOtpInput = (
   const nextCode = [...currentCode];
   const characters = normalizeOtpInput(value);
 
+  if (value === "") {
+    nextCode[startIndex] = "";
+    return nextCode;
+  }
+
   characters.forEach((character, offset) => {
     const targetIndex = startIndex + offset;
 
@@ -30,7 +35,7 @@ export const getNextOtpIndex = (
   value: string,
   codeLength: number
 ) => {
-  const inputLength = Math.max(normalizeOtpInput(value).length, 1);
+  const inputLength = normalizeOtpInput(value).length;
 
   return Math.min(startIndex + inputLength, codeLength - 1);
 };
