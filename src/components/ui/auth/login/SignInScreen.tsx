@@ -1,7 +1,7 @@
 import { SocialButton } from "@/components/shared/auth/SocialButton";
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Modal,
@@ -31,6 +31,7 @@ type SignInScreenProps = {
 };
 
 export const SignInScreen = ({ onPressRegion }: SignInScreenProps) => {
+  const router = useRouter();
   const [authMethod, setAuthMethod] = useState<AuthMethod>("phone");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -49,6 +50,12 @@ export const SignInScreen = ({ onPressRegion }: SignInScreenProps) => {
       onPressRegion();
     } else {
       setIsPickerVisible(true);
+    }
+  };
+
+  const handleSignIn = () => {
+    if (isPhone) {
+      router.push("./confirm-phone");
     }
   };
 
@@ -114,7 +121,11 @@ export const SignInScreen = ({ onPressRegion }: SignInScreenProps) => {
           : "We will send a confirmation link to your email"}
       </Text>
 
-      <TouchableOpacity style={styles.signInButton} activeOpacity={0.8}>
+      <TouchableOpacity
+        style={styles.signInButton}
+        activeOpacity={0.8}
+        onPress={handleSignIn}
+      >
         <Text style={styles.signInButtonText}>Sign In</Text>
       </TouchableOpacity>
 
