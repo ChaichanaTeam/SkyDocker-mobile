@@ -1,9 +1,10 @@
 import { Platform, StyleSheet } from "react-native";
+import { colors } from "@/theme";
 
 export const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#1E293B",
+    backgroundColor: colors.backgroundMain,
   },
   content: {
     flex: 1,
@@ -15,7 +16,7 @@ export const styles = StyleSheet.create({
     marginTop: 56,
   },
   title: {
-    color: "#E8EEFF",
+    color: colors.text2,
     fontFamily: "Inter_600SemiBold",
     fontSize: 36,
     fontWeight: "600",
@@ -23,7 +24,7 @@ export const styles = StyleSheet.create({
   },
   subtitle: {
     marginTop: 8,
-    color: "#CAD4E380",
+    color: colors.text3,
     fontFamily: "Inter_400Regular",
     fontSize: 13,
     letterSpacing: 0,
@@ -38,7 +39,7 @@ export const styles = StyleSheet.create({
     height: 64,
     borderRadius: 8,
     backgroundColor: "#FFFDFD",
-    color: "#536BBA",
+    color: colors.pressableActive1,
     fontFamily: "Inter_600SemiBold",
     fontSize: 32,
     fontWeight: "600",
@@ -53,7 +54,7 @@ export const styles = StyleSheet.create({
     padding: 8,
   },
   centerBackText: {
-    color: "#6987E9",
+    color: colors.text1,
     fontFamily: "Inter_400Regular",
     fontSize: 14,
     letterSpacing: 0,
@@ -65,7 +66,7 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   bottomBackText: {
-    color: "#E8EEFF",
+    color: colors.text2,
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
     letterSpacing: 0,
@@ -74,7 +75,7 @@ export const styles = StyleSheet.create({
     height: 46,
     paddingHorizontal: 22,
     borderRadius: 24,
-    backgroundColor: "#536BBA",
+    backgroundColor: colors.pressableActive1,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -82,7 +83,7 @@ export const styles = StyleSheet.create({
     opacity: 0.5,
   },
   nextButtonText: {
-    color: "#E8EEFF",
+    color: colors.text2,
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
     letterSpacing: 0,

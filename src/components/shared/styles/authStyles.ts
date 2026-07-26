@@ -1,9 +1,10 @@
 import { Platform, StyleSheet } from "react-native";
+import { colors } from "@/theme";
 
 export const authStyles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#1E293B",
+    backgroundColor: colors.backgroundMain,
   },
   content: {
     paddingHorizontal: (412 - 351) / 2,
@@ -42,7 +43,7 @@ export const authStyles = StyleSheet.create({
     width: 351,
     height: 64,
     borderRadius: 16,
-    backgroundColor: "#10336D",
+    backgroundColor: colors.pressableActive3,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -91,7 +92,7 @@ export const authStyles = StyleSheet.create({
     position: "absolute",
     top: -9,
     left: 16,
-    backgroundColor: "#1E293B",
+    backgroundColor: colors.backgroundMain,
     paddingHorizontal: 6,
     color: "#FFFFFF",
     fontFamily: "Inter_400Regular",
@@ -200,7 +201,7 @@ export const authStyles = StyleSheet.create({
     width: 87,
     height: 52,
     borderRadius: 28,
-    backgroundColor: "#536BBA",
+    backgroundColor: colors.pressableActive1,
     alignItems: "center",
     justifyContent: "center",
   },
