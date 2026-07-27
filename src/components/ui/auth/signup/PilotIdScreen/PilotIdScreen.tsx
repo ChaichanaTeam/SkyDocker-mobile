@@ -16,7 +16,7 @@ export const PilotIdScreen = () => {
   };
 
   const handleNext = () => {
-    router.push("/(auth)/fullnamscreen");
+    router.push("/(auth)/phonenumscreen");
   };
   return (
     <ScrollView

@@ -1,5 +1,5 @@
-import { Platform, StyleSheet } from "react-native";
 import { colors } from "@/theme";
+import { Platform, StyleSheet } from "react-native";
 
 export const authStyles = StyleSheet.create({
   screen: {
@@ -245,6 +245,32 @@ export const authStyles = StyleSheet.create({
   },
   modalOptionSelected: {
     color: "#3B82F6",
+    fontFamily: "Inter_600SemiBold",
+  },
+  dropdownList: {
+    marginTop: 4,
+    marginHorizontal: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  dropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  dropdownItemSelected: {
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+  },
+  dropdownItemText: {
+    color: "#FFFFFF80",
+    fontFamily: "Inter_400Regular",
+    fontSize: 14,
+  },
+  dropdownItemTextSelected: {
+    color: "#ffffff",
     fontFamily: "Inter_600SemiBold",
   },
 });
