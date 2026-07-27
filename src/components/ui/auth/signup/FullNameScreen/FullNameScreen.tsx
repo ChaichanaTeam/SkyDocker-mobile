@@ -1,4 +1,5 @@
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
+import { colors } from "@/theme";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -40,7 +41,7 @@ export const FullNameScreen = () => {
             value={name}
             onChangeText={setName}
             placeholder="Anatoly"
-            placeholderTextColor="#FFFFFF80"
+            placeholderTextColor={colors.backgroundWhite80}
             autoCapitalize="words"
           />
         </View>
@@ -54,7 +55,7 @@ export const FullNameScreen = () => {
             value={secondName}
             onChangeText={setSecondName}
             placeholder="Fisher"
-            placeholderTextColor="#FFFFFF80"
+            placeholderTextColor={colors.backgroundWhite80}
             autoCapitalize="words"
           />
         </View>

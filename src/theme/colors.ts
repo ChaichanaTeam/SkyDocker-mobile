@@ -20,7 +20,10 @@ export const colors = {
   mapZoneRestrictedArea: '#E33C3C33',
   strokeRestricted: '#D71C1C',
   popupWarning: '#D71C1C',
-  startupBackground: '#FFFFFF',
+
+  //temp colors
+  backgroundWhite: '#FFFFFF',
+  backgroundWhite80: '#FFFFFF80',
   startupLogo: '#000000',
   startupSpinner: '#D9D9D9',
   textPrimary: '#141414',

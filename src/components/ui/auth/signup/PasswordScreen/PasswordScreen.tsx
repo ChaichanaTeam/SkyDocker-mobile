@@ -1,5 +1,6 @@
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { PasswordRequirementList } from "@/components/ui/auth/signup/PasswordScreen/features/PasswordRequirementsList";
+import { colors } from "@/theme";
 import { isPasswordValid } from "@/validators/password.schema";
 import { icons } from "../../../../../../assets/icons";
 import { router } from "expo-router";
@@ -73,7 +74,7 @@ export const PasswordScreen = () => {
               value={password}
               onChangeText={setPassword}
               placeholder="Password"
-              placeholderTextColor="#FFFFFF80"
+              placeholderTextColor={colors.backgroundWhite80}
               secureTextEntry={!showPassword}
             />
             <TouchableOpacity
@@ -82,9 +83,9 @@ export const PasswordScreen = () => {
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               {showPassword ? (
-                <EyeIcon width={20} height={20} color="#FFFFFF80" />
+                <EyeIcon width={20} height={20} color={colors.backgroundWhite80} />
               ) : (
-                <EyeOffIcon width={20} height={20} color="#FFFFFF80" />
+                <EyeOffIcon width={20} height={20} color={colors.backgroundWhite80} />
               )}
             </TouchableOpacity>
           </View>
@@ -106,7 +107,7 @@ export const PasswordScreen = () => {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               placeholder="Confirm password"
-              placeholderTextColor="#FFFFFF80"
+              placeholderTextColor={colors.backgroundWhite80}
               secureTextEntry={!showConfirmPassword}
             />
             <TouchableOpacity
@@ -115,9 +116,9 @@ export const PasswordScreen = () => {
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               {showConfirmPassword ? (
-                <EyeIcon width={20} height={20} color="#FFFFFF80" />
+                <EyeIcon width={20} height={20} color={colors.backgroundWhite80} />
               ) : (
-                <EyeOffIcon width={20} height={20} color="#FFFFFF80" />
+                <EyeOffIcon width={20} height={20} color={colors.backgroundWhite80} />
               )}
             </TouchableOpacity>
           </View>

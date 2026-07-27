@@ -1,4 +1,5 @@
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
+import { colors } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -75,7 +76,7 @@ export const PhoneScreen = ({ onPressRegion }: SignInScreenProps) => {
             <Ionicons
               name={isDropdownOpen ? "chevron-up" : "chevron-down"}
               size={18}
-              color="#ffffff"
+              color={colors.backgroundWhite}
             />
           </TouchableOpacity>
 
@@ -102,7 +103,7 @@ export const PhoneScreen = ({ onPressRegion }: SignInScreenProps) => {
                       {item.name} ({item.dialCode})
                     </Text>
                     {isSelected && (
-                      <Ionicons name="checkmark" size={16} color="#ffffff" />
+                      <Ionicons name="checkmark" size={16} color={colors.backgroundWhite} />
                     )}
                   </TouchableOpacity>
                 );
@@ -118,7 +119,7 @@ export const PhoneScreen = ({ onPressRegion }: SignInScreenProps) => {
               value={phone}
               onChangeText={setPhone}
               placeholder="(29) 123-45-67"
-              placeholderTextColor="#FFFFFF80"
+              placeholderTextColor={colors.backgroundWhite80}
               keyboardType="phone-pad"
             />
           </View>

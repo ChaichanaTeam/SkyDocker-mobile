@@ -1,4 +1,5 @@
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
+import { colors } from "@/theme";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -38,7 +39,7 @@ export const PilotIdScreen = () => {
               value={pilotId}
               onChangeText={setPilotId}
               placeholder="POL-p-xxxxxxxxxxxx"
-              placeholderTextColor="#FFFFFF80"
+              placeholderTextColor={colors.backgroundWhite80}
               autoCapitalize="characters"
               autoCorrect={false}
             />
