@@ -1,12 +1,14 @@
 import { StyleSheet } from "react-native";
 
+import { colors } from "@/theme";
+
 export const socialButtonStyles = StyleSheet.create({
   button: {
     width: 351,
     height: 66,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#ffffff",
+    borderColor: colors.backgroundWhite,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -20,7 +22,7 @@ export const socialButtonStyles = StyleSheet.create({
     justifyContent: "center",
   },
   label: {
-    color: "#ffffff",
+    color: colors.backgroundWhite,
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
     textAlign: "center",

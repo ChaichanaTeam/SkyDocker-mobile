@@ -1,5 +1,6 @@
 import { SocialButton } from "@/components/shared/auth/SocialButton";
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
+import { colors } from "@/theme";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -36,7 +37,7 @@ export const SignUpScreen = () => {
             value={email}
             onChangeText={setEmail}
             placeholder="name@example.com"
-            placeholderTextColor="#FFFFFF80"
+            placeholderTextColor={colors.backgroundWhite80}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
@@ -68,7 +69,7 @@ export const SignUpScreen = () => {
           Icon={icons.Google}
           iconWidth={19}
           iconHeight={20}
-          color="#ffffff"
+          color={colors.backgroundWhite}
           onPress={() => {}}
         />
         <SocialButton
@@ -76,7 +77,7 @@ export const SignUpScreen = () => {
           Icon={icons.Facebook}
           iconWidth={20}
           iconHeight={20}
-          color="#ffffff"
+          color={colors.backgroundWhite}
           onPress={() => {}}
         />
         <SocialButton
@@ -84,7 +85,7 @@ export const SignUpScreen = () => {
           Icon={icons.X}
           iconWidth={20}
           iconHeight={18}
-          color="#ffffff"
+          color={colors.backgroundWhite}
           onPress={() => {}}
         />
       </View>

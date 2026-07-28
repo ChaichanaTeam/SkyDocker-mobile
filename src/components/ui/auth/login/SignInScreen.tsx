@@ -1,5 +1,6 @@
 import { SocialButton } from "@/components/shared/auth/SocialButton";
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
+import { colors } from "@/theme";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -37,7 +38,7 @@ export const SignInScreen = () => {
             value={email}
             onChangeText={setEmail}
             placeholder="name@example.com"
-            placeholderTextColor="#FFFFFF80"
+            placeholderTextColor={colors.backgroundWhite80}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
@@ -60,9 +61,9 @@ export const SignInScreen = () => {
       <View style={{ marginTop: 16, alignItems: "center" }}>
         <Link href="/(auth)/signup" asChild>
           <TouchableOpacity activeOpacity={0.7}>
-            <Text style={{ color: "#FFFFFF80", fontSize: 14 }}>
+            <Text style={{ color: colors.backgroundWhite80, fontSize: 14 }}>
               Dont have an account?{" "}
-              <Text style={{ color: "#FFFFFF", fontWeight: "600" }}>
+              <Text style={{ color: colors.backgroundWhite, fontWeight: "600" }}>
                 Sign Up
               </Text>
             </Text>
@@ -82,7 +83,7 @@ export const SignInScreen = () => {
           Icon={icons.Google}
           iconWidth={19}
           iconHeight={20}
-          color="#ffffff"
+          color={colors.backgroundWhite}
           onPress={() => {}}
         />
         <SocialButton
@@ -90,7 +91,7 @@ export const SignInScreen = () => {
           Icon={icons.Facebook}
           iconWidth={20}
           iconHeight={20}
-          color="#ffffff"
+          color={colors.backgroundWhite}
           onPress={() => {}}
         />
         <SocialButton
@@ -98,7 +99,7 @@ export const SignInScreen = () => {
           Icon={icons.X}
           iconWidth={20}
           iconHeight={18}
-          color="#ffffff"
+          color={colors.backgroundWhite}
           onPress={() => {}}
         />
       </View>

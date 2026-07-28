@@ -15,14 +15,14 @@ export const authStyles = StyleSheet.create({
   },
   title: {
     alignSelf: "flex-start",
-    color: "#ffffff",
+    color: colors.backgroundWhite,
     fontFamily: "Inter_600SemiBold",
     fontSize: 32,
   },
   subtitle: {
     alignSelf: "flex-start",
     marginTop: 8,
-    color: "#FFFFFF80",
+    color: colors.backgroundWhite80,
     fontFamily: "Inter_400Regular",
     fontSize: 13,
   },
@@ -35,7 +35,7 @@ export const authStyles = StyleSheet.create({
     textAlign: "center",
     marginTop: 25,
     marginBottom: 24,
-    color: "#FFFFFF80",
+    color: colors.backgroundWhite80,
     fontFamily: "Inter_400Regular",
     fontSize: 12,
   },
@@ -48,7 +48,7 @@ export const authStyles = StyleSheet.create({
     justifyContent: "center",
   },
   signInButtonText: {
-    color: "#ffffff",
+    color: colors.backgroundWhite,
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
   },
@@ -62,11 +62,11 @@ export const authStyles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.backgroundWhite,
   },
   dividerText: {
     marginHorizontal: 12,
-    color: "#FFFFFF80",
+    color: colors.backgroundWhite80,
     fontFamily: "Inter_400Regular",
     fontSize: 13,
   },
@@ -77,7 +77,7 @@ export const authStyles = StyleSheet.create({
   container: {
     width: 351,
     borderWidth: 1,
-    borderColor: "#ffffff",
+    borderColor: colors.backgroundWhite,
     borderRadius: 16,
     paddingVertical: 12,
     justifyContent: "center",
@@ -94,7 +94,7 @@ export const authStyles = StyleSheet.create({
     left: 16,
     backgroundColor: colors.backgroundMain,
     paddingHorizontal: 6,
-    color: "#FFFFFF",
+    color: colors.backgroundWhite,
     fontFamily: "Inter_400Regular",
     fontSize: 12,
   },
@@ -106,13 +106,13 @@ export const authStyles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   regionText: {
-    color: "#ffffff",
+    color: colors.backgroundWhite,
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
   },
   divider: {
     height: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.backgroundWhite,
     marginVertical: 12,
     width: "100%",
   },
@@ -127,14 +127,14 @@ export const authStyles = StyleSheet.create({
   },
   phoneInput: {
     flex: 1,
-    color: "#ffffff",
+    color: colors.backgroundWhite,
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
     padding: 0,
     height: 36,
   },
   emailInput: {
-    color: "#ffffff",
+    color: colors.backgroundWhite,
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
     padding: 0,
@@ -142,7 +142,7 @@ export const authStyles = StyleSheet.create({
     height: 36,
   },
   passwordInput: {
-    color: "#ffffff",
+    color: colors.backgroundWhite,
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
     padding: 0,
@@ -163,7 +163,7 @@ export const authStyles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "#FFFFFF80",
+    backgroundColor: colors.backgroundWhite80,
     marginRight: 10,
   },
   bulletValid: {
@@ -173,7 +173,7 @@ export const authStyles = StyleSheet.create({
     backgroundColor: "#EF4444",
   },
   requirementText: {
-    color: "#FFFFFF80",
+    color: colors.backgroundWhite80,
     fontFamily: "Inter_400Regular",
     fontSize: 13,
   },
@@ -193,7 +193,7 @@ export const authStyles = StyleSheet.create({
     paddingBottom: 20,
   },
   backText: {
-    color: "#ffffff",
+    color: colors.backgroundWhite,
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
   },
@@ -206,7 +206,7 @@ export const authStyles = StyleSheet.create({
     justifyContent: "center",
   },
   nextButtonText: {
-    color: "#ffffff",
+    color: colors.backgroundWhite,
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
   },
@@ -223,7 +223,7 @@ export const authStyles = StyleSheet.create({
     padding: 16,
   },
   modalTitle: {
-    color: "#ffffff",
+    color: colors.backgroundWhite,
     fontFamily: "Inter_600SemiBold",
     fontSize: 18,
     marginBottom: 12,
@@ -239,7 +239,7 @@ export const authStyles = StyleSheet.create({
     borderBottomColor: "#475569",
   },
   modalOptionText: {
-    color: "#ffffff",
+    color: colors.backgroundWhite,
     fontFamily: "Inter_400Regular",
     fontSize: 16,
   },
@@ -265,12 +265,12 @@ export const authStyles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.12)",
   },
   dropdownItemText: {
-    color: "#FFFFFF80",
+    color: colors.backgroundWhite80,
     fontFamily: "Inter_400Regular",
     fontSize: 14,
   },
   dropdownItemTextSelected: {
-    color: "#ffffff",
+    color: colors.backgroundWhite,
     fontFamily: "Inter_600SemiBold",
   },
 });
