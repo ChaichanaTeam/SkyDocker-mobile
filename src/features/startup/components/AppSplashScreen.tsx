@@ -1,7 +1,6 @@
-import React from 'react';
 import { useWindowDimensions, View } from 'react-native';
 
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { LoadingSpinner } from '../../../components/ui/auth/LoadingSpiner/LoadingSpinner';
 
 import { styles } from '../styles/AppSplashScreen.styles';
 import { getStartupMetrics } from '../utils/startupScale';

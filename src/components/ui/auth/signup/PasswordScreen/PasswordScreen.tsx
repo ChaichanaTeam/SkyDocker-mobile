@@ -2,7 +2,6 @@ import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { PasswordRequirementList } from "@/components/ui/auth/signup/PasswordScreen/features/PasswordRequirementsList";
 import { colors } from "@/theme";
 import { isPasswordValid } from "@/validators/password.schema";
-import { icons } from "../../../../../../assets/icons";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import {
@@ -12,21 +11,45 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { icons } from "../../../../../../assets/icons";
 
 export type PasswordScreenMode = "single" | "multiple";
+export type PasswordScreenVariant = "default" | "forgot-password";
 
 type PasswordScreenProps = {
   mode?: PasswordScreenMode;
+  variant?: PasswordScreenVariant;
 };
 
 export const PasswordScreen = ({
   mode = "multiple",
+  variant = "default",
 }: PasswordScreenProps) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const isMultipleMode = mode === "multiple";
+  const isForgotPassword = variant === "forgot-password";
+
+  const content = isForgotPassword
+    ? {
+        title: "Create new password",
+        subtitle:
+          "Prove us that only you have permission to use drones. Again",
+        passwordLabel: "New password",
+        passwordPlaceholder: "Example: Your favorite fruit",
+        confirmPasswordLabel: "Confirm Password",
+        confirmPasswordPlaceholder: "Sample",
+      }
+    : {
+        title: "Enter Password",
+        subtitle: "Prove us that only you have permission to use drones.",
+        passwordLabel: "Password",
+        passwordPlaceholder: "Password",
+        confirmPasswordLabel: "Confirm Password",
+        confirmPasswordPlaceholder: "Confirm password",
+      };
 
   const passwordValid = isPasswordValid(password);
   const passwordsMatch =
@@ -51,6 +74,11 @@ export const PasswordScreen = ({
   };
 
   const handleNext = () => {
+    if (isForgotPassword) {
+      router.replace("/(auth)/signin");
+      return;
+    }
+
     if (!isMultipleMode) {
       router.replace("/(tabs)");
       return;
@@ -68,14 +96,12 @@ export const PasswordScreen = ({
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.title}>Enter Password</Text>
-      <Text style={styles.subtitle}>
-        Prove us that only you have permission to use drones.
-      </Text>
+      <Text style={styles.title}>{content.title}</Text>
+      <Text style={styles.subtitle}>{content.subtitle}</Text>
 
       <View style={styles.inputWrapper}>
         <View style={[styles.container, passwordBorderStyle]}>
-          <Text style={styles.label}>Password</Text>
+          <Text style={styles.label}>{content.passwordLabel}</Text>
           <View
             style={{
               flexDirection: "row",
@@ -87,7 +113,7 @@ export const PasswordScreen = ({
               style={[styles.passwordInput, { flex: 1, paddingHorizontal: 0 }]}
               value={password}
               onChangeText={setPassword}
-              placeholder="Password"
+              placeholder={content.passwordPlaceholder}
               placeholderTextColor={colors.backgroundWhite80}
               secureTextEntry={!showPassword}
             />
@@ -107,7 +133,7 @@ export const PasswordScreen = ({
       </View>
 
       {!isMultipleMode && (
-        <Link href="/" asChild>
+        <Link href="/(auth)/forgot-password" asChild>
           <TouchableOpacity
             style={styles.forgotPasswordLink}
             activeOpacity={0.7}
@@ -121,7 +147,7 @@ export const PasswordScreen = ({
         <>
           <View style={[styles.inputWrapper, { marginTop: 20 }]}>
             <View style={[styles.container, confirmBorderStyle]}>
-              <Text style={styles.label}>Confirm Password</Text>
+              <Text style={styles.label}>{content.confirmPasswordLabel}</Text>
               <View
                 style={{
                   flexDirection: "row",
@@ -136,7 +162,7 @@ export const PasswordScreen = ({
                   ]}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
-                  placeholder="Confirm password"
+                  placeholder={content.confirmPasswordPlaceholder}
                   placeholderTextColor={colors.backgroundWhite80}
                   secureTextEntry={!showConfirmPassword}
                 />
