@@ -1,4 +1,8 @@
-import { Inter_400Regular, useFonts } from '@expo-google-fonts/inter';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  useFonts,
+} from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { PropsWithChildren, useEffect, useMemo, useState } from 'react';
 
@@ -24,7 +28,10 @@ export function StartupGate({
   loadingDurationMs = STARTUP_LOADING_DURATION_MS,
   children,
 }: StartupGateProps) {
-  const [fontsLoaded, fontError] = useFonts({ Inter_400Regular });
+  const [fontsLoaded, fontError] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+  });
   const [bootstrapComplete, setBootstrapComplete] = useState(false);
   const [nativeSplashHidden, setNativeSplashHidden] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);

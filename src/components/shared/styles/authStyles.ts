@@ -149,6 +149,19 @@ export const authStyles = StyleSheet.create({
     paddingHorizontal: 16,
     height: 36,
   },
+  forgotPasswordLink: {
+    marginTop: 24,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  forgotPasswordText: {
+    color: colors.pressableActive1,
+    fontFamily: "Inter_500Medium",
+    fontSize: 12,
+    lineHeight: 14.4,
+    letterSpacing: 0.12,
+    textAlign: "center",
+  },
   requirementsList: {
     width: 335,
     alignSelf: "center",

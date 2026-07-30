@@ -17,7 +17,10 @@ export const SignInScreen = () => {
   const [email, setEmail] = useState("");
 
   const handleSignIn = () => {
-    router.push("./confirm-phone");
+    router.push({
+      pathname: "/(auth)/passcreen",
+      params: { mode: "single" },
+    });
   };
 
   return (
