@@ -103,7 +103,11 @@ export const PhoneScreen = ({ onPressRegion }: SignInScreenProps) => {
                       {item.name} ({item.dialCode})
                     </Text>
                     {isSelected && (
-                      <Ionicons name="checkmark" size={16} color={colors.backgroundWhite} />
+                      <Ionicons
+                        name="checkmark"
+                        size={16}
+                        color={colors.backgroundWhite}
+                      />
                     )}
                   </TouchableOpacity>
                 );

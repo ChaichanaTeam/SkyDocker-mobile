@@ -1,6 +1,7 @@
 import { SocialButton } from "@/components/shared/auth/SocialButton";
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { colors } from "@/theme";
+import { icons } from "@assets/icons";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -10,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { icons } from "../../../../../assets/icons";
 
 export const SignInScreen = () => {
   const router = useRouter();
@@ -66,7 +66,9 @@ export const SignInScreen = () => {
           <TouchableOpacity activeOpacity={0.7}>
             <Text style={{ color: colors.backgroundWhite80, fontSize: 14 }}>
               Dont have an account?{" "}
-              <Text style={{ color: colors.backgroundWhite, fontWeight: "600" }}>
+              <Text
+                style={{ color: colors.backgroundWhite, fontWeight: "600" }}
+              >
                 Sign Up
               </Text>
             </Text>

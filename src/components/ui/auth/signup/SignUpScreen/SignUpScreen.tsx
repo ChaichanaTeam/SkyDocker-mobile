@@ -1,6 +1,7 @@
 import { SocialButton } from "@/components/shared/auth/SocialButton";
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { colors } from "@/theme";
+import { icons } from "@assets/icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -10,8 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { icons } from "../../../../../../assets/icons";
-
 export const SignUpScreen = () => {
   const [email, setEmail] = useState("");
 

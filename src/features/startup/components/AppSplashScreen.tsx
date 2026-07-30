@@ -1,13 +1,13 @@
-import { useWindowDimensions, View } from 'react-native';
+import { useWindowDimensions, View } from "react-native";
 
-import { LoadingSpinner } from '../../../components/ui/auth/LoadingSpiner/LoadingSpinner';
+import { LoadingSpinner } from "@/components/ui/auth/LoadingSpiner/LoadingSpinner";
 
-import { styles } from '../styles/AppSplashScreen.styles';
-import { getStartupMetrics } from '../utils/startupScale';
-import { BrandWordmark } from './BrandWordmark';
+import { BrandWordmark } from "@/features/startup/components/BrandWordmark";
+import { styles } from "@/features/startup/styles/AppSplashScreen.styles";
+import { getStartupMetrics } from "@/features/startup/utils/startupScale";
 
 export type AppSplashScreenProps = {
-  phase: 'brand' | 'loading';
+  phase: "brand" | "loading";
 };
 
 export function AppSplashScreen({ phase }: AppSplashScreenProps) {
@@ -16,10 +16,13 @@ export function AppSplashScreen({ phase }: AppSplashScreenProps) {
 
   return (
     <View style={styles.container}>
-      {phase === 'brand' ? (
+      {phase === "brand" ? (
         <BrandWordmark viewportWidth={width} />
       ) : (
-        <LoadingSpinner size={metrics.spinnerSize} strokeWidth={metrics.spinnerStrokeWidth} />
+        <LoadingSpinner
+          size={metrics.spinnerSize}
+          strokeWidth={metrics.spinnerStrokeWidth}
+        />
       )}
     </View>
   );

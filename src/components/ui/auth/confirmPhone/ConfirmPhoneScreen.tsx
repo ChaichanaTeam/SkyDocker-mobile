@@ -16,8 +16,8 @@ import {
   getNextOtpIndex,
   getPreviousOtpIndex,
   isOtpCodeComplete,
-} from "./otpCode";
-import { styles } from "./styles/ConfirmPhoneScreen.styles";
+} from "@/components/ui/auth/confirmPhone/otpCode";
+import { styles } from "@/components/ui/auth/confirmPhone/styles/ConfirmPhoneScreen.styles";
 
 const CODE_LENGTH = 6;
 
@@ -59,7 +59,7 @@ export const ConfirmPhoneScreen = () => {
 
   const handleKeyPress = (
     index: number,
-    event: NativeSyntheticEvent<TextInputKeyPressEventData>
+    event: NativeSyntheticEvent<TextInputKeyPressEventData>,
   ) => {
     if (event.nativeEvent.key !== "Backspace") {
       return;
@@ -134,7 +134,10 @@ export const ConfirmPhoneScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.nextButton, !isComplete && styles.nextButtonDisabled]}
+            style={[
+              styles.nextButton,
+              !isComplete && styles.nextButtonDisabled,
+            ]}
             activeOpacity={0.8}
             disabled={!isComplete}
             onPress={handleNext}
