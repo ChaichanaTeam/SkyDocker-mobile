@@ -3,7 +3,7 @@ import { AccessibilityInfo, Animated, Easing, ViewStyle } from "react-native";
 
 import { colors } from "@/theme";
 
-import { styles } from "./LoadingSpinner.styles";
+import { styles } from "./styles/LoadingSpinner.styles";
 
 export type LoadingSpinnerProps = {
   size?: number;
