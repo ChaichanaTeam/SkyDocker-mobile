@@ -7,9 +7,6 @@ export default function PassScreen() {
   const isSingleMode = mode === "single";
 
   return (
-    <PasswordScreen
-      mode={isSingleMode ? "single" : "multiple"}
-      forgotPasswordHref={isSingleMode ? "#" : undefined}
-    />
+    <PasswordScreen mode={isSingleMode ? "single" : "multiple"} />
   );
 }

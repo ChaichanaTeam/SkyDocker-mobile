@@ -3,7 +3,7 @@ import { PasswordRequirementList } from "@/components/ui/auth/signup/PasswordScr
 import { colors } from "@/theme";
 import { isPasswordValid } from "@/validators/password.schema";
 import { icons } from "../../../../../../assets/icons";
-import { Link, router, type Href } from "expo-router";
+import { Link, router } from "expo-router";
 import { useState } from "react";
 import {
   ScrollView,
@@ -17,12 +17,10 @@ export type PasswordScreenMode = "single" | "multiple";
 
 type PasswordScreenProps = {
   mode?: PasswordScreenMode;
-  forgotPasswordHref?: Href | "#";
 };
 
 export const PasswordScreen = ({
   mode = "multiple",
-  forgotPasswordHref,
 }: PasswordScreenProps) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -108,8 +106,8 @@ export const PasswordScreen = ({
         </View>
       </View>
 
-      {forgotPasswordHref && (
-        <Link href={forgotPasswordHref as Href} asChild>
+      {!isMultipleMode && (
+        <Link href="/" asChild>
           <TouchableOpacity
             style={styles.forgotPasswordLink}
             activeOpacity={0.7}
