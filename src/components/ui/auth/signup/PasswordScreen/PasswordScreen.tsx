@@ -3,7 +3,7 @@ import { PasswordRequirementList } from "@/components/ui/auth/signup/PasswordScr
 import { colors } from "@/theme";
 import { isPasswordValid } from "@/validators/password.schema";
 import { icons } from "../../../../../../assets/icons";
-import { router } from "expo-router";
+import { Link, router, type Href } from "expo-router";
 import { useState } from "react";
 import {
   ScrollView,
@@ -13,18 +13,29 @@ import {
   View,
 } from "react-native";
 
-export const PasswordScreen = () => {
+export type PasswordScreenMode = "single" | "multiple";
+
+type PasswordScreenProps = {
+  mode?: PasswordScreenMode;
+  forgotPasswordHref?: Href | "#";
+};
+
+export const PasswordScreen = ({
+  mode = "multiple",
+  forgotPasswordHref,
+}: PasswordScreenProps) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const isMultipleMode = mode === "multiple";
 
   const passwordValid = isPasswordValid(password);
   const passwordsMatch =
     confirmPassword.length > 0 && confirmPassword === password;
 
   const passwordBorderStyle =
-    password.length === 0
+    !isMultipleMode || password.length === 0
       ? null
       : passwordValid
         ? styles.containerValid
@@ -42,6 +53,11 @@ export const PasswordScreen = () => {
   };
 
   const handleNext = () => {
+    if (!isMultipleMode) {
+      router.replace("/(tabs)");
+      return;
+    }
+
     router.push("/(auth)/pilotidscreen");
   };
 
@@ -92,40 +108,66 @@ export const PasswordScreen = () => {
         </View>
       </View>
 
-      <View style={[styles.inputWrapper, { marginTop: 20 }]}>
-        <View style={[styles.container, confirmBorderStyle]}>
-          <Text style={styles.label}>Confirm Password</Text>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              paddingHorizontal: 16,
-            }}
+      {forgotPasswordHref && (
+        <Link href={forgotPasswordHref as Href} asChild>
+          <TouchableOpacity
+            style={styles.forgotPasswordLink}
+            activeOpacity={0.7}
           >
-            <TextInput
-              style={[styles.passwordInput, { flex: 1, paddingHorizontal: 0 }]}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              placeholder="Confirm password"
-              placeholderTextColor={colors.backgroundWhite80}
-              secureTextEntry={!showConfirmPassword}
-            />
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => setShowConfirmPassword((prev) => !prev)}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              {showConfirmPassword ? (
-                <EyeIcon width={20} height={20} color={colors.backgroundWhite80} />
-              ) : (
-                <EyeOffIcon width={20} height={20} color={colors.backgroundWhite80} />
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
+            <Text style={styles.forgotPasswordText}>Forgot the password</Text>
+          </TouchableOpacity>
+        </Link>
+      )}
 
-      <PasswordRequirementList password={password} />
+      {isMultipleMode && (
+        <>
+          <View style={[styles.inputWrapper, { marginTop: 20 }]}>
+            <View style={[styles.container, confirmBorderStyle]}>
+              <Text style={styles.label}>Confirm Password</Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingHorizontal: 16,
+                }}
+              >
+                <TextInput
+                  style={[
+                    styles.passwordInput,
+                    { flex: 1, paddingHorizontal: 0 },
+                  ]}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  placeholder="Confirm password"
+                  placeholderTextColor={colors.backgroundWhite80}
+                  secureTextEntry={!showConfirmPassword}
+                />
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => setShowConfirmPassword((prev) => !prev)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  {showConfirmPassword ? (
+                    <EyeIcon
+                      width={20}
+                      height={20}
+                      color={colors.backgroundWhite80}
+                    />
+                  ) : (
+                    <EyeOffIcon
+                      width={20}
+                      height={20}
+                      color={colors.backgroundWhite80}
+                    />
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+
+          <PasswordRequirementList password={password} />
+        </>
+      )}
 
       <View style={styles.bottomRow}>
         <TouchableOpacity activeOpacity={0.7} onPress={handleBack}>
@@ -136,7 +178,11 @@ export const PasswordScreen = () => {
           style={styles.nextButton}
           activeOpacity={0.8}
           onPress={handleNext}
-          disabled={!passwordValid || !passwordsMatch}
+          disabled={
+            isMultipleMode
+              ? !passwordValid || !passwordsMatch
+              : password.length === 0
+          }
         >
           <Text style={styles.nextButtonText}>Next</Text>
         </TouchableOpacity>
