@@ -1,7 +1,6 @@
-import { colors } from '@/theme';
-import { Link } from 'expo-router';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { colors } from "@/theme";
+import { Link } from "expo-router";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function ModalScreen() {
   return (
@@ -17,22 +16,22 @@ export default function ModalScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: colors.backgroundWhite,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
   },
   title: {
-    color: '#141414',
+    color: "#141414",
     fontSize: 24,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   link: {
     marginTop: 15,
     paddingVertical: 15,
   },
   linkText: {
-    color: '#0A7EA4',
+    color: "#0A7EA4",
     fontSize: 16,
   },
 });

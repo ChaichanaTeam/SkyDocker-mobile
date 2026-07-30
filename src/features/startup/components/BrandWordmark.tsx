@@ -1,8 +1,7 @@
-import React from 'react';
-import { Text, useWindowDimensions } from 'react-native';
+import { Text, useWindowDimensions } from "react-native";
 
-import { styles } from '../styles/BrandWordmark.styles';
-import { getStartupMetrics } from '../utils/startupScale';
+import { styles } from "@/features/startup/styles/BrandWordmark.styles";
+import { getStartupMetrics } from "@/features/startup/utils/startupScale";
 
 export type BrandWordmarkProps = {
   viewportWidth?: number;

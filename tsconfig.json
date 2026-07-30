@@ -1,16 +1,43 @@
+// tsconfig.json
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "jsx": "react-jsx",
     "strict": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+
+      "@app/*": ["./app/*"],
+
+      "@assets/*": ["./assets/*"],
+
       "@components/*": ["./src/components/*"],
-      "@features/*": ["./src/features/*"],
-      "@services/*": ["./src/services/*"],
-      "@hooks/*": ["./src/hooks/*"],
+      "@components/shared/*": ["./src/components/shared/*"],
+      "@components/ui/*": ["./src/components/ui/*"],
+
       "@constants/*": ["./src/constants/*"],
-      "@types/*": ["./src/types/*"]
+
+      "@features/*": ["./src/features/*"],
+      "@features/auth/*": ["./src/features/auth/*"],
+      "@features/startup/*": ["./src/features/startup/*"],
+      "@features/tracking/*": ["./src/features/tracking/*"],
+
+      "@hooks/*": ["./src/hooks/*"],
+
+      "@services/*": ["./src/services/*"],
+      "@services/api/*": ["./src/services/api/*"],
+      "@services/mocks/*": ["./src/services/mocks/*"],
+
+      "@store/*": ["./src/store/*"],
+
+      "@theme/*": ["./src/theme/*"],
+
+      "@types/*": ["./src/types/*"],
+
+      "@utils/*": ["./src/utils/*"],
+
+      "@validators/*": ["./src/validators/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]

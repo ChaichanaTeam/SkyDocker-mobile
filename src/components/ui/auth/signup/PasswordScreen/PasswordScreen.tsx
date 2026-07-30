@@ -2,6 +2,7 @@ import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { PasswordRequirementList } from "@/components/ui/auth/signup/PasswordScreen/features/PasswordRequirementsList";
 import { colors } from "@/theme";
 import { isPasswordValid } from "@/validators/password.schema";
+import { icons } from "@assets/icons";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import {
@@ -11,7 +12,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { icons } from "../../../../../../assets/icons";
 
 export type PasswordScreenMode = "single" | "multiple";
 export type PasswordScreenVariant = "default" | "forgot-password";
@@ -35,8 +35,7 @@ export const PasswordScreen = ({
   const content = isForgotPassword
     ? {
         title: "Create new password",
-        subtitle:
-          "Prove us that only you have permission to use drones. Again",
+        subtitle: "Prove us that only you have permission to use drones. Again",
         passwordLabel: "New password",
         passwordPlaceholder: "Example: Your favorite fruit",
         confirmPasswordLabel: "Confirm Password",
@@ -123,9 +122,17 @@ export const PasswordScreen = ({
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               {showPassword ? (
-                <EyeIcon width={20} height={20} color={colors.backgroundWhite80} />
+                <EyeIcon
+                  width={20}
+                  height={20}
+                  color={colors.backgroundWhite80}
+                />
               ) : (
-                <EyeOffIcon width={20} height={20} color={colors.backgroundWhite80} />
+                <EyeOffIcon
+                  width={20}
+                  height={20}
+                  color={colors.backgroundWhite80}
+                />
               )}
             </TouchableOpacity>
           </View>
