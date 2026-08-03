@@ -102,7 +102,7 @@ export const authStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    minHeight: 36,
+    height: 52,
     paddingHorizontal: 16,
   },
   regionText: {
@@ -261,26 +261,22 @@ export const authStyles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
   },
   dropdownList: {
-    marginTop: 4,
-    marginHorizontal: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-    borderRadius: 12,
-    overflow: "hidden",
+    width: "100%",
   },
   dropdownItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
-  dropdownItemSelected: {
-    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    height: 52,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: colors.backgroundWhite,
   },
   dropdownItemText: {
     color: colors.backgroundWhite80,
     fontFamily: "Inter_400Regular",
-    fontSize: 14,
+    fontSize: 16,
   },
   dropdownItemTextSelected: {
     color: colors.backgroundWhite,

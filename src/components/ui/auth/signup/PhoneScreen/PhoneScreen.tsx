@@ -82,36 +82,20 @@ export const PhoneScreen = ({ onPressRegion }: SignInScreenProps) => {
 
           {isDropdownOpen && (
             <View style={styles.dropdownList}>
-              {REGIONS.map((item) => {
-                const isSelected = region.name === item.name;
-                return (
+              {REGIONS.filter((item) => item.name !== region.name).map(
+                (item) => (
                   <TouchableOpacity
                     key={item.name}
-                    style={[
-                      styles.dropdownItem,
-                      isSelected && styles.dropdownItemSelected,
-                    ]}
+                    style={styles.dropdownItem}
                     activeOpacity={0.7}
                     onPress={() => handleSelectRegion(item)}
                   >
-                    <Text
-                      style={[
-                        styles.dropdownItemText,
-                        isSelected && styles.dropdownItemTextSelected,
-                      ]}
-                    >
+                    <Text style={styles.dropdownItemText}>
                       {item.name} ({item.dialCode})
                     </Text>
-                    {isSelected && (
-                      <Ionicons
-                        name="checkmark"
-                        size={16}
-                        color={colors.backgroundWhite}
-                      />
-                    )}
                   </TouchableOpacity>
-                );
-              })}
+                ),
+              )}
             </View>
           )}
 
