@@ -36,7 +36,7 @@ export const PhoneScreen = ({ onPressRegion }: SignInScreenProps) => {
   };
 
   const handleNext = () => {
-    router.push("/(auth)/fullnamscreen");
+    router.push("/(auth)/passcreen");
   };
 
   const handleSelectRegion = (selectedRegion: Region) => {

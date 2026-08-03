@@ -15,7 +15,7 @@ export const SignUpScreen = () => {
   const [email, setEmail] = useState("");
 
   const handleSignUp = () => {
-    router.push("/(auth)/passcreen");
+    router.push("/(auth)/confirm-phone");
   };
 
   return (

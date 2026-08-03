@@ -83,7 +83,7 @@ export const PasswordScreen = ({
       return;
     }
 
-    router.push("/(auth)/pilotidscreen");
+    router.push("/(auth)/fullnamscreen");
   };
 
   const EyeIcon = icons.Eye;

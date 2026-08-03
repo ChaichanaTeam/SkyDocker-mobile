@@ -1,3 +1,11 @@
+import {
+  applyOtpInput,
+  createEmptyOtpCode,
+  getNextOtpIndex,
+  getPreviousOtpIndex,
+  isOtpCodeComplete,
+} from "@/components/ui/auth/confirmPhone/otpCode";
+import { styles } from "@/components/ui/auth/confirmPhone/styles/ConfirmPhoneScreen.styles";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -10,18 +18,16 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  applyOtpInput,
-  createEmptyOtpCode,
-  getNextOtpIndex,
-  getPreviousOtpIndex,
-  isOtpCodeComplete,
-} from "@/components/ui/auth/confirmPhone/otpCode";
-import { styles } from "@/components/ui/auth/confirmPhone/styles/ConfirmPhoneScreen.styles";
 
 const CODE_LENGTH = 6;
 
-export const ConfirmPhoneScreen = () => {
+type ConfirmPhoneScreenProps = {
+  nextRoute?: string;
+};
+
+export const ConfirmPhoneScreen = ({
+  nextRoute = "/(tabs)",
+}: ConfirmPhoneScreenProps) => {
   const router = useRouter();
   const inputRefs = useRef<(TextInput | null)[]>([]);
   const [code, setCode] = useState(() => createEmptyOtpCode(CODE_LENGTH));
@@ -81,7 +87,7 @@ export const ConfirmPhoneScreen = () => {
 
   const handleNext = () => {
     if (isComplete) {
-      router.replace("/(tabs)");
+      router.replace(nextRoute as any);
     }
   };
 
