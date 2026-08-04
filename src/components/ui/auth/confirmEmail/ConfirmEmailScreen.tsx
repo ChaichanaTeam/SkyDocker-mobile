@@ -131,7 +131,7 @@ export const ConfirmEmailScreen = ({
           activeOpacity={0.7}
           onPress={handleBack}
         >
-          <Text style={styles.centerBackText}>Re-send code</Text>
+          <Text style={styles.centerBackText}>Send again</Text>
         </TouchableOpacity>
 
         <View style={styles.bottomRow}>
