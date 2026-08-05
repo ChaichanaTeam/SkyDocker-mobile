@@ -1,5 +1,5 @@
-import { Platform, StyleSheet } from "react-native";
 import { colors } from "@/theme";
+import { Platform, StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   screen: {
@@ -37,6 +37,7 @@ export const styles = StyleSheet.create({
   codeInput: {
     flex: 1,
     height: 64,
+    width:48,
     borderRadius: 8,
     backgroundColor: "#FFFDFD",
     color: colors.pressableActive1,
@@ -72,7 +73,8 @@ export const styles = StyleSheet.create({
     letterSpacing: 0,
   },
   nextButton: {
-    height: 46,
+    height: 52,
+    width:87,
     paddingHorizontal: 22,
     borderRadius: 24,
     backgroundColor: colors.pressableActive1,

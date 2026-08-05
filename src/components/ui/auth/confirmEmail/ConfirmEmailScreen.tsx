@@ -4,8 +4,8 @@ import {
   getNextOtpIndex,
   getPreviousOtpIndex,
   isOtpCodeComplete,
-} from "@/components/ui/auth/confirmPhone/otpCode";
-import { styles } from "@/components/ui/auth/confirmPhone/styles/ConfirmPhoneScreen.styles";
+} from "@/components/ui/auth/confirmEmail/otpCode";
+import { styles } from "@/components/ui/auth/confirmEmail/styles/ConfirmEmailScreen.styles";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -21,13 +21,13 @@ import {
 
 const CODE_LENGTH = 6;
 
-type ConfirmPhoneScreenProps = {
+type ConfirmEmailScreenProps = {
   nextRoute?: string;
 };
 
-export const ConfirmPhoneScreen = ({
+export const ConfirmEmailScreen = ({
   nextRoute = "/(tabs)",
-}: ConfirmPhoneScreenProps) => {
+}: ConfirmEmailScreenProps) => {
   const router = useRouter();
   const inputRefs = useRef<(TextInput | null)[]>([]);
   const [code, setCode] = useState(() => createEmptyOtpCode(CODE_LENGTH));
@@ -98,9 +98,9 @@ export const ConfirmPhoneScreen = ({
     >
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>Confirm contacts</Text>
+          <Text style={styles.title}>Confirm email</Text>
           <Text style={styles.subtitle}>
-            enter the code thats was sent on your phone
+            enter the code thats was sent on your email
           </Text>
         </View>
 
@@ -121,7 +121,7 @@ export const ConfirmPhoneScreen = ({
               keyboardType="default"
               selectTextOnFocus={false}
               textContentType="oneTimeCode"
-              testID={`confirm-phone-code-input-${index}`}
+              testID={`confirm-email-code-input-${index}`}
             />
           ))}
         </View>
@@ -131,7 +131,7 @@ export const ConfirmPhoneScreen = ({
           activeOpacity={0.7}
           onPress={handleBack}
         >
-          <Text style={styles.centerBackText}>Re-send code</Text>
+          <Text style={styles.centerBackText}>Send again</Text>
         </TouchableOpacity>
 
         <View style={styles.bottomRow}>

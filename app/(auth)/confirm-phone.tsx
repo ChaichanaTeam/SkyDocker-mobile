@@ -1,5 +1,5 @@
-import { ConfirmPhoneScreen } from "@/components/ui/auth/confirmPhone/ConfirmPhoneScreen";
+import { ConfirmEmailScreen } from "@/components/ui/auth/confirmEmail/ConfirmEmailScreen";
 
 export default function ConfirmPhone() {
-  return <ConfirmPhoneScreen nextRoute="/(auth)/phonenumscreen" />;
+  return <ConfirmEmailScreen nextRoute="/(auth)/emailconfirmscreen" />;
 }
