@@ -6,6 +6,7 @@ import {
   isOtpCodeComplete,
 } from "@/components/ui/auth/confirmEmail/otpCode";
 import { styles } from "@/components/ui/auth/confirmEmail/styles/ConfirmEmailScreen.styles";
+import { useSignUp } from "@app/api/context/SignUpContext";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -81,14 +82,25 @@ export const ConfirmEmailScreen = ({
     }
   };
 
+  const { confirmOtp, resendOtp, isSubmitting, error } = useSignUp();
+
+  const handleResend = async () => {
+    try {
+      await resendOtp();
+    } catch {}
+  };
+
   const handleBack = () => {
     router.back();
   };
 
-  const handleNext = () => {
-    if (isComplete) {
+  const handleNext = async () => {
+    if (!isComplete) return;
+
+    try {
+      await confirmOtp(code.join(""));
       router.replace(nextRoute as any);
-    }
+    } catch {}
   };
 
   return (
@@ -126,10 +138,13 @@ export const ConfirmEmailScreen = ({
           ))}
         </View>
 
+        {error && <Text style={styles.errorText}>{error.message}</Text>}
+
         <TouchableOpacity
           style={styles.centerBackButton}
           activeOpacity={0.7}
-          onPress={handleBack}
+          onPress={handleResend}
+          disabled={isSubmitting}
         >
           <Text style={styles.centerBackText}>Send again</Text>
         </TouchableOpacity>

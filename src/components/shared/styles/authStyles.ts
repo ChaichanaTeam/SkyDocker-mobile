@@ -98,6 +98,11 @@ export const authStyles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     fontSize: 12,
   },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginTop: 8,
+  },
   regionRow: {
     flexDirection: "row",
     alignItems: "center",

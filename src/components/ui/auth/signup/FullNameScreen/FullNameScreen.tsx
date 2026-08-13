@@ -1,8 +1,10 @@
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { colors } from "@/theme";
+import { useSignUp } from "@app/api/context/SignUpContext";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   ScrollView,
   Text,
   TextInput,
@@ -13,13 +15,19 @@ import {
 export const FullNameScreen = () => {
   const [name, setName] = useState("");
   const [secondName, setSecondName] = useState("");
+  const { submitProfile, isSubmitting, error } = useSignUp();
 
   const handleBack = () => {
     router.back();
   };
 
-  const handleNext = () => {
-    router.push("/");
+  const handleNext = async () => {
+    if (!name.trim() || !secondName.trim() || isSubmitting) return;
+
+    try {
+      await submitProfile(name.trim(), secondName.trim());
+      router.push("/(auth)/confirm-email");
+    } catch {}
   };
 
   return (
@@ -61,6 +69,8 @@ export const FullNameScreen = () => {
         </View>
       </View>
 
+      {error && <Text style={styles.errorText}>{error.message}</Text>}
+
       <View style={styles.bottomRow}>
         <TouchableOpacity activeOpacity={0.7} onPress={handleBack}>
           <Text style={styles.backText}>Back</Text>
@@ -70,8 +80,13 @@ export const FullNameScreen = () => {
           style={styles.nextButton}
           activeOpacity={0.8}
           onPress={handleNext}
+          disabled={!name.trim() || !secondName.trim() || isSubmitting}
         >
-          <Text style={styles.nextButtonText}>Next</Text>
+          {isSubmitting ? (
+            <ActivityIndicator color={colors.backgroundWhite} />
+          ) : (
+            <Text style={styles.nextButtonText}>Next</Text>
+          )}
         </TouchableOpacity>
       </View>
     </ScrollView>

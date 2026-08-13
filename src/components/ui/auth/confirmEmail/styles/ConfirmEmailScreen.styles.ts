@@ -37,7 +37,7 @@ export const styles = StyleSheet.create({
   codeInput: {
     flex: 1,
     height: 64,
-    width:48,
+    width: 48,
     borderRadius: 8,
     backgroundColor: "#FFFDFD",
     color: colors.pressableActive1,
@@ -74,7 +74,7 @@ export const styles = StyleSheet.create({
   },
   nextButton: {
     height: 52,
-    width:87,
+    width: 87,
     paddingHorizontal: 22,
     borderRadius: 24,
     backgroundColor: colors.pressableActive1,
@@ -83,6 +83,11 @@ export const styles = StyleSheet.create({
   },
   nextButtonDisabled: {
     opacity: 0.5,
+  },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginTop: 8,
   },
   nextButtonText: {
     color: colors.text2,
