@@ -1,6 +1,7 @@
 import { SocialButton } from "@/components/shared/auth/SocialButton";
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { colors } from "@/theme";
+import { useSignUp } from "@app/api/context/SignUpContext";
 import { icons } from "@assets/icons";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -13,11 +14,15 @@ import {
 } from "react-native";
 export const SignUpScreen = () => {
   const [email, setEmail] = useState("");
+  const { setEmail: saveEmail, isSubmitting } = useSignUp();
 
-  const handleSignUp = () => {
-    router.push("/(auth)/confirm-phone");
+  const handleSignUp = async () => {
+    if (!email.trim()) return;
+    try {
+      await saveEmail(email.trim());
+      router.push("/(auth)/confirm-email");
+    } catch {}
   };
-
   return (
     <ScrollView
       style={styles.screen}
@@ -52,6 +57,7 @@ export const SignUpScreen = () => {
         style={styles.signInButton}
         activeOpacity={0.8}
         onPress={handleSignUp}
+        disabled={!email.trim() || isSubmitting}
       >
         <Text style={styles.signInButtonText}>Sign Up</Text>
       </TouchableOpacity>

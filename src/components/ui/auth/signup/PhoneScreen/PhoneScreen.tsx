@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSignUp } from "@app/api/context/SignUpContext";
 
 type SignInScreenProps = {
   onPressRegion?: () => void;
@@ -30,12 +31,17 @@ export const PhoneScreen = ({ onPressRegion }: SignInScreenProps) => {
   const router = useRouter();
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { setPhone: savePhone } = useSignUp();
 
   const handleBack = () => {
     router.back();
   };
 
   const handleNext = () => {
+    const digitsOnly = phone.replace(/\D/g, "");
+    if (!digitsOnly) return;
+
+    savePhone(`${region.dialCode}${digitsOnly}`);
     router.push("/(auth)/passcreen");
   };
 
@@ -123,6 +129,7 @@ export const PhoneScreen = ({ onPressRegion }: SignInScreenProps) => {
           style={styles.nextButton}
           activeOpacity={0.8}
           onPress={handleNext}
+          disabled={!phone.replace(/\D/g, "")}
         >
           <Text style={styles.nextButtonText}>Next</Text>
         </TouchableOpacity>

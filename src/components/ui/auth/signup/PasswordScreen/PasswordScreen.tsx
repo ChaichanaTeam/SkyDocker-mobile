@@ -2,6 +2,7 @@ import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { PasswordRequirementList } from "@/components/ui/auth/signup/PasswordScreen/features/PasswordRequirementsList";
 import { colors } from "@/theme";
 import { isPasswordValid } from "@/validators/password.schema";
+import { useSignUp } from "@app/api/context/SignUpContext";
 import { icons } from "@assets/icons";
 import { Link, router } from "expo-router";
 import { useState } from "react";
@@ -31,6 +32,7 @@ export const PasswordScreen = ({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const isMultipleMode = mode === "multiple";
   const isForgotPassword = variant === "forgot-password";
+  const { setPassword: savePassword } = useSignUp();
 
   const content = isForgotPassword
     ? {
@@ -83,6 +85,7 @@ export const PasswordScreen = ({
       return;
     }
 
+    savePassword(password);
     router.push("/(auth)/fullnamscreen");
   };
 
