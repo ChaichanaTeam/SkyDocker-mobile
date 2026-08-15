@@ -28,6 +28,18 @@ export interface RegisterResponse {
   refresh_token: string;
 }
 
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+}
+
 export type RegistrationStep = "email" | "otp" | "phone" | "password" | "name";
 
 export interface RegistrationDraft extends Partial<RegisterPayload> {
