@@ -63,6 +63,7 @@ export const SignInScreen = () => {
             placeholder="name@example.com"
             placeholderTextColor={colors.backgroundWhite80}
             keyboardType="email-address"
+            autoComplete="email"
             autoCapitalize="none"
             autoCorrect={false}
           />

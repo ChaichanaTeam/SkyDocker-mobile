@@ -1,5 +1,6 @@
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { PasswordRequirementList } from "@/components/ui/auth/signup/PasswordScreen/features/PasswordRequirementsList";
+import type { PasswordScreenProps } from "@/components/ui/auth/signup/PasswordScreen/types";
 import { colors } from "@/theme";
 import {
   getEmailValidationError,
@@ -20,15 +21,6 @@ import {
   View,
   ActivityIndicator,
 } from "react-native";
-
-export type PasswordScreenMode = "single" | "multiple";
-export type PasswordScreenVariant = "default" | "forgot-password";
-
-type PasswordScreenProps = {
-  email?: string;
-  mode?: PasswordScreenMode;
-  variant?: PasswordScreenVariant;
-};
 
 export const PasswordScreen = ({
   email = "",
