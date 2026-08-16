@@ -2,11 +2,17 @@ import { PasswordScreen } from "@/components/ui/auth/signup/PasswordScreen/Passw
 import { useLocalSearchParams } from "expo-router";
 
 export default function PassScreen() {
-  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const { email, mode } = useLocalSearchParams<{
+    email?: string;
+    mode?: string;
+  }>();
 
   const isSingleMode = mode === "single";
 
   return (
-    <PasswordScreen mode={isSingleMode ? "single" : "multiple"} />
+    <PasswordScreen
+      email={isSingleMode ? email : undefined}
+      mode={isSingleMode ? "single" : "multiple"}
+    />
   );
 }

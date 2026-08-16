@@ -1,6 +1,10 @@
 import { SocialButton } from "@/components/shared/auth/SocialButton";
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { colors } from "@/theme";
+import {
+  getEmailValidationError,
+  normalizeEmail,
+} from "@/validators/email.schema";
 import { icons } from "@assets/icons";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
@@ -15,11 +19,22 @@ import {
 export const SignInScreen = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   const handleSignIn = () => {
+    const validationError = getEmailValidationError(email);
+
+    if (validationError) {
+      setEmailError(validationError);
+      return;
+    }
+
+    const normalizedEmail = normalizeEmail(email);
+    setEmailError(null);
+
     router.push({
       pathname: "/(auth)/passcreen",
-      params: { mode: "single" },
+      params: { mode: "single", email: normalizedEmail },
     });
   };
 
@@ -33,24 +48,31 @@ export const SignInScreen = () => {
       <Text style={styles.subtitle}>You do have an account, right?</Text>
 
       <View style={styles.inputWrapper}>
-        <View style={styles.container}>
+        <View style={[styles.container, emailError && styles.containerInvalid]}>
           <Text style={styles.label}>Email</Text>
 
           <TextInput
             style={styles.emailInput}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(value) => {
+              setEmail(value);
+              if (emailError) {
+                setEmailError(getEmailValidationError(value));
+              }
+            }}
             placeholder="name@example.com"
             placeholderTextColor={colors.backgroundWhite80}
             keyboardType="email-address"
+            autoComplete="email"
             autoCapitalize="none"
             autoCorrect={false}
           />
         </View>
+        {emailError && <Text style={styles.errorText}>{emailError}</Text>}
       </View>
 
       <Text style={styles.hint}>
-        We will send a confirmation link to your email
+        Enter the email linked to your account
       </Text>
 
       <TouchableOpacity

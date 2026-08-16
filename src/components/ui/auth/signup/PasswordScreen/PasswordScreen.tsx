@@ -1,7 +1,14 @@
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
 import { PasswordRequirementList } from "@/components/ui/auth/signup/PasswordScreen/features/PasswordRequirementsList";
+import type { PasswordScreenProps } from "@/components/ui/auth/signup/PasswordScreen/types";
 import { colors } from "@/theme";
+import {
+  getEmailValidationError,
+  normalizeEmail,
+} from "@/validators/email.schema";
 import { isPasswordValid } from "@/validators/password.schema";
+import { signIn } from "@app/api/services/auth.service";
+import { isApiError } from "@app/api/types/apiError";
 import { useSignUp } from "@app/api/context/SignUpContext";
 import { icons } from "@assets/icons";
 import { Link, router } from "expo-router";
@@ -12,17 +19,11 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
 
-export type PasswordScreenMode = "single" | "multiple";
-export type PasswordScreenVariant = "default" | "forgot-password";
-
-type PasswordScreenProps = {
-  mode?: PasswordScreenMode;
-  variant?: PasswordScreenVariant;
-};
-
 export const PasswordScreen = ({
+  email = "",
   mode = "multiple",
   variant = "default",
 }: PasswordScreenProps) => {
@@ -30,9 +31,14 @@ export const PasswordScreen = ({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const isMultipleMode = mode === "multiple";
   const isForgotPassword = variant === "forgot-password";
   const { setPassword: savePassword } = useSignUp();
+  const normalizedEmail = normalizeEmail(email);
+  const emailError = getEmailValidationError(normalizedEmail);
 
   const content = isForgotPassword
     ? {
@@ -56,12 +62,14 @@ export const PasswordScreen = ({
   const passwordsMatch =
     confirmPassword.length > 0 && confirmPassword === password;
 
-  const passwordBorderStyle =
-    !isMultipleMode || password.length === 0
-      ? null
-      : passwordValid
-        ? styles.containerValid
-        : styles.containerInvalid;
+  const shouldShowPasswordValidation =
+    isMultipleMode ? password.length > 0 : hasSubmitted || password.length > 0;
+
+  const passwordBorderStyle = !shouldShowPasswordValidation
+    ? null
+    : passwordValid
+      ? styles.containerValid
+      : styles.containerInvalid;
 
   const confirmBorderStyle =
     confirmPassword.length === 0
@@ -74,14 +82,39 @@ export const PasswordScreen = ({
     router.back();
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    setHasSubmitted(true);
+    setFormError(null);
+
     if (isForgotPassword) {
       router.replace("/(auth)/signin");
       return;
     }
 
     if (!isMultipleMode) {
-      router.replace("/(tabs)");
+      if (emailError) {
+        setFormError(emailError);
+        return;
+      }
+
+      if (!passwordValid || isSubmitting) {
+        if (!passwordValid) {
+          setFormError("Enter a password that meets all requirements");
+        }
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        await signIn({ email: normalizedEmail, password });
+        router.replace("/(tabs)");
+      } catch (error) {
+        setFormError(
+          isApiError(error) ? error.message : "Unable to sign in right now",
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
       return;
     }
 
@@ -114,7 +147,12 @@ export const PasswordScreen = ({
             <TextInput
               style={[styles.passwordInput, { flex: 1, paddingHorizontal: 0 }]}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(value) => {
+                setPassword(value);
+                if (formError) {
+                  setFormError(null);
+                }
+              }}
               placeholder={content.passwordPlaceholder}
               placeholderTextColor={colors.backgroundWhite80}
               secureTextEntry={!showPassword}
@@ -152,6 +190,12 @@ export const PasswordScreen = ({
           </TouchableOpacity>
         </Link>
       )}
+
+      {!isMultipleMode && password.length > 0 && !passwordValid && (
+        <PasswordRequirementList password={password} />
+      )}
+
+      {formError && <Text style={styles.errorText}>{formError}</Text>}
 
       {isMultipleMode && (
         <>
@@ -215,10 +259,14 @@ export const PasswordScreen = ({
           disabled={
             isMultipleMode
               ? !passwordValid || !passwordsMatch
-              : password.length === 0
+              : isSubmitting || !passwordValid
           }
         >
-          <Text style={styles.nextButtonText}>Next</Text>
+          {isSubmitting ? (
+            <ActivityIndicator color={colors.backgroundWhite} />
+          ) : (
+            <Text style={styles.nextButtonText}>Next</Text>
+          )}
         </TouchableOpacity>
       </View>
     </ScrollView>
