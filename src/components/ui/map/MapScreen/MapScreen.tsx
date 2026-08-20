@@ -16,32 +16,14 @@ import {
   useFocusedForegroundLocation,
 } from "@features/tracking";
 
+import { toUserRegion, WORLD_REGION } from "./constants/mapRegion";
 import { styles } from "./styles/MapScreen.styles";
-
-import type { UserCoordinates } from "@features/tracking";
-import type { Region } from "react-native-maps";
 
 import type {
   MapAppearance,
   MapControlButtonProps,
   SessionMapType,
 } from "./types/types";
-
-const WORLD_REGION: Region = {
-  latitude: 20,
-  latitudeDelta: 120,
-  longitude: 0,
-  longitudeDelta: 160,
-};
-
-const USER_REGION_DELTA = 0.012;
-
-const toUserRegion = (coordinates: UserCoordinates): Region => ({
-  latitude: coordinates.latitude,
-  latitudeDelta: USER_REGION_DELTA,
-  longitude: coordinates.longitude,
-  longitudeDelta: USER_REGION_DELTA,
-});
 
 const MapControlButton = ({
   accessibilityLabel,
