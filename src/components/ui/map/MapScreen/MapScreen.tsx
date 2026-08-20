@@ -16,39 +16,11 @@ import {
   useFocusedForegroundLocation,
 } from "@features/tracking";
 
+import { MapControlButton } from "./MapControlButton";
 import { toUserRegion, WORLD_REGION } from "./constants/mapRegion";
 import { styles } from "./styles/MapScreen.styles";
 
-import type {
-  MapAppearance,
-  MapControlButtonProps,
-  SessionMapType,
-} from "./types/types";
-
-const MapControlButton = ({
-  accessibilityLabel,
-  iconName,
-  isActive = false,
-  onPress,
-}: MapControlButtonProps) => (
-  <TouchableOpacity
-    accessibilityLabel={accessibilityLabel}
-    accessibilityRole="button"
-    activeOpacity={0.76}
-    onPress={onPress}
-    style={[
-      styles.controlTouchable,
-      isActive && styles.controlTouchableActive,
-    ]}
-  >
-    <Ionicons
-      color={isActive ? colors.mapControlTextActive : colors.mapControlText}
-      name={iconName}
-      size={22}
-      style={styles.controlIcon}
-    />
-  </TouchableOpacity>
-);
+import type { MapAppearance, SessionMapType } from "./types/types";
 
 export const MapScreen = () => {
   const colorScheme = useColorScheme();
