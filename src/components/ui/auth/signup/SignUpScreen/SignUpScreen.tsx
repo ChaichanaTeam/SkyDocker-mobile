@@ -1,17 +1,14 @@
 import { SocialButton } from "@/components/shared/auth/SocialButton";
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
+import { Button } from "@/components/shared/ui/Button/Button";
+import { InputField } from "@/components/shared/ui/Input/InputField";
+import { TextField } from "@/components/shared/ui/Text/TextField";
 import { colors } from "@/theme";
 import { useSignUp } from "@app/api/context/SignUpContext";
 import { icons } from "@assets/icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, View } from "react-native";
 export const SignUpScreen = () => {
   const [email, setEmail] = useState("");
   const { setEmail: saveEmail, isSubmitting } = useSignUp();
@@ -29,14 +26,20 @@ export const SignUpScreen = () => {
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.title}>Sign Up</Text>
-      <Text style={styles.subtitle}>Let get you started</Text>
+      <TextField style={styles.title} variant="title">
+        Sign Up
+      </TextField>
+      <TextField style={styles.subtitle} variant="subtitle">
+        Let get you started
+      </TextField>
 
       <View style={styles.inputWrapper}>
         <View style={styles.container}>
-          <Text style={styles.label}>Email</Text>
+          <TextField style={styles.label} variant="label">
+            Email
+          </TextField>
 
-          <TextInput
+          <InputField
             style={styles.emailInput}
             value={email}
             onChangeText={setEmail}
@@ -49,22 +52,21 @@ export const SignUpScreen = () => {
         </View>
       </View>
 
-      <Text style={styles.hint}>
+      <TextField style={styles.hint} variant="hint">
         We will send a confirmation link to your email
-      </Text>
+      </TextField>
 
-      <TouchableOpacity
-        style={styles.signInButton}
-        activeOpacity={0.8}
+      <Button
+        variant="primary"
+        size="large"
         onPress={handleSignUp}
         disabled={!email.trim() || isSubmitting}
-      >
-        <Text style={styles.signInButtonText}>Sign Up</Text>
-      </TouchableOpacity>
+        text="Sign Up"
+      />
 
       <View style={styles.dividerRow}>
         <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>OR</Text>
+        <TextField style={styles.dividerText}>OR</TextField>
         <View style={styles.dividerLine} />
       </View>
 

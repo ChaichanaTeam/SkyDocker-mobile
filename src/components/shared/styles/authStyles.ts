@@ -135,7 +135,9 @@ export const authStyles = StyleSheet.create({
     color: colors.backgroundWhite,
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
-    padding: 0,
+    paddingLeft: 0,
+    paddingRight: 0,
+    paddingVertical: 0,
     height: 36,
   },
   emailInput: {
