@@ -1,20 +1,17 @@
 import { SocialButton } from "@/components/shared/auth/SocialButton";
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
+import { Button } from "@/components/shared/ui/Button/Button";
+import { InputField } from "@/components/shared/ui/Input/InputField";
+import { TextField } from "@/components/shared/ui/Text/TextField";
 import { colors } from "@/theme";
 import {
   getEmailValidationError,
   normalizeEmail,
 } from "@/validators/email.schema";
 import { icons } from "@assets/icons";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, View } from "react-native";
 
 export const SignInScreen = () => {
   const router = useRouter();
@@ -44,16 +41,22 @@ export const SignInScreen = () => {
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.title}>Sign In</Text>
-      <Text style={styles.subtitle}>You do have an account, right?</Text>
+      <TextField style={styles.title} variant="title">
+        Sign In
+      </TextField>
+      <TextField style={styles.subtitle} variant="subtitle">
+        You do have an account, right?
+      </TextField>
 
       <View style={styles.inputWrapper}>
         <View style={[styles.container, emailError && styles.containerInvalid]}>
-          <Text style={styles.label}>Email</Text>
+          <TextField style={styles.label} variant="label">
+            Email
+          </TextField>
 
-          <TextInput
-            style={styles.emailInput}
+          <InputField
             value={email}
+            style={styles.emailInput}
             onChangeText={(value) => {
               setEmail(value);
               if (emailError) {
@@ -68,39 +71,52 @@ export const SignInScreen = () => {
             autoCorrect={false}
           />
         </View>
-        {emailError && <Text style={styles.errorText}>{emailError}</Text>}
+        {emailError && (
+          <TextField style={styles.errorText} variant="error">
+            {emailError}
+          </TextField>
+        )}
       </View>
 
-      <Text style={styles.hint}>
+      <TextField style={styles.hint} variant="hint">
         Enter the email linked to your account
-      </Text>
+      </TextField>
 
-      <TouchableOpacity
-        style={styles.signInButton}
-        activeOpacity={0.8}
+      <Button
+        variant="primary"
+        size="large"
         onPress={handleSignIn}
-      >
-        <Text style={styles.signInButtonText}>Sign In</Text>
-      </TouchableOpacity>
+        text="Sign In"
+      />
 
       <View style={{ marginTop: 16, alignItems: "center" }}>
-        <Link href="/(auth)/signup" asChild>
-          <TouchableOpacity activeOpacity={0.7}>
-            <Text style={{ color: colors.backgroundWhite80, fontSize: 14 }}>
-              Dont have an account?{" "}
-              <Text
-                style={{ color: colors.backgroundWhite, fontWeight: "600" }}
-              >
-                Sign Up
-              </Text>
-            </Text>
-          </TouchableOpacity>
-        </Link>
+        <Button
+          variant="text"
+          size="small"
+          onPress={() => router.push("/(auth)/signup")}
+        >
+          <TextField
+            variant="body"
+            style={{ color: colors.backgroundWhite80, fontSize: 14 }}
+          >
+            Dont have an account?{" "}
+            <TextField
+              variant="link"
+              style={{
+                color: colors.backgroundWhite,
+                fontWeight: "600",
+                fontSize: 14,
+              }}
+            >
+              Sign Up
+            </TextField>
+          </TextField>
+        </Button>
       </View>
 
       <View style={styles.dividerRow}>
         <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>OR</Text>
+        <TextField style={styles.dividerText}>OR</TextField>
         <View style={styles.dividerLine} />
       </View>
 

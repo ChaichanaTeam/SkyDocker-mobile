@@ -1,3 +1,6 @@
+import { Button } from "@/components/shared/ui/Button/Button";
+import { InputField } from "@/components/shared/ui/Input/InputField";
+import { TextField } from "@/components/shared/ui/Text/TextField";
 import {
   applyOtpInput,
   createEmptyOtpCode,
@@ -13,10 +16,8 @@ import {
   KeyboardAvoidingView,
   NativeSyntheticEvent,
   Platform,
-  Text,
   TextInput,
   TextInputKeyPressEventData,
-  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -110,15 +111,18 @@ export const ConfirmEmailScreen = ({
     >
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>Confirm email</Text>
-          <Text style={styles.subtitle}>
+          <TextField style={styles.title} variant="title">
+            Confirm email
+          </TextField>
+
+          <TextField style={styles.subtitle} variant="subtitle">
             enter the code thats was sent on your email
-          </Text>
+          </TextField>
         </View>
 
         <View style={styles.codeRow}>
           {code.map((character, index) => (
-            <TextInput
+            <InputField
               key={index}
               ref={(element) => {
                 inputRefs.current[index] = element;
@@ -138,33 +142,43 @@ export const ConfirmEmailScreen = ({
           ))}
         </View>
 
-        {error && <Text style={styles.errorText}>{error.message}</Text>}
+        {error && (
+          <TextField style={styles.errorText} variant="error">
+            {error.message}
+          </TextField>
+        )}
 
-        <TouchableOpacity
+        <Button
           style={styles.centerBackButton}
-          activeOpacity={0.7}
           onPress={handleResend}
           disabled={isSubmitting}
+          variant="text"
+          size="small"
+          activeOpacity={0.7}
         >
-          <Text style={styles.centerBackText}>Send again</Text>
-        </TouchableOpacity>
+          <TextField style={styles.centerBackText} variant="link">
+            Send again
+          </TextField>
+        </Button>
 
         <View style={styles.bottomRow}>
-          <TouchableOpacity activeOpacity={0.7} onPress={handleBack}>
-            <Text style={styles.bottomBackText}>Back</Text>
-          </TouchableOpacity>
+          <Button
+            text="Back"
+            onPress={handleBack}
+            size="small"
+            variant="text"
+            activeOpacity={0.7}
+          />
 
-          <TouchableOpacity
-            style={[
-              styles.nextButton,
-              !isComplete && styles.nextButtonDisabled,
-            ]}
-            activeOpacity={0.8}
-            disabled={!isComplete}
+          <Button
+            text="Next"
             onPress={handleNext}
-          >
-            <Text style={styles.nextButtonText}>Next</Text>
-          </TouchableOpacity>
+            disabled={!isComplete}
+            loading={isSubmitting}
+            size="small"
+            variant="secondary"
+            activeOpacity={0.8}
+          />
         </View>
       </View>
     </KeyboardAvoidingView>

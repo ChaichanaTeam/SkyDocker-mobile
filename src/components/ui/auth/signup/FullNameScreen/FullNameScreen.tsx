@@ -1,16 +1,12 @@
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
+import { Button } from "@/components/shared/ui/Button/Button";
+import { InputField } from "@/components/shared/ui/Input/InputField";
+import { TextField } from "@/components/shared/ui/Text/TextField";
 import { colors } from "@/theme";
 import { useSignUp } from "@app/api/context/SignUpContext";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, View } from "react-native";
 
 export const FullNameScreen = () => {
   const [name, setName] = useState("");
@@ -26,7 +22,7 @@ export const FullNameScreen = () => {
 
     try {
       await submitProfile(name.trim(), secondName.trim());
-      router.push("/(auth)/confirm-email");
+      router.push("/(auth)/signin");
     } catch {}
   };
 
@@ -36,16 +32,20 @@ export const FullNameScreen = () => {
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.title}>And to finish this up</Text>
-      <Text style={styles.subtitle}>
+      <TextField style={styles.title} variant="title">
+        And to finish this up
+      </TextField>
+      <TextField style={styles.subtitle} variant="subtitle">
         Please enter your name to finish registration
-      </Text>
+      </TextField>
 
       <View style={styles.inputWrapper}>
         <View style={styles.container}>
-          <Text style={styles.label}>Name</Text>
-          <TextInput
-            style={styles.passwordInput}
+          <TextField style={styles.label} variant="label">
+            Name
+          </TextField>
+          <InputField
+            style={[styles.passwordInput]}
             value={name}
             onChangeText={setName}
             placeholder="Anatoly"
@@ -57,9 +57,11 @@ export const FullNameScreen = () => {
 
       <View style={[styles.inputWrapper, { marginTop: 50 }]}>
         <View style={styles.container}>
-          <Text style={styles.label}>Second name</Text>
-          <TextInput
-            style={styles.passwordInput}
+          <TextField style={styles.label} variant="label">
+            Second name
+          </TextField>
+          <InputField
+            style={[styles.passwordInput]}
             value={secondName}
             onChangeText={setSecondName}
             placeholder="Fisher"
@@ -69,25 +71,30 @@ export const FullNameScreen = () => {
         </View>
       </View>
 
-      {error && <Text style={styles.errorText}>{error.message}</Text>}
+      {error && (
+        <TextField style={styles.errorText} variant="error">
+          {error.message}
+        </TextField>
+      )}
 
       <View style={styles.bottomRow}>
-        <TouchableOpacity activeOpacity={0.7} onPress={handleBack}>
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
+        <Button
+          text="Back"
+          onPress={handleBack}
+          size="small"
+          variant="text"
+          activeOpacity={0.7}
+        />
 
-        <TouchableOpacity
-          style={styles.nextButton}
-          activeOpacity={0.8}
+        <Button
+          text="Next"
           onPress={handleNext}
-          disabled={!name.trim() || !secondName.trim() || isSubmitting}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator color={colors.backgroundWhite} />
-          ) : (
-            <Text style={styles.nextButtonText}>Next</Text>
-          )}
-        </TouchableOpacity>
+          disabled={!name.trim() || !secondName.trim()}
+          loading={isSubmitting}
+          size="small"
+          variant="secondary"
+          activeOpacity={0.8}
+        />
       </View>
     </ScrollView>
   );

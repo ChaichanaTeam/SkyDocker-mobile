@@ -1,23 +1,19 @@
 import { authStyles as styles } from "@/components/shared/styles/authStyles";
+import { Button } from "@/components/shared/ui/Button/Button";
+import { InputField } from "@/components/shared/ui/Input/InputField";
+import { TextField } from "@/components/shared/ui/Text/TextField";
 import { colors } from "@/theme";
+import { useSignUp } from "@app/api/context/SignUpContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { useSignUp } from "@app/api/context/SignUpContext";
+import { ScrollView, View } from "react-native";
 
 type SignInScreenProps = {
   onPressRegion?: () => void;
 };
 
 const REGIONS = [
-  { name: "Belarus", dialCode: "+375" },
   { name: "Poland", dialCode: "+48" },
   { name: "Ukraine", dialCode: "+380" },
 ] as const;
@@ -64,42 +60,51 @@ export const PhoneScreen = ({ onPressRegion }: SignInScreenProps) => {
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.title}>Enter Phone Number</Text>
-      <Text style={styles.subtitle}>Please write phone number</Text>
+      <TextField style={styles.title} variant="title">
+        Enter Phone Number
+      </TextField>
+
+      <TextField style={styles.subtitle} variant="subtitle">
+        Please write phone number
+      </TextField>
 
       <View style={styles.inputWrapper}>
         <View style={styles.container}>
-          <Text style={styles.label}>Region/Country</Text>
+          <TextField style={styles.label} variant="label">
+            Region/Country
+          </TextField>
 
-          <TouchableOpacity
+          <Button
             style={styles.regionRow}
+            variant="text"
             activeOpacity={0.7}
             onPress={handleToggleDropdown}
           >
-            <Text style={styles.regionText}>
+            <TextField style={styles.regionText}>
               {region.name} ({region.dialCode})
-            </Text>
+            </TextField>
             <Ionicons
               name={isDropdownOpen ? "chevron-up" : "chevron-down"}
               size={18}
               color={colors.backgroundWhite}
             />
-          </TouchableOpacity>
+          </Button>
 
           {isDropdownOpen && (
             <View style={styles.dropdownList}>
               {REGIONS.filter((item) => item.name !== region.name).map(
                 (item) => (
-                  <TouchableOpacity
+                  <Button
                     key={item.name}
                     style={styles.dropdownItem}
+                    variant="text"
                     activeOpacity={0.7}
                     onPress={() => handleSelectRegion(item)}
                   >
-                    <Text style={styles.dropdownItemText}>
+                    <TextField style={styles.dropdownItemText}>
                       {item.name} ({item.dialCode})
-                    </Text>
-                  </TouchableOpacity>
+                    </TextField>
+                  </Button>
                 ),
               )}
             </View>
@@ -108,11 +113,11 @@ export const PhoneScreen = ({ onPressRegion }: SignInScreenProps) => {
           <View style={styles.divider} />
 
           <View style={styles.phoneRow}>
-            <TextInput
+            <InputField
               style={styles.phoneInput}
               value={phone}
               onChangeText={setPhone}
-              placeholder="(29) 123-45-67"
+              placeholder="123-45-67"
               placeholderTextColor={colors.backgroundWhite80}
               keyboardType="phone-pad"
             />
@@ -121,18 +126,22 @@ export const PhoneScreen = ({ onPressRegion }: SignInScreenProps) => {
       </View>
 
       <View style={styles.bottomRow}>
-        <TouchableOpacity activeOpacity={0.7} onPress={handleBack}>
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
+        <Button
+          text="Back"
+          onPress={handleBack}
+          size="small"
+          variant="text"
+          activeOpacity={0.7}
+        />
 
-        <TouchableOpacity
-          style={styles.nextButton}
-          activeOpacity={0.8}
+        <Button
+          text="Next"
           onPress={handleNext}
           disabled={!phone.replace(/\D/g, "")}
-        >
-          <Text style={styles.nextButtonText}>Next</Text>
-        </TouchableOpacity>
+          size="small"
+          variant="secondary"
+          activeOpacity={0.8}
+        />
       </View>
     </ScrollView>
   );
