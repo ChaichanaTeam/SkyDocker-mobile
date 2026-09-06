@@ -28,6 +28,11 @@ export const colors = {
   mapControlTextActive: "#10213F",
   mapNoticeBackground: "#10151FF2",
   mapNoticeBorder: "#FFFFFF2E",
+  checkInBackdrop: "#00000066",
+  checkInLightSurface: "#FFFFFF",
+  checkInLightBorder: "#153D80",
+  checkInLightFieldBorder: "#555555",
+  checkInLightText: "#000000",
 
   //temp colors
   backgroundWhite: "#FFFFFF",

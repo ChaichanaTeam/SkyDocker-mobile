@@ -1,0 +1,3 @@
+export const DISMISS_ANIMATION_DURATION_MS = 200;
+export const DISMISS_DISTANCE_RATIO = 0.25;
+export const DISMISS_VELOCITY_Y = 1000;
