@@ -16,7 +16,7 @@ export const DEFAULT_CHECK_IN_FORM_VALUES: CheckInDraftValues = {
   weight: "",
 };
 
-export const CHECK_IN_FIELDS = [
+export const CHECK_IN_FIELDS: readonly CheckInFormField[] = [
   {
     key: "weight",
     keyboardType: "numeric",
@@ -36,7 +36,6 @@ export const CHECK_IN_FIELDS = [
     keyboardType: "default",
     label: "Category",
     placeholder: "A1",
-    suffix: undefined,
   },
   {
     key: "range",
@@ -50,7 +49,6 @@ export const CHECK_IN_FIELDS = [
     keyboardType: "default",
     label: "Start",
     placeholder: "Now",
-    suffix: undefined,
   },
   {
     key: "duration",
@@ -59,7 +57,7 @@ export const CHECK_IN_FIELDS = [
     placeholder: "30",
     suffix: "min",
   },
-] as const satisfies readonly CheckInFormField[];
+];
 
 export const CHECK_IN_DROPDOWNS = [
   {
