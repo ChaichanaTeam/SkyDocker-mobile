@@ -31,6 +31,20 @@ export const styles = StyleSheet.create({
   controlTouchableActive: {
     backgroundColor: colors.mapControlBackgroundActive,
   },
+  dronePin: {
+    alignItems: "center",
+    backgroundColor: colors.pressableActive1,
+    borderColor: colors.text2,
+    borderRadius: 8,
+    borderWidth: 1,
+    height: 38,
+    justifyContent: "center",
+    shadowColor: colors.startupLogo,
+    shadowOffset: { height: 2, width: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    width: 38,
+  },
   map: {
     ...StyleSheet.absoluteFillObject,
   },

@@ -1,18 +1,21 @@
 import {
   Inter_400Regular,
   Inter_500Medium,
+  Inter_700Bold,
   useFonts,
 } from "@expo-google-fonts/inter";
 import * as SplashScreen from "expo-splash-screen";
-import { PropsWithChildren, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { PropsWithChildren } from "react";
 
 import { AppSplashScreen } from "@/features/startup/components/AppSplashScreen";
 import {
   getStartupPhase,
   STARTUP_BRAND_DURATION_MS,
   STARTUP_LOADING_DURATION_MS,
-  StartupPhase,
 } from "@/features/startup/hooks/startupTiming";
+
+import type { StartupPhase } from "@/features/startup/hooks/startupTiming";
 
 export type StartupGateProps = PropsWithChildren<{
   bootstrap?: () => Promise<void>;
@@ -22,15 +25,16 @@ export type StartupGateProps = PropsWithChildren<{
 
 const DEFAULT_BOOTSTRAP = async () => {};
 
-export function StartupGate({
+export const StartupGate = ({
   bootstrap = DEFAULT_BOOTSTRAP,
   brandDurationMs = STARTUP_BRAND_DURATION_MS,
   loadingDurationMs = STARTUP_LOADING_DURATION_MS,
   children,
-}: StartupGateProps) {
+}: StartupGateProps) => {
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
+    Inter_700Bold,
   });
   const [bootstrapComplete, setBootstrapComplete] = useState(false);
   const [nativeSplashHidden, setNativeSplashHidden] = useState(false);
@@ -136,4 +140,4 @@ export function StartupGate({
   }
 
   return <AppSplashScreen phase={phase} />;
-}
+};
