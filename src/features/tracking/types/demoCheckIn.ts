@@ -7,7 +7,6 @@ export type CheckInDraftValues = Record<
   | "height"
   | "mission"
   | "range"
-  | "start"
   | "weight",
   string
 >;

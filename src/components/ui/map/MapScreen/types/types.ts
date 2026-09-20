@@ -37,7 +37,6 @@ export type CheckInFormFieldKey =
   | "duration"
   | "height"
   | "range"
-  | "start"
   | "weight";
 
 export type CheckInFormField = {

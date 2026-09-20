@@ -20,8 +20,10 @@ export const styles = StyleSheet.create({
     width: 180,
   },
   buttonSpacer: {
-    flex: 1,
-    minHeight: 8,
+    height: 40,
+  },
+  buttonSpacerCompact: {
+    height: 24,
   },
   dropdownStack: {
     gap: 14,
