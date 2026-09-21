@@ -46,14 +46,14 @@ export const MapScreen = () => {
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const {
     error,
+    getFreshCoordinates,
     isLocating,
     permission,
     retry,
     userCoordinates,
   } = useFocusedForegroundLocation();
   const { checkIns, submitCheckIn } = useDemoCheckIns({
-    onMissingLocation: retry,
-    userCoordinates,
+    getFreshCoordinates,
   });
 
   const userRegion = useMemo(

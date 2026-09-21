@@ -14,5 +14,5 @@ export { useDemoCheckIns } from "./hooks/useDemoCheckIns";
 export type {
   UseDemoCheckInsParams,
   UseDemoCheckInsResult,
-} from "./hooks/useDemoCheckIns";
+} from "./types/useDemoCheckIns";
 export { useFocusedForegroundLocation } from "./useFocusedForegroundLocation";

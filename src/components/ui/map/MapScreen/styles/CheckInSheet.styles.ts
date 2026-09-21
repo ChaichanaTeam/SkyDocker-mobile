@@ -35,6 +35,9 @@ export const styles = StyleSheet.create({
   fieldCell: {
     width: "31%",
   },
+  fieldCellOpen: {
+    zIndex: 20,
+  },
   fieldGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -72,56 +75,9 @@ export const styles = StyleSheet.create({
   handleTouchAreaCompact: {
     height: 20,
   },
-  inputSuffix: {
-    fontFamily: typography.interRegular,
-    fontSize: 16,
-    lineHeight: 20,
-    marginLeft: 2,
-  },
-  inputValueRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    paddingHorizontal: 8,
-  },
   modalRoot: {
     flex: 1,
     justifyContent: "flex-end",
-  },
-  outlinedField: {
-    borderRadius: 8,
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 54,
-  },
-  outlinedFieldCompact: {
-    minHeight: 48,
-  },
-  outlinedInput: {
-    backgroundColor: "transparent",
-    fontFamily: typography.interRegular,
-    fontSize: 16,
-    height: 50,
-    minWidth: 0,
-    paddingHorizontal: 0,
-    textAlign: "center",
-  },
-  outlinedInputCompact: {
-    height: 44,
-  },
-  outlinedInputWithSuffix: {
-    flexGrow: 0,
-    flexShrink: 1,
-    maxWidth: "70%",
-  },
-  outlinedLabel: {
-    fontFamily: typography.interRegular,
-    fontSize: 14,
-    left: 12,
-    paddingHorizontal: 4,
-    position: "absolute",
-    top: -11,
-    zIndex: 1,
   },
   sheet: {
     borderTopLeftRadius: 32,

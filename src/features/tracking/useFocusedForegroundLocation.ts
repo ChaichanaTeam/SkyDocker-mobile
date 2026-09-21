@@ -2,6 +2,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import {
   Accuracy,
   getForegroundPermissionsAsync,
+  getCurrentPositionAsync,
   hasServicesEnabledAsync,
   PermissionStatus,
   requestForegroundPermissionsAsync,
@@ -23,6 +24,7 @@ import type {
 } from "./types/types";
 
 import {
+  currentPositionFailedMessage,
   deniedPermissionMessage,
   disabledServicesMessage,
   watchFailedMessage,
@@ -55,6 +57,70 @@ export const useFocusedForegroundLocation =
     const retry = useCallback((): void => {
       setRetryCount((currentRetryCount) => currentRetryCount + 1);
     }, []);
+
+    const ensureLocationAccess = useCallback(async (): Promise<void> => {
+      const existingPermission = await getForegroundPermissionsAsync();
+      let nextPermission = toPermissionState(existingPermission);
+      setPermission(nextPermission);
+
+      if (!nextPermission.granted && existingPermission.canAskAgain) {
+        const requestedPermission = await requestForegroundPermissionsAsync();
+        nextPermission = toPermissionState(requestedPermission);
+        setPermission(nextPermission);
+      }
+
+      if (!nextPermission.granted) {
+        setError({
+          message: deniedPermissionMessage,
+          reason: "permission-denied",
+        });
+        throw new Error(deniedPermissionMessage);
+      }
+
+      const areServicesEnabled = await hasServicesEnabledAsync();
+
+      if (!areServicesEnabled) {
+        setError({
+          message: disabledServicesMessage,
+          reason: "services-disabled",
+        });
+        throw new Error(disabledServicesMessage);
+      }
+    }, []);
+
+    const getFreshCoordinates = useCallback(async (): Promise<UserCoordinates> => {
+      try {
+        await ensureLocationAccess();
+        const currentPosition = await getCurrentPositionAsync({
+          accuracy: Accuracy.High,
+        });
+        const nextCoordinates = toUserCoordinates(currentPosition);
+
+        setUserCoordinates(nextCoordinates);
+        setError(null);
+
+        return nextCoordinates;
+      } catch (error: unknown) {
+        const caughtMessage = error instanceof Error ? error.message : null;
+        const message =
+          caughtMessage === deniedPermissionMessage ||
+          caughtMessage === disabledServicesMessage
+            ? caughtMessage
+            : currentPositionFailedMessage;
+
+        setError({
+          message,
+          reason:
+            message === deniedPermissionMessage
+              ? "permission-denied"
+              : message === disabledServicesMessage
+                ? "services-disabled"
+                : "current-position-failed",
+        });
+
+        throw new Error(message);
+      }
+    }, [ensureLocationAccess]);
 
     useFocusEffect(
       useCallback(() => {
@@ -182,6 +248,7 @@ export const useFocusedForegroundLocation =
 
     return {
       error,
+      getFreshCoordinates,
       isLocating,
       permission,
       retry,

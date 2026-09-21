@@ -1,63 +1,54 @@
 import { useCallback, useState } from "react";
 
-import { triggerDemoCheckIn } from "@app/api/services/checkIn.service";
-import { isApiError } from "@app/api/types/apiError";
+import { createDemoCheckIn } from "@app/api/services/checkIn.service";
+import { mapCheckInErrorToMessage } from "@features/tracking/mappers/checkInErrorMapper";
+import { mapValidatedDraftToDemoCheckInRequest } from "@features/tracking/mappers/demoCheckInMapper";
+import { validateCheckInDraft } from "@validators/checkIn.schema";
 
 import type {
   CheckInDraftValues,
   DemoCheckInRecord,
-} from "../types/demoCheckIn";
-import type { UserCoordinates } from "../types/types";
-
-export type UseDemoCheckInsParams = {
-  onMissingLocation: () => void;
-  userCoordinates: UserCoordinates | null;
-};
-
-export type UseDemoCheckInsResult = {
-  checkIns: readonly DemoCheckInRecord[];
-  submitCheckIn: (values: CheckInDraftValues) => Promise<void>;
-};
+} from "@features/tracking/types/demoCheckIn";
+import type {
+  UseDemoCheckInsParams,
+  UseDemoCheckInsResult,
+} from "@features/tracking/types/useDemoCheckIns";
 
 export const useDemoCheckIns = ({
-  onMissingLocation,
-  userCoordinates,
+  getFreshCoordinates,
 }: UseDemoCheckInsParams): UseDemoCheckInsResult => {
   const [checkIns, setCheckIns] = useState<DemoCheckInRecord[]>([]);
 
   const submitCheckIn = useCallback(
     async (values: CheckInDraftValues): Promise<void> => {
-      if (!userCoordinates) {
-        onMissingLocation();
-        throw new Error(
-          "Current location is required to create a check-in. Please try again.",
-        );
-      }
-
       try {
-        await triggerDemoCheckIn();
-      } catch (error: unknown) {
-        if (isApiError(error)) {
-          throw new Error("Could not create check-in. Please try again.");
-        }
-
-        throw error;
-      }
-
-      const coordinate = userCoordinates;
-      const createdAt = Date.now();
-
-      setCheckIns((currentCheckIns) => [
-        ...currentCheckIns,
-        {
+        const validatedDraft = validateCheckInDraft(values);
+        const coordinate = await getFreshCoordinates();
+        const submittedAt = new Date();
+        const payload = mapValidatedDraftToDemoCheckInRequest(
+          validatedDraft,
           coordinate,
-          createdAt,
-          id: `check-in-${createdAt}-${currentCheckIns.length + 1}`,
-          values,
-        },
-      ]);
+          submittedAt,
+        );
+
+        await createDemoCheckIn(payload);
+
+        setCheckIns((currentCheckIns) => [
+          ...currentCheckIns,
+          {
+            coordinate,
+            createdAt: submittedAt.getTime(),
+            id: `check-in-${submittedAt.getTime()}-${
+              currentCheckIns.length + 1
+            }`,
+            values: validatedDraft.values,
+          },
+        ]);
+      } catch (error: unknown) {
+        throw new Error(mapCheckInErrorToMessage(error));
+      }
     },
-    [onMissingLocation, userCoordinates],
+    [getFreshCoordinates],
   );
 
   return {
