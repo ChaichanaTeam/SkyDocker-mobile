@@ -160,6 +160,7 @@ export const CheckInForm = ({
             </View>
           </View>
         ))}
+        <View style={styles.fieldCell} />
       </View>
 
       {submitError ? (
@@ -168,7 +169,12 @@ export const CheckInForm = ({
         </TextField>
       ) : null}
 
-      <View style={styles.buttonSpacer} />
+      <View
+        style={[
+          styles.buttonSpacer,
+          isCompactLayout ? styles.buttonSpacerCompact : null,
+        ]}
+      />
       <Button
         disabled={isSubmitDisabled}
         loading={isSubmitting}

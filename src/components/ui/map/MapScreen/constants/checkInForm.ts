@@ -12,7 +12,6 @@ export const DEFAULT_CHECK_IN_FORM_VALUES: CheckInDraftValues = {
   height: "",
   mission: "",
   range: "",
-  start: "",
   weight: "",
 };
 
@@ -49,6 +48,7 @@ export const CHECK_IN_FIELDS: readonly CheckInFormField[] = [
     keyboardType: "default",
     label: "Start",
     placeholder: "Now",
+    suffix: undefined,
   },
   {
     key: "duration",
@@ -62,12 +62,12 @@ export const CHECK_IN_FIELDS: readonly CheckInFormField[] = [
 export const CHECK_IN_DROPDOWNS = [
   {
     key: "mission",
-    label: "Mission",
+    label: "List of missions",
     options: [{ label: "Mission list", value: "Mission list" }],
   },
   {
     key: "drone",
-    label: "Drone",
+    label: "List of drones",
     options: [{ label: "SkyDocker drone", value: "SkyDocker drone" }],
   },
 ] as const satisfies readonly CheckInDropdownField[];
