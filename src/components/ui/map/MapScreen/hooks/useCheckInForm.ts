@@ -8,24 +8,10 @@ import type {
   CheckInDropdownOption,
   CheckInFormFieldKey,
 } from "../types/types";
+import type { UseCheckInFormResult } from "../types/useCheckInForm";
 
 type UseCheckInFormParams = {
   onSubmit: (values: CheckInDraftValues) => Promise<void>;
-};
-
-export type UseCheckInFormResult = {
-  activeDropdown: CheckInDropdownFieldKey | null;
-  formValues: CheckInDraftValues;
-  isSubmitDisabled: boolean;
-  isSubmitting: boolean;
-  resetTransientState: () => void;
-  selectDropdownOption: (
-    fieldKey: CheckInDropdownFieldKey,
-  ) => (option: CheckInDropdownOption) => void;
-  submitError: string | null;
-  submitForm: () => Promise<void>;
-  toggleDropdown: (fieldKey: CheckInDropdownFieldKey) => void;
-  updateField: (fieldKey: CheckInFormFieldKey) => (value: string) => void;
 };
 
 export const useCheckInForm = ({

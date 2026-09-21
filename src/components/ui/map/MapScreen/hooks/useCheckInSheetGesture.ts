@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { LayoutChangeEvent } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import {
@@ -26,9 +26,14 @@ export const useCheckInSheetGesture = ({
   onClose,
   windowHeight,
 }: UseCheckInSheetGestureParams) => {
+  const onCloseRef = useRef(onClose);
   const sheetHeight = useSharedValue(0);
   const translateY = useSharedValue(0);
   const isDragDismissing = useSharedValue(false);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (isVisible) {
@@ -36,6 +41,10 @@ export const useCheckInSheetGesture = ({
       isDragDismissing.value = false;
     }
   }, [isDragDismissing, isVisible, translateY]);
+
+  const closeFromGesture = useCallback((): void => {
+    onCloseRef.current();
+  }, []);
 
   const handleSheetLayout = useCallback(
     (event: LayoutChangeEvent): void => {
@@ -77,7 +86,7 @@ export const useCheckInSheetGesture = ({
             { duration: DISMISS_ANIMATION_DURATION_MS },
             (finished) => {
               if (finished) {
-                scheduleOnRN(onClose);
+                scheduleOnRN(closeFromGesture);
               }
             },
           );
@@ -87,7 +96,13 @@ export const useCheckInSheetGesture = ({
             translateY.value = withSpring(0);
           }
         }),
-    [isDragDismissing, onClose, sheetHeight, translateY, windowHeight],
+    [
+      closeFromGesture,
+      isDragDismissing,
+      sheetHeight,
+      translateY,
+      windowHeight,
+    ],
   );
 
   return {
