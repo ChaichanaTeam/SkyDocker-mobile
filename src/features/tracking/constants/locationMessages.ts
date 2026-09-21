@@ -6,3 +6,6 @@ export const disabledServicesMessage =
 
 export const watchFailedMessage =
   "SkyDocker could not start live location updates. You can keep using the map and retry.";
+
+export const currentPositionFailedMessage =
+  "SkyDocker could not get a fresh GPS position. Please try again.";
