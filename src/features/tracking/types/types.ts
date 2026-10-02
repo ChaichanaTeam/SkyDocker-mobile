@@ -6,6 +6,7 @@ export type UserCoordinates = {
 export type TrackingErrorReason =
   | "permission-denied"
   | "services-disabled"
+  | "current-position-failed"
   | "watch-failed";
 
 export type TrackingErrorState = {
@@ -20,6 +21,7 @@ export type TrackingPermissionState = {
 
 export type FocusedForegroundLocationState = {
   error: TrackingErrorState | null;
+  getFreshCoordinates: () => Promise<UserCoordinates>;
   isLocating: boolean;
   permission: TrackingPermissionState;
   retry: () => void;

@@ -24,6 +24,10 @@ export const CheckInDropdown = ({
     appearance === "light" ? colors.checkInLightBorder : colors.text1;
   const placeholderColor =
     appearance === "light" ? colors.checkInLightText : colors.text1;
+  const selectedOption = field.options.find((option) => option.value === value);
+  const displayValue =
+    selectedOption?.label ??
+    (value.length > 0 ? value : field.placeholder ?? "");
 
   return (
     <View
@@ -59,7 +63,7 @@ export const CheckInDropdown = ({
           color={value ? textColor : placeholderColor}
           style={styles.dropdownValue}
         >
-          {value}
+          {displayValue}
         </TextField>
       </TouchableOpacity>
 

@@ -31,7 +31,7 @@ export type MapBottomBarProps = {
   onProfilePress: () => void;
 };
 
-export type CheckInDropdownFieldKey = "mission" | "drone";
+export type CheckInDropdownFieldKey = "mission" | "drone" | "category";
 export type CheckInFormFieldKey =
   | "category"
   | "duration"
@@ -56,6 +56,7 @@ export type CheckInDropdownField = {
   key: CheckInDropdownFieldKey;
   label: string;
   options: readonly CheckInDropdownOption[];
+  placeholder?: string;
 };
 
 export type CheckInFormProps = {
@@ -63,6 +64,14 @@ export type CheckInFormProps = {
   isCompactLayout: boolean;
   isVisible: boolean;
   onSubmit: (values: CheckInDraftValues) => Promise<void>;
+};
+
+export type CheckInTextFieldProps = {
+  appearance: MapAppearance;
+  field: CheckInFormField;
+  isCompact: boolean;
+  onChangeText: (value: string) => void;
+  value: string;
 };
 
 export type CheckInDropdownProps = {
