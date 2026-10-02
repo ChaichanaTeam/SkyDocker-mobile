@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Linking,
   Text,
@@ -7,7 +7,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Polygon, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { colors } from "@/theme";
@@ -20,7 +20,23 @@ import { MapControlButton } from "./MapControlButton";
 import { toUserRegion, WORLD_REGION } from "./constants/mapRegion";
 import { styles } from "./styles/MapScreen.styles";
 
+import { useGeoZones } from "@/hooks/useGeoZones";
+import { polygonGeometryToLatLngs } from "@/utils/geoConvert";
+import { getGeoZoneStyle } from "@/utils/geoZoneStyle";
+import { BoundingBox } from "@app/api/types/geoZone";
 import type { MapAppearance, SessionMapType } from "./types/types";
+
+const regionToBoundingBox = (region: Region): BoundingBox => {
+  const halfLat = region.latitudeDelta / 2;
+  const halfLon = region.longitudeDelta / 2;
+
+  return {
+    min_lat: region.latitude - halfLat,
+    max_lat: region.latitude + halfLat,
+    min_lon: region.longitude - halfLon,
+    max_lon: region.longitude + halfLon,
+  };
+};
 
 export const MapScreen = () => {
   const colorScheme = useColorScheme();
@@ -32,13 +48,10 @@ export const MapScreen = () => {
   );
   const [mapType, setMapType] = useState<SessionMapType>("standard");
   const [settingsError, setSettingsError] = useState<string | null>(null);
-  const {
-    error,
-    isLocating,
-    permission,
-    retry,
-    userCoordinates,
-  } = useFocusedForegroundLocation();
+  const { error, isLocating, permission, retry, userCoordinates } =
+    useFocusedForegroundLocation();
+
+  const { zones, onRegionChange } = useGeoZones();
 
   const userRegion = useMemo(
     () => (userCoordinates ? toUserRegion(userCoordinates) : null),
@@ -52,7 +65,25 @@ export const MapScreen = () => {
 
     hasFocusedOnFirstLocation.current = true;
     mapRef.current?.animateToRegion(userRegion, 700);
-  }, [userRegion]);
+    if (userCoordinates) {
+      onRegionChange(regionToBoundingBox(userRegion), {
+        lon: userCoordinates.longitude,
+        lat: userCoordinates.latitude,
+      });
+    }
+  }, [userRegion, userCoordinates, onRegionChange]);
+
+  const handleRegionChangeComplete = useCallback(
+    (region: Region) => {
+      if (!hasFocusedOnFirstLocation.current || !userCoordinates) return;
+
+      onRegionChange(regionToBoundingBox(region), {
+        lon: userCoordinates.longitude,
+        lat: userCoordinates.latitude,
+      });
+    },
+    [onRegionChange, userCoordinates],
+  );
 
   const toggleAppearance = (): void => {
     setAppearance((currentAppearance) =>
@@ -102,19 +133,30 @@ export const MapScreen = () => {
         customMapStyle={appearance === "dark" ? blackGoogleMapStyle : []}
         initialRegion={WORLD_REGION}
         mapType={mapType}
+        onRegionChangeComplete={handleRegionChangeComplete}
         provider={PROVIDER_GOOGLE}
         ref={mapRef}
         showsCompass
         showsMyLocationButton={false}
         showsUserLocation={permission.granted}
         style={styles.map}
-      />
+      >
+        {Array.from(zones.values()).map((feature) => {
+          const style = getGeoZoneStyle(feature.properties.tag);
+          return (
+            <Polygon
+              key={feature.properties.name}
+              coordinates={polygonGeometryToLatLngs(feature.geometry)}
+              fillColor={style.fillColor}
+              strokeColor={style.strokeColor}
+              strokeWidth={style.strokeWidth}
+            />
+          );
+        })}
+      </MapView>
 
       <View
-        style={[
-          styles.controlStack,
-          { top: Math.max(insets.top + 16, 32) },
-        ]}
+        style={[styles.controlStack, { top: Math.max(insets.top + 16, 32) }]}
       >
         <MapControlButton
           accessibilityLabel={
@@ -146,10 +188,7 @@ export const MapScreen = () => {
       {noticeMessage ? (
         <View
           accessibilityLiveRegion="polite"
-          style={[
-            styles.notice,
-            { bottom: Math.max(insets.bottom + 20, 28) },
-          ]}
+          style={[styles.notice, { bottom: Math.max(insets.bottom + 20, 28) }]}
         >
           <Text style={styles.noticeText}>{noticeMessage}</Text>
           <TouchableOpacity
@@ -161,9 +200,7 @@ export const MapScreen = () => {
             <Ionicons
               color={colors.mapControlTextActive}
               name={
-                noticeActionLabel === "Open settings"
-                  ? "settings"
-                  : "refresh"
+                noticeActionLabel === "Open settings" ? "settings" : "refresh"
               }
               size={18}
             />

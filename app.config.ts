@@ -1,5 +1,6 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
+const appBundleId = "com.gormanprog.skydocker";
 const androidGoogleMapsApiKey = process.env.GOOGLE_MAPS_ANDROID_API_KEY;
 const iosGoogleMapsApiKey = process.env.GOOGLE_MAPS_IOS_API_KEY;
 
@@ -14,10 +15,9 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
   orientation: "portrait",
   scheme: "skydocker",
   userInterfaceStyle: "automatic",
-  newArchEnabled: true,
   ios: {
     ...config.ios,
-    bundleIdentifier: "com.gormanprog.skydocker",
+    bundleIdentifier: appBundleId,
     config: {
       ...config.ios?.config,
       ...(iosGoogleMapsApiKey
@@ -38,8 +38,7 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
           }
         : {}),
     },
-    edgeToEdgeEnabled: true,
-    package: "com.gormanprog.SkyDocker",
+    package: appBundleId,
     predictiveBackGestureEnabled: false,
   },
   web: {
@@ -48,6 +47,12 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     "expo-router",
+    "expo-font",
+    "expo-image",
+    "expo-splash-screen",
+    "expo-status-bar",
+    "expo-secure-store",
+    "expo-web-browser",
     [
       "expo-location",
       {

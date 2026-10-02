@@ -127,13 +127,12 @@ export function StartupGate({
     nativeSplashHidden,
   ]);
 
-  if (phase === "nativeSplash") {
-    return null;
-  }
-
-  if (phase === "ready") {
-    return children;
-  }
-
-  return <AppSplashScreen phase={phase} />;
+  return (
+    <>
+      {children}
+      {phase === "brand" || phase === "loading" ? (
+        <AppSplashScreen phase={phase} />
+      ) : null}
+    </>
+  );
 }

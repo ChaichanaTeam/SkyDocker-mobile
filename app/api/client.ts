@@ -8,6 +8,7 @@ interface RequestOptions {
   body?: unknown;
   requiresAuth?: boolean;
   token?: string;
+  signal?: AbortSignal;
 }
 
 const parseErrorResponse = async (response: Response): Promise<ApiError> => {
@@ -29,7 +30,7 @@ const parseErrorResponse = async (response: Response): Promise<ApiError> => {
 
 export const apiRequest = async <T>(
   path: string,
-  { method, body, requiresAuth = true, token }: RequestOptions,
+  { method, body, requiresAuth = true, token, signal }: RequestOptions,
 ): Promise<T> => {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -44,14 +45,20 @@ export const apiRequest = async <T>(
     }
   }
 
+  const url = `${process.env.EXPO_PUBLIC_API_URL}${path}`;
+
   let response: Response;
   try {
-    response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}${path}`, {
+    response = await fetch(url, {
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal,
     });
-  } catch {
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") {
+      throw e;
+    }
     const networkError: ApiError = {
       status: 0,
       message: "Not connect to server",
