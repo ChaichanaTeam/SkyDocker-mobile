@@ -1,4 +1,5 @@
 export const typography = {
-  interRegular: 'Inter_400Regular',
+  interBold: "Inter_700Bold",
+  interRegular: "Inter_400Regular",
 } as const;
 

@@ -1,5 +1,6 @@
 import { requestOtp, signup, verifyOtp } from "@app/api/services/auth.service";
-import { ApiError, isApiError } from "@app/api/types/apiError";
+import { isApiError } from "@app/api/types/apiError";
+import type { ApiError } from "@app/api/types/apiError";
 import {
   RegisterPayload,
   RegistrationDraft,
@@ -30,7 +31,13 @@ interface SignUpContextValue {
 const SignUpContext = createContext<SignUpContextValue | undefined>(undefined);
 
 const toApiError = (e: unknown): ApiError =>
-  isApiError(e) ? e : { status: 0, message: "Unknown error" };
+  isApiError(e)
+    ? e
+    : {
+        kind: "invalid-response",
+        status: 0,
+        message: "Unknown error",
+      };
 
 export const SignUpProvider = ({ children }: { children: ReactNode }) => {
   const [step, setStep] = useState<RegistrationStep>("email");
@@ -70,6 +77,7 @@ export const SignUpProvider = ({ children }: { children: ReactNode }) => {
     async (otp: string) => {
       if (!draft.verify_token) {
         const tokenError: ApiError = {
+          kind: "configuration",
           status: 0,
           message: "Verify token is missing",
         };
@@ -118,6 +126,7 @@ export const SignUpProvider = ({ children }: { children: ReactNode }) => {
     async (firstName: string, lastName: string) => {
       if (!draft.phone_number || !draft.password) {
         const incompleteError: ApiError = {
+          kind: "configuration",
           status: 0,
           message: "Not all data has been filled in.",
         };
@@ -127,6 +136,7 @@ export const SignUpProvider = ({ children }: { children: ReactNode }) => {
 
       if (!draft.registration_token) {
         const tokenError: ApiError = {
+          kind: "configuration",
           status: 0,
           message: "Registration token is missing",
         };

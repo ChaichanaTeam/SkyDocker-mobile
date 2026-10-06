@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+﻿import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Linking,
@@ -7,24 +7,32 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import MapView, { Polygon, PROVIDER_GOOGLE, Region } from "react-native-maps";
+import MapView, { Marker, Polygon, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { colors } from "@/theme";
 import {
   blackGoogleMapStyle,
+  useDemoCheckIns,
   useFocusedForegroundLocation,
 } from "@features/tracking";
-
-import { MapControlButton } from "./MapControlButton";
-import { toUserRegion, WORLD_REGION } from "./constants/mapRegion";
-import { styles } from "./styles/MapScreen.styles";
 
 import { useGeoZones } from "@/hooks/useGeoZones";
 import { polygonGeometryToLatLngsWithHoles } from "@/utils/geoConvert";
 import { getGeoZoneStyle } from "@/utils/geoZoneStyle";
 import { BoundingBox } from "@app/api/types/geoZone";
-import type { MapAppearance, SessionMapType } from "./types/types";
+
+import { CheckInSheet } from "./CheckInSheet";
+import { MapBottomBar } from "./MapBottomBar";
+import { MapControlButton } from "./MapControlButton";
+import { toUserRegion, WORLD_REGION } from "./constants/mapRegion";
+import { styles } from "./styles/MapScreen.styles";
+import type { CheckInDraftValues } from "@features/tracking";
+import type {
+  MapBottomBarItemKey,
+  MapAppearance,
+  SessionMapType,
+} from "./types/types";
 
 const regionToBoundingBox = (region: Region): BoundingBox => {
   const halfLat = region.latitudeDelta / 2;
@@ -46,12 +54,24 @@ export const MapScreen = () => {
   const [appearance, setAppearance] = useState<MapAppearance>(
     colorScheme === "dark" ? "dark" : "light",
   );
+  const [isCheckInSheetVisible, setIsCheckInSheetVisible] =
+    useState<boolean>(false);
+  const [selectedBottomTab, setSelectedBottomTab] =
+    useState<MapBottomBarItemKey>("map");
   const [mapType, setMapType] = useState<SessionMapType>("standard");
   const [settingsError, setSettingsError] = useState<string | null>(null);
-  const { error, isLocating, permission, retry, userCoordinates } =
-    useFocusedForegroundLocation();
-
+  const {
+    error,
+    getFreshCoordinates,
+    isLocating,
+    permission,
+    retry,
+    userCoordinates,
+  } = useFocusedForegroundLocation();
   const { zones, onRegionChange } = useGeoZones();
+  const { checkIns, submitCheckIn } = useDemoCheckIns({
+    getFreshCoordinates,
+  });
 
   const userRegion = useMemo(
     () => (userCoordinates ? toUserRegion(userCoordinates) : null),
@@ -85,28 +105,56 @@ export const MapScreen = () => {
     [onRegionChange, userCoordinates],
   );
 
-  const toggleAppearance = (): void => {
+  const toggleAppearance = useCallback((): void => {
     setAppearance((currentAppearance) =>
       currentAppearance === "dark" ? "light" : "dark",
     );
-  };
+  }, []);
 
-  const toggleMapType = (): void => {
+  const toggleMapType = useCallback((): void => {
     setMapType((currentMapType) =>
       currentMapType === "standard" ? "satellite" : "standard",
     );
-  };
+  }, []);
 
-  const recenterOnUser = (): void => {
+  const recenterOnUser = useCallback((): void => {
     if (!userRegion) {
       retry();
       return;
     }
 
     mapRef.current?.animateToRegion(userRegion, 700);
-  };
+  }, [retry, userRegion]);
 
-  const handleNoticeAction = (): void => {
+  const openCheckInSheet = useCallback((): void => {
+    setSelectedBottomTab("checkIn");
+    setIsCheckInSheetVisible(true);
+  }, []);
+
+  const closeCheckInSheet = useCallback((): void => {
+    setSelectedBottomTab("map");
+    setIsCheckInSheetVisible(false);
+  }, []);
+
+  const handleMapBottomTabPress = useCallback((): void => {
+    setSelectedBottomTab("map");
+    recenterOnUser();
+  }, [recenterOnUser]);
+
+  const handleProfileBottomTabPress = useCallback((): void => {
+    setSelectedBottomTab("profile");
+    setIsCheckInSheetVisible(false);
+  }, []);
+
+  const handleCreateCheckIn = useCallback(async (
+    values: CheckInDraftValues,
+  ): Promise<void> => {
+    await submitCheckIn(values);
+    setSelectedBottomTab("map");
+    setIsCheckInSheetVisible(false);
+  }, [submitCheckIn]);
+
+  const handleNoticeAction = useCallback((): void => {
     if (error?.reason === "permission-denied" && !permission.canAskAgain) {
       Linking.openSettings().catch(() => {
         setSettingsError(
@@ -118,7 +166,7 @@ export const MapScreen = () => {
 
     setSettingsError(null);
     retry();
-  };
+  }, [error?.reason, permission.canAskAgain, retry]);
 
   const noticeMessage = settingsError ?? error?.message;
 
@@ -146,6 +194,7 @@ export const MapScreen = () => {
           const { outer, holes } = polygonGeometryToLatLngsWithHoles(
             feature.geometry,
           );
+
           return (
             <Polygon
               key={feature.properties.tag}
@@ -157,6 +206,18 @@ export const MapScreen = () => {
             />
           );
         })}
+
+        {checkIns.map((checkIn) => (
+          <Marker
+            coordinate={checkIn.coordinate}
+            key={checkIn.id}
+            title="Drone check-in"
+          >
+            <View style={styles.dronePin}>
+              <Ionicons color={colors.text2} name="airplane" size={22} />
+            </View>
+          </Marker>
+        ))}
       </MapView>
 
       <View
@@ -192,7 +253,10 @@ export const MapScreen = () => {
       {noticeMessage ? (
         <View
           accessibilityLiveRegion="polite"
-          style={[styles.notice, { bottom: Math.max(insets.bottom + 20, 28) }]}
+          style={[
+            styles.notice,
+            { bottom: Math.max(insets.bottom + 104, 112) },
+          ]}
         >
           <Text style={styles.noticeText}>{noticeMessage}</Text>
           <TouchableOpacity
@@ -212,6 +276,21 @@ export const MapScreen = () => {
           </TouchableOpacity>
         </View>
       ) : null}
+
+      <MapBottomBar
+        activeItem={selectedBottomTab}
+        bottomInset={insets.bottom}
+        onCheckInPress={openCheckInSheet}
+        onMapPress={handleMapBottomTabPress}
+        onProfilePress={handleProfileBottomTabPress}
+      />
+
+      <CheckInSheet
+        appearance={appearance}
+        isVisible={isCheckInSheetVisible}
+        onClose={closeCheckInSheet}
+        onSubmit={handleCreateCheckIn}
+      />
     </View>
   );
 };

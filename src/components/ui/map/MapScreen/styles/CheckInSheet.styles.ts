@@ -1,0 +1,109 @@
+import { StyleSheet } from "react-native";
+
+import { colors, typography } from "@/theme";
+
+export const styles = StyleSheet.create({
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: colors.checkInBackdrop,
+  },
+  createListButton: {
+    alignSelf: "flex-end",
+    borderRadius: 28,
+    height: 56,
+    marginTop: 0,
+    width: 200,
+  },
+  createListButtonCompact: {
+    borderRadius: 24,
+    height: 48,
+    width: 180,
+  },
+  buttonSpacer: {
+    height: 40,
+  },
+  buttonSpacerCompact: {
+    height: 24,
+  },
+  dropdownStack: {
+    gap: 14,
+    zIndex: 2,
+  },
+  dropdownStackCompact: {
+    gap: 7,
+  },
+  fieldCell: {
+    width: "31%",
+  },
+  fieldCellOpen: {
+    zIndex: 20,
+  },
+  fieldGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    columnGap: 8,
+    rowGap: 14,
+    justifyContent: "space-between",
+    paddingTop: 22,
+    zIndex: 1,
+  },
+  fieldGridCompact: {
+    paddingTop: 14,
+    rowGap: 10,
+  },
+  formError: {
+    color: colors.text6,
+    fontFamily: typography.interRegular,
+    fontSize: 14,
+    marginTop: 12,
+    textAlign: "right",
+  },
+  gestureRoot: {
+    flex: 1,
+  },
+  handle: {
+    backgroundColor: colors.pressableActive2,
+    borderRadius: 3,
+    height: 6,
+    width: 225,
+  },
+  handleTouchArea: {
+    alignItems: "center",
+    height: 30,
+    justifyContent: "flex-start",
+  },
+  handleTouchAreaCompact: {
+    height: 20,
+  },
+  modalRoot: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    height: "60%",
+    paddingHorizontal: 36,
+    paddingTop: 6,
+  },
+  sheetContent: {
+    flex: 1,
+  },
+  sheetContentCompact: {
+    gap: 0,
+  },
+  sheetDark: {
+    backgroundColor: colors.backgroundMain,
+  },
+  sheetLight: {
+    backgroundColor: colors.checkInLightSurface,
+  },
+  title: {
+    fontFamily: typography.interBold,
+    fontSize: 30,
+    marginBottom: 22,
+  },
+  titleCompact: {
+    marginBottom: 10,
+  },
+});
