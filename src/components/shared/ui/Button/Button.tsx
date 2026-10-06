@@ -4,7 +4,7 @@ import {
   variantStyles,
 } from "@/components/shared/ui/Button/Button.styles";
 import { CommonButtonProps } from "@/components/shared/ui/Button/Button.types";
-import { ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import { ActivityIndicator, Pressable, Text } from "react-native";
 
 export const Button = ({
   text,
@@ -16,22 +16,21 @@ export const Button = ({
   hitSlop,
   onPress,
   loading,
-  activeOpacity = 0.8,
 }: CommonButtonProps) => {
   const isDisabled = disabled || loading;
 
   return (
-    <TouchableOpacity
-      style={[
+    <Pressable
+      style={(state) => [
         styles.base,
         sizeStyles[size],
         variantStyles[variant].container,
         isDisabled && styles.disabled,
-        style,
+        state.pressed && !isDisabled && { opacity: 0.8 },
+        typeof style === "function" ? style(state) : style,
       ]}
       disabled={isDisabled}
       onPress={onPress}
-      activeOpacity={activeOpacity}
       hitSlop={hitSlop}
     >
       {loading ? (
@@ -41,6 +40,6 @@ export const Button = ({
       ) : (
         <Text style={[styles.text, variantStyles[variant].text]}>{text}</Text>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 };

@@ -1,12 +1,6 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useColorScheme } from "react-native";
 import "react-native-reanimated";
 
 import { StartupGate } from "@/features/startup";
@@ -22,21 +16,17 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <StartupGate>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen
-            name="modal"
-            options={{ presentation: "modal", title: "SkyDocker" }}
-          />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="modal"
+          options={{ presentation: "modal", title: "SkyDocker" }}
+        />
+      </Stack>
+      <StatusBar style="auto" />
     </StartupGate>
   );
 }

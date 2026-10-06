@@ -1,4 +1,3 @@
-import { useFocusEffect } from "@react-navigation/native";
 import {
   Accuracy,
   getForegroundPermissionsAsync,
@@ -8,6 +7,7 @@ import {
   requestForegroundPermissionsAsync,
   watchPositionAsync,
 } from "expo-location";
+import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 
 import type {

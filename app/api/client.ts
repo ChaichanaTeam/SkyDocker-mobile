@@ -1,4 +1,4 @@
-import { DEFAULT_TIMEOUT_MS } from "@app/api/constants/client";
+﻿import { DEFAULT_TIMEOUT_MS } from "@app/api/constants/client";
 import { getAccessToken } from "@app/api/storage/tokenStorage";
 import type { ApiError } from "@app/api/types/apiError";
 import type { RequestOptions } from "@app/api/types/client";
@@ -52,6 +52,7 @@ export const apiRequest = async <T>(
     body,
     requiresAuth = true,
     timeoutMs = DEFAULT_TIMEOUT_MS,
+    signal,
     token,
   }: RequestOptions,
 ): Promise<T> => {
@@ -70,6 +71,7 @@ export const apiRequest = async <T>(
 
   const requestUrl = getApiUrl(path);
   const controller = new AbortController();
+  const requestSignal = signal ?? controller.signal;
   const timeoutId = setTimeout(() => {
     controller.abort();
   }, timeoutMs);
@@ -80,7 +82,7 @@ export const apiRequest = async <T>(
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
-      signal: controller.signal,
+      signal: requestSignal,
     });
   } catch (error: unknown) {
     if (error instanceof Error && error.name === "AbortError") {

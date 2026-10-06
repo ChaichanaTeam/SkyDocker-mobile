@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Insets, StyleProp, TextStyle, ViewStyle } from "react-native";
+import { Insets, PressableProps, StyleProp, TextStyle } from "react-native";
 
 export type ButtonVariant = "primary" | "secondary" | "text";
 export type ButtonSize = "large" | "small";
@@ -16,7 +16,7 @@ export type CommonButtonProps = {
   hitSlop?: Insets;
   prefixIcon?: React.ReactNode;
   suffixIcon?: React.ReactNode;
-  style?: StyleProp<ViewStyle>;
+  style?: PressableProps["style"];
   textStyle?: StyleProp<TextStyle>;
   onPress?: () => void;
 };

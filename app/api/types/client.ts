@@ -5,5 +5,6 @@ export type RequestOptions = {
   body?: unknown;
   requiresAuth?: boolean;
   timeoutMs?: number;
+  signal?: AbortSignal;
   token?: string;
 };

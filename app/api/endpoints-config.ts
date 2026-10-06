@@ -5,6 +5,10 @@ export const AUTH_CONFIG = {
   REQUESTOTP: () => "api/v1/auth/register/request-otp",
 } as const;
 
+export const GEO_ZONE_CONFIG = {
+  GEOZONE: () => "api/v1/geo-zone/",
+} as const;
+
 export const DEMO_CHECK_IN_CONFIG = {
   CREATE: () => "api/demo/check-in/",
 } as const;
