@@ -48,9 +48,7 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-router",
     "expo-font",
-    "expo-image",
     "expo-splash-screen",
-    "expo-status-bar",
     "expo-secure-store",
     "expo-web-browser",
     [

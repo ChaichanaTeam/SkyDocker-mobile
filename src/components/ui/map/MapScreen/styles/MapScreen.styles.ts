@@ -32,7 +32,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.mapControlBackgroundActive,
   },
   map: {
-    ...StyleSheet.absoluteFill,
+    ...StyleSheet.absoluteFillObject,
   },
   notice: {
     backgroundColor: colors.mapNoticeBackground,

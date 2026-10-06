@@ -25,14 +25,12 @@ export interface GeoZonePolygonGeometry {
 export type GeoZoneType = "Flight prohibited" | (string & {});
 
 export interface GeoZoneProperties {
-  name: string;
   country_id: number;
   country: string;
   type: GeoZoneType;
   tag: string;
   strength: number;
   height_agl: number;
-  height_amsl: number;
   activity_time: string | null;
 }
 

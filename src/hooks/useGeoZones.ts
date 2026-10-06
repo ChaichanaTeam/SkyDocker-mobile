@@ -24,7 +24,7 @@ interface TileRequest {
 }
 
 export const useGeoZones = () => {
-  const [zonesByName, setZonesByName] = useState<Map<string, GeoZoneFeature>>(
+  const [zonesByTag, setZonesByTag] = useState<Map<string, GeoZoneFeature>>(
     new Map(),
   );
 
@@ -35,64 +35,62 @@ export const useGeoZones = () => {
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const processQueue = useCallback(
-    function processQueueRequests(userPos: LatLon) {
-      while (
-        activeRequests.current.size < MAX_CONCURRENT_TILE_REQUESTS &&
-        pendingQueue.current.length > 0
-      ) {
-        const next = pendingQueue.current.shift();
-        if (!next) break;
+  const processQueue = useCallback(function processQueueRequests(
+    userPos: LatLon,
+  ) {
+    while (
+      activeRequests.current.size < MAX_CONCURRENT_TILE_REQUESTS &&
+      pendingQueue.current.length > 0
+    ) {
+      const next = pendingQueue.current.shift();
+      if (!next) break;
 
-        const controller = new AbortController();
-        activeRequests.current.set(next.keyString, controller);
+      const controller = new AbortController();
+      activeRequests.current.set(next.keyString, controller);
 
-        const bbox: BoundingBox = tileKeyToBoundingBox(next.key);
+      const bbox: BoundingBox = tileKeyToBoundingBox(next.key);
 
-        fetchGeoZones(bbox, userPos, controller.signal)
-          .then((collection) => {
-            setZonesByName((prev) => {
-              const updated = new Map(prev);
-              for (const feature of collection.features) {
-                updated.set(feature.properties.name, feature);
-              }
-              return updated;
-            });
-          })
-          .catch((e: unknown) => {
-            if (e instanceof DOMException && e.name === "AbortError") {
-              loadedOrLoadingTiles.current.delete(next.keyString);
-              return;
+      fetchGeoZones(bbox, userPos, controller.signal)
+        .then((collection) => {
+          setZonesByTag((prev) => {
+            const updated = new Map(prev);
+            for (const feature of collection.features) {
+              updated.set(feature.properties.tag, feature);
             }
-
-            if (isApiError(e) && e.status === 404) {
-              return;
-            }
-
-            loadedOrLoadingTiles.current.delete(next.keyString);
-
-            const apiError = e as {
-              details?: { loc: unknown[]; msg: string }[];
-            };
-            if (apiError.details) {
-              console.warn(
-                `Tile ${next.keyString} missing fields:`,
-                apiError.details.map(
-                  (d) => `${JSON.stringify(d.loc)}: ${d.msg}`,
-                ),
-              );
-            } else {
-              console.warn(`Failed to load geo-zone tile ${next.keyString}`, e);
-            }
-          })
-          .finally(() => {
-            activeRequests.current.delete(next.keyString);
-            processQueueRequests(userPos);
+            return updated;
           });
-      }
-    },
-    [],
-  );
+        })
+        .catch((e: unknown) => {
+          const name = (e as { name?: string } | null)?.name;
+
+          if (name === "AbortError") {
+            loadedOrLoadingTiles.current.delete(next.keyString);
+            return;
+          }
+
+          if (isApiError(e) && e.status === 404) {
+            return;
+          }
+
+          loadedOrLoadingTiles.current.delete(next.keyString);
+          const apiError = e as {
+            details?: { loc: unknown[]; msg: string }[];
+          };
+          if (apiError.details) {
+            console.warn(
+              `Tile ${next.keyString} missing fields:`,
+              apiError.details.map((d) => `${JSON.stringify(d.loc)}: ${d.msg}`),
+            );
+          } else {
+            console.warn(`Failed to load geo-zone tile ${next.keyString}`, e);
+          }
+        })
+        .finally(() => {
+          activeRequests.current.delete(next.keyString);
+          processQueueRequests(userPos);
+        });
+    }
+  }, []);
 
   const requestTilesForRegion = useCallback(
     (visibleBbox: BoundingBox, userPos: LatLon) => {
@@ -133,7 +131,7 @@ export const useGeoZones = () => {
   }, []);
 
   return {
-    zones: zonesByName,
+    zones: zonesByTag,
     onRegionChange,
   };
 };

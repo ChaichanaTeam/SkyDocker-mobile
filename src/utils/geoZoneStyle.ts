@@ -38,5 +38,7 @@ const DEFAULT_ZONE_STYLE: GeoZoneStyle = {
   strokeWidth: 1,
 };
 
-export const getGeoZoneStyle = (tag: string): GeoZoneStyle =>
-  ZONE_STYLES_BY_TAG[tag] ?? DEFAULT_ZONE_STYLE;
+export const getGeoZoneStyle = (type?: string): GeoZoneStyle => {
+  const key = type?.toUpperCase().replace(/_/g, "-") ?? "";
+  return ZONE_STYLES_BY_TAG[key] ?? DEFAULT_ZONE_STYLE;
+};

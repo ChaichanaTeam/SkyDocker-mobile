@@ -21,7 +21,7 @@ import { toUserRegion, WORLD_REGION } from "./constants/mapRegion";
 import { styles } from "./styles/MapScreen.styles";
 
 import { useGeoZones } from "@/hooks/useGeoZones";
-import { polygonGeometryToLatLngs } from "@/utils/geoConvert";
+import { polygonGeometryToLatLngsWithHoles } from "@/utils/geoConvert";
 import { getGeoZoneStyle } from "@/utils/geoZoneStyle";
 import { BoundingBox } from "@app/api/types/geoZone";
 import type { MapAppearance, SessionMapType } from "./types/types";
@@ -142,11 +142,15 @@ export const MapScreen = () => {
         style={styles.map}
       >
         {Array.from(zones.values()).map((feature) => {
-          const style = getGeoZoneStyle(feature.properties.tag);
+          const style = getGeoZoneStyle(feature.properties.type);
+          const { outer, holes } = polygonGeometryToLatLngsWithHoles(
+            feature.geometry,
+          );
           return (
             <Polygon
-              key={feature.properties.name}
-              coordinates={polygonGeometryToLatLngs(feature.geometry)}
+              key={feature.properties.tag}
+              coordinates={outer}
+              holes={holes}
               fillColor={style.fillColor}
               strokeColor={style.strokeColor}
               strokeWidth={style.strokeWidth}
