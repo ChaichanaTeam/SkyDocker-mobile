@@ -1,13 +1,14 @@
 ﻿import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Linking,
   Text,
   TouchableOpacity,
   useColorScheme,
   View,
 } from "react-native";
-import MapView, { Marker, Polygon, PROVIDER_GOOGLE, Region } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { colors } from "@/theme";
@@ -18,21 +19,29 @@ import {
 } from "@features/tracking";
 
 import { useGeoZones } from "@/hooks/useGeoZones";
-import { polygonGeometryToLatLngsWithHoles } from "@/utils/geoConvert";
-import { getGeoZoneStyle } from "@/utils/geoZoneStyle";
 import { BoundingBox } from "@app/api/types/geoZone";
 
-import { CheckInSheet } from "./CheckInSheet";
-import { MapBottomBar } from "./MapBottomBar";
-import { MapControlButton } from "./MapControlButton";
-import { toUserRegion, WORLD_REGION } from "./constants/mapRegion";
-import { styles } from "./styles/MapScreen.styles";
+import { GeoZonesLayer } from "@features/tracking/GeoZonesLayer";
 import type { CheckInDraftValues } from "@features/tracking";
+import { CheckInSheet } from "@components/ui/map/MapScreen/CheckInSheet";
+import { MapBottomBar } from "@components/ui/map/MapScreen/MapBottomBar";
+import { MapControlButton } from "@components/ui/map/MapScreen/MapControlButton";
+import { toUserRegion } from "@components/ui/map/MapScreen/constants/mapRegion";
+import { styles } from "@components/ui/map/MapScreen/styles/MapScreen.styles";
 import type {
-  MapBottomBarItemKey,
   MapAppearance,
+  MapBottomBarItemKey,
   SessionMapType,
-} from "./types/types";
+} from "@components/ui/map/MapScreen/types/types";
+
+const MAX_ZONES_DELTA = 0.5;
+
+const DEFAULT_REGION: Region = {
+  latitude: 52.2297,
+  longitude: 21.0122,
+  latitudeDelta: 0.1,
+  longitudeDelta: 0.1,
+};
 
 const regionToBoundingBox = (region: Region): BoundingBox => {
   const halfLat = region.latitudeDelta / 2;
@@ -50,7 +59,6 @@ export const MapScreen = () => {
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
-  const hasFocusedOnFirstLocation = useRef<boolean>(false);
   const [appearance, setAppearance] = useState<MapAppearance>(
     colorScheme === "dark" ? "dark" : "light",
   );
@@ -60,6 +68,8 @@ export const MapScreen = () => {
     useState<MapBottomBarItemKey>("map");
   const [mapType, setMapType] = useState<SessionMapType>("standard");
   const [settingsError, setSettingsError] = useState<string | null>(null);
+  const [initialRegion, setInitialRegion] = useState<Region | null>(null);
+  const [isZoomedOut, setIsZoomedOut] = useState<boolean>(false);
   const {
     error,
     getFreshCoordinates,
@@ -79,27 +89,29 @@ export const MapScreen = () => {
   );
 
   useEffect(() => {
-    if (!userRegion || hasFocusedOnFirstLocation.current) {
-      return;
-    }
+    if (initialRegion) return;
 
-    hasFocusedOnFirstLocation.current = true;
-    mapRef.current?.animateToRegion(userRegion, 700);
-    if (userCoordinates) {
-      onRegionChange(regionToBoundingBox(userRegion), {
-        lon: userCoordinates.longitude,
-        lat: userCoordinates.latitude,
-      });
+    if (userRegion) {
+      setInitialRegion(userRegion);
+    } else if (error) {
+      setInitialRegion(DEFAULT_REGION);
     }
-  }, [userRegion, userCoordinates, onRegionChange]);
+  }, [initialRegion, userRegion, error]);
 
   const handleRegionChangeComplete = useCallback(
     (region: Region) => {
-      if (!hasFocusedOnFirstLocation.current || !userCoordinates) return;
+      if (
+        region.latitudeDelta > MAX_ZONES_DELTA ||
+        region.longitudeDelta > MAX_ZONES_DELTA
+      ) {
+        setIsZoomedOut(true);
+        return;
+      }
 
+      setIsZoomedOut(false);
       onRegionChange(regionToBoundingBox(region), {
-        lon: userCoordinates.longitude,
-        lat: userCoordinates.latitude,
+        lon: userCoordinates?.longitude ?? region.longitude,
+        lat: userCoordinates?.latitude ?? region.latitude,
       });
     },
     [onRegionChange, userCoordinates],
@@ -146,13 +158,14 @@ export const MapScreen = () => {
     setIsCheckInSheetVisible(false);
   }, []);
 
-  const handleCreateCheckIn = useCallback(async (
-    values: CheckInDraftValues,
-  ): Promise<void> => {
-    await submitCheckIn(values);
-    setSelectedBottomTab("map");
-    setIsCheckInSheetVisible(false);
-  }, [submitCheckIn]);
+  const handleCreateCheckIn = useCallback(
+    async (values: CheckInDraftValues): Promise<void> => {
+      await submitCheckIn(values);
+      setSelectedBottomTab("map");
+      setIsCheckInSheetVisible(false);
+    },
+    [submitCheckIn],
+  );
 
   const handleNoticeAction = useCallback((): void => {
     if (error?.reason === "permission-denied" && !permission.canAskAgain) {
@@ -177,48 +190,44 @@ export const MapScreen = () => {
 
   return (
     <View style={styles.container}>
-      <MapView
-        customMapStyle={appearance === "dark" ? blackGoogleMapStyle : []}
-        initialRegion={WORLD_REGION}
-        mapType={mapType}
-        onRegionChangeComplete={handleRegionChangeComplete}
-        provider={PROVIDER_GOOGLE}
-        ref={mapRef}
-        showsCompass
-        showsMyLocationButton={false}
-        showsUserLocation={permission.granted}
-        style={styles.map}
-      >
-        {Array.from(zones.values()).map((feature) => {
-          const style = getGeoZoneStyle(feature.properties.type);
-          const { outer, holes } = polygonGeometryToLatLngsWithHoles(
-            feature.geometry,
-          );
+      {initialRegion ? (
+        <MapView
+          customMapStyle={appearance === "dark" ? blackGoogleMapStyle : []}
+          initialRegion={initialRegion}
+          mapType={mapType}
+          onRegionChangeComplete={handleRegionChangeComplete}
+          provider={PROVIDER_GOOGLE}
+          ref={mapRef}
+          showsCompass
+          showsMyLocationButton={false}
+          showsUserLocation={permission.granted}
+          style={styles.map}
+        >
+          <GeoZonesLayer zones={zones} />
 
-          return (
-            <Polygon
-              key={feature.properties.tag}
-              coordinates={outer}
-              holes={holes}
-              fillColor={style.fillColor}
-              strokeColor={style.strokeColor}
-              strokeWidth={style.strokeWidth}
-            />
-          );
-        })}
-
-        {checkIns.map((checkIn) => (
-          <Marker
-            coordinate={checkIn.coordinate}
-            key={checkIn.id}
-            title="Drone check-in"
-          >
-            <View style={styles.dronePin}>
-              <Ionicons color={colors.text2} name="airplane" size={22} />
-            </View>
-          </Marker>
-        ))}
-      </MapView>
+          {checkIns.map((checkIn) => (
+            <Marker
+              coordinate={checkIn.coordinate}
+              key={checkIn.id}
+              title="Drone check-in"
+              tracksViewChanges={false}
+            >
+              <View style={styles.dronePin}>
+                <Ionicons color={colors.text2} name="airplane" size={22} />
+              </View>
+            </Marker>
+          ))}
+        </MapView>
+      ) : (
+        <View
+          style={[
+            styles.map,
+            { alignItems: "center", justifyContent: "center" },
+          ]}
+        >
+          <ActivityIndicator size="large" />
+        </View>
+      )}
 
       <View
         style={[styles.controlStack, { top: Math.max(insets.top + 16, 32) }]}
@@ -274,6 +283,15 @@ export const MapScreen = () => {
             />
             <Text style={styles.noticeActionText}>{noticeActionLabel}</Text>
           </TouchableOpacity>
+        </View>
+      ) : isZoomedOut ? (
+        <View
+          style={[
+            styles.notice,
+            { bottom: Math.max(insets.bottom + 104, 112) },
+          ]}
+        >
+          <Text style={styles.noticeText}>Zoom in to see geo-zones</Text>
         </View>
       ) : null}
 
