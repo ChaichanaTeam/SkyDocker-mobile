@@ -8,10 +8,16 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
+import MapView, {
+  MapPressEvent,
+  Marker,
+  PROVIDER_GOOGLE,
+  Region,
+} from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { colors } from "@/theme";
+import { findZonesAtPoint } from "@/utils/geoConvert";
 import {
   blackGoogleMapStyle,
   useCheckInMap,
@@ -20,10 +26,8 @@ import {
 } from "@features/tracking";
 
 import { useGeoZones } from "@/hooks/useGeoZones";
-import type { BoundingBox } from "@app/api/types/geoZone";
+import { BoundingBox, GeoZoneFeature } from "@app/api/types/geoZone";
 
-import { GeoZonesLayer } from "@features/tracking/GeoZonesLayer";
-import type { CheckInDraftValues } from "@features/tracking";
 import { CheckInSheet } from "@components/ui/map/MapScreen/CheckInSheet";
 import { MapBottomBar } from "@components/ui/map/MapScreen/MapBottomBar";
 import { MapControlButton } from "@components/ui/map/MapScreen/MapControlButton";
@@ -34,6 +38,8 @@ import type {
   MapBottomBarItemKey,
   SessionMapType,
 } from "@components/ui/map/MapScreen/types/types";
+import type { CheckInDraftValues } from "@features/tracking";
+import { GeoZonesLayer } from "@features/tracking/GeoZonesLayer";
 
 const MAX_ZONES_DELTA = 0.5;
 
@@ -70,6 +76,7 @@ export const MapScreen = () => {
   const [mapType, setMapType] = useState<SessionMapType>("standard");
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [initialRegion, setInitialRegion] = useState<Region | null>(null);
+  const [zonesAtTap, setZonesAtTap] = useState<GeoZoneFeature[]>([]);
   const [isZoomedOut, setIsZoomedOut] = useState<boolean>(false);
   const {
     error,
@@ -204,6 +211,14 @@ export const MapScreen = () => {
       ? "Open settings"
       : "Retry";
 
+  const handleMapPress = useCallback(
+    (event: MapPressEvent) => {
+      const { latitude, longitude } = event.nativeEvent.coordinate;
+      setZonesAtTap(findZonesAtPoint(zones, latitude, longitude));
+    },
+    [zones],
+  );
+
   return (
     <View style={styles.container}>
       {initialRegion ? (
@@ -211,6 +226,7 @@ export const MapScreen = () => {
           customMapStyle={appearance === "dark" ? blackGoogleMapStyle : []}
           initialRegion={initialRegion}
           mapType={mapType}
+          onPress={handleMapPress}
           onRegionChangeComplete={handleRegionChangeComplete}
           provider={PROVIDER_GOOGLE}
           ref={mapRef}
