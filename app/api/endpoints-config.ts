@@ -11,4 +11,6 @@ export const GEO_ZONE_CONFIG = {
 
 export const DEMO_CHECK_IN_CONFIG = {
   CREATE: () => "api/demo/check-in/",
+  BBOX: () => "api/demo/check-in/bbox",
+  END: (id: number) => `api/demo/check-in/${id}/end`,
 } as const;
