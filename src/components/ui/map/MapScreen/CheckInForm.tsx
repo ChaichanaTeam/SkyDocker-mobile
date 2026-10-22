@@ -21,6 +21,7 @@ export const CheckInForm = ({
   appearance,
   isCompactLayout,
   isVisible,
+  isMutationPending = false,
   onSubmit,
 }: CheckInFormProps) => {
   const {
@@ -133,7 +134,7 @@ export const CheckInForm = ({
         ]}
       />
       <Button
-        disabled={isSubmitDisabled}
+        disabled={isSubmitDisabled || isMutationPending}
         loading={isSubmitting}
         onPress={submitForm}
         size="large"
@@ -144,7 +145,7 @@ export const CheckInForm = ({
         variant="secondary"
       >
         <TextField color={colors.text2}>
-          Create new list
+          Create check-in
         </TextField>
       </Button>
     </View>

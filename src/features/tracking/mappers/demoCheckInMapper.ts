@@ -18,6 +18,5 @@ export const mapValidatedDraftToDemoCheckInRequest = (
     range: draft.range,
     time,
     starts_at: submittedAt.toISOString(),
-    ends_at: new Date(submittedAt.getTime() + time * 1000).toISOString(),
   };
 };

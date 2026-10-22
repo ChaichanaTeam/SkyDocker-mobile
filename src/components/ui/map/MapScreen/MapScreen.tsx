@@ -1,4 +1,4 @@
-﻿import { Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -8,18 +8,19 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE, Region } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { colors } from "@/theme";
 import {
   blackGoogleMapStyle,
+  useCheckInMap,
   useDemoCheckIns,
   useFocusedForegroundLocation,
 } from "@features/tracking";
 
 import { useGeoZones } from "@/hooks/useGeoZones";
-import { BoundingBox } from "@app/api/types/geoZone";
+import type { BoundingBox } from "@app/api/types/geoZone";
 
 import { GeoZonesLayer } from "@features/tracking/GeoZonesLayer";
 import type { CheckInDraftValues } from "@features/tracking";
@@ -79,8 +80,17 @@ export const MapScreen = () => {
     userCoordinates,
   } = useFocusedForegroundLocation();
   const { zones, onRegionChange } = useGeoZones();
-  const { checkIns, submitCheckIn } = useDemoCheckIns({
+  const {
+    markers: checkIns,
+    onRegionChange: onCheckInRegionChange,
+    refresh: refreshCheckIns,
+  } = useCheckInMap();
+  const {
+    mutation,
+    submitCheckIn,
+  } = useDemoCheckIns({
     getFreshCoordinates,
+    onChanged: refreshCheckIns,
   });
 
   const userRegion = useMemo(
@@ -98,6 +108,10 @@ export const MapScreen = () => {
     }
   }, [initialRegion, userRegion, error]);
 
+  useEffect(() => {
+    if (initialRegion) onCheckInRegionChange(regionToBoundingBox(initialRegion));
+  }, [initialRegion, onCheckInRegionChange]);
+
   const handleRegionChangeComplete = useCallback(
     (region: Region) => {
       if (
@@ -105,16 +119,18 @@ export const MapScreen = () => {
         region.longitudeDelta > MAX_ZONES_DELTA
       ) {
         setIsZoomedOut(true);
+        onCheckInRegionChange(null);
         return;
       }
 
       setIsZoomedOut(false);
+      onCheckInRegionChange(regionToBoundingBox(region));
       onRegionChange(regionToBoundingBox(region), {
         lon: userCoordinates?.longitude ?? region.longitude,
         lat: userCoordinates?.latitude ?? region.latitude,
       });
     },
-    [onRegionChange, userCoordinates],
+    [onRegionChange, onCheckInRegionChange, userCoordinates],
   );
 
   const toggleAppearance = useCallback((): void => {
@@ -208,7 +224,8 @@ export const MapScreen = () => {
           {checkIns.map((checkIn) => (
             <Marker
               coordinate={checkIn.coordinate}
-              key={checkIn.id}
+              description={`${checkIn.properties.status.replace(/_/g, " ")} · ${checkIn.properties.height} m AGL · ${checkIn.properties.range} m range · ${checkIn.properties.time} s`}
+              key={checkIn.key}
               title="Drone check-in"
               tracksViewChanges={false}
             >
@@ -219,12 +236,7 @@ export const MapScreen = () => {
           ))}
         </MapView>
       ) : (
-        <View
-          style={[
-            styles.map,
-            { alignItems: "center", justifyContent: "center" },
-          ]}
-        >
+        <View style={styles.mapLoading}>
           <ActivityIndicator size="large" />
         </View>
       )}
@@ -259,41 +271,36 @@ export const MapScreen = () => {
         />
       </View>
 
-      {noticeMessage ? (
-        <View
-          accessibilityLiveRegion="polite"
-          style={[
-            styles.notice,
-            { bottom: Math.max(insets.bottom + 104, 112) },
-          ]}
-        >
-          <Text style={styles.noticeText}>{noticeMessage}</Text>
-          <TouchableOpacity
-            accessibilityRole="button"
-            activeOpacity={0.76}
-            onPress={handleNoticeAction}
-            style={styles.noticeAction}
+      <View style={[styles.statusStack, { bottom: Math.max(insets.bottom + 104, 112) }]}>
+        {noticeMessage ? (
+          <View
+            accessibilityLiveRegion="polite"
+            style={styles.notice}
           >
-            <Ionicons
-              color={colors.mapControlTextActive}
-              name={
-                noticeActionLabel === "Open settings" ? "settings" : "refresh"
-              }
-              size={18}
-            />
-            <Text style={styles.noticeActionText}>{noticeActionLabel}</Text>
-          </TouchableOpacity>
-        </View>
-      ) : isZoomedOut ? (
-        <View
-          style={[
-            styles.notice,
-            { bottom: Math.max(insets.bottom + 104, 112) },
-          ]}
-        >
-          <Text style={styles.noticeText}>Zoom in to see geo-zones</Text>
-        </View>
-      ) : null}
+            <Text style={styles.noticeText}>{noticeMessage}</Text>
+            <TouchableOpacity
+              accessibilityRole="button"
+              activeOpacity={0.76}
+              onPress={handleNoticeAction}
+              style={styles.noticeAction}
+            >
+              <Ionicons
+                color={colors.mapControlTextActive}
+                name={
+                  noticeActionLabel === "Open settings" ? "settings" : "refresh"
+                }
+                size={18}
+              />
+              <Text style={styles.noticeActionText}>{noticeActionLabel}</Text>
+            </TouchableOpacity>
+          </View>
+        ) : isZoomedOut ? (
+          <View style={styles.notice}>
+            <Text style={styles.noticeText}>Zoom in to see geo-zones and check-ins</Text>
+          </View>
+        ) : null}
+
+      </View>
 
       <MapBottomBar
         activeItem={selectedBottomTab}
@@ -306,6 +313,7 @@ export const MapScreen = () => {
       <CheckInSheet
         appearance={appearance}
         isVisible={isCheckInSheetVisible}
+        isMutationPending={mutation !== null}
         onClose={closeCheckInSheet}
         onSubmit={handleCreateCheckIn}
       />
