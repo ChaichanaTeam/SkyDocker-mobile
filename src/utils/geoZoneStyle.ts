@@ -4,41 +4,68 @@ export interface GeoZoneStyle {
   strokeWidth: number;
 }
 
-const ZONE_STYLES_BY_TAG: Record<string, GeoZoneStyle> = {
+interface ZoneColor {
+  rgb: string;
+  fillAlpha: number;
+  strokeAlpha: number;
+  strokeWidth: number;
+}
+
+const ZONE_COLORS: Record<string, ZoneColor> = {
   "DRA-P": {
-    fillColor: "rgba(220, 38, 38, 0.25)",
-    strokeColor: "rgba(220, 38, 38, 0.9)",
-    strokeWidth: 1.5,
+    rgb: "220, 38, 38",
+    fillAlpha: 0.22,
+    strokeAlpha: 0.95,
+    strokeWidth: 2,
   },
   "DRA-R": {
-    fillColor: "rgba(234, 179, 8, 0.25)",
-    strokeColor: "rgba(234, 179, 8, 0.9)",
+    rgb: "234, 179, 8",
+    fillAlpha: 0.14,
+    strokeAlpha: 0.9,
     strokeWidth: 1.5,
   },
   "DRA-RH": {
-    fillColor: "rgba(34, 197, 94, 0.25)",
-    strokeColor: "rgba(34, 197, 94, 0.9)",
+    rgb: "34, 197, 94",
+    fillAlpha: 0.12,
+    strokeAlpha: 0.9,
     strokeWidth: 1.5,
   },
   "DRA-RM": {
-    fillColor: "rgba(56, 189, 248, 0.25)",
-    strokeColor: "rgba(56, 189, 248, 0.9)",
+    rgb: "56, 189, 248",
+    fillAlpha: 0.1,
+    strokeAlpha: 0.9,
     strokeWidth: 1.5,
   },
   "DRA-RL": {
-    fillColor: "rgba(168, 85, 247, 0.25)",
-    strokeColor: "rgba(168, 85, 247, 0.9)",
+    rgb: "168, 85, 247",
+    fillAlpha: 0.1,
+    strokeAlpha: 0.9,
     strokeWidth: 1.5,
   },
 };
 
-const DEFAULT_ZONE_STYLE: GeoZoneStyle = {
-  fillColor: "rgba(107, 114, 128, 0.2)",
-  strokeColor: "rgba(107, 114, 128, 0.8)",
+const DEFAULT_COLOR: ZoneColor = {
+  rgb: "107, 114, 128",
+  fillAlpha: 0.1,
+  strokeAlpha: 0.8,
   strokeWidth: 1,
 };
 
-export const getGeoZoneStyle = (type?: string): GeoZoneStyle => {
+const LARGE_ZONE_AREA_DEG2 = 0.02;
+const LARGE_ZONE_FILL_FACTOR = 0.35;
+
+export const getGeoZoneStyle = (
+  type?: string,
+  areaDeg2: number = 0,
+): GeoZoneStyle => {
   const key = type?.toUpperCase().replace(/_/g, "-") ?? "";
-  return ZONE_STYLES_BY_TAG[key] ?? DEFAULT_ZONE_STYLE;
+  const color = ZONE_COLORS[key] ?? DEFAULT_COLOR;
+  const fillFactor =
+    areaDeg2 > LARGE_ZONE_AREA_DEG2 ? LARGE_ZONE_FILL_FACTOR : 1;
+
+  return {
+    fillColor: `rgba(${color.rgb}, ${(color.fillAlpha * fillFactor).toFixed(3)})`,
+    strokeColor: `rgba(${color.rgb}, ${color.strokeAlpha})`,
+    strokeWidth: color.strokeWidth,
+  };
 };
