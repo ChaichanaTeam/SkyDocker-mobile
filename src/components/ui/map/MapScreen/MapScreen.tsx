@@ -15,6 +15,7 @@ import MapView, {
   Region,
 } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { colors } from "@/theme";
 import { findZonesAtPoint } from "@/utils/geoConvert";
@@ -29,6 +30,7 @@ import { useGeoZones } from "@/hooks/useGeoZones";
 import { BoundingBox, GeoZoneFeature } from "@app/api/types/geoZone";
 
 import { CheckInSheet } from "@components/ui/map/MapScreen/CheckInSheet";
+import { GeoZoneInfoSheet } from "@components/ui/map/MapScreen/GeoZoneInfoSheet";
 import { MapBottomBar } from "@components/ui/map/MapScreen/MapBottomBar";
 import { MapControlButton } from "@components/ui/map/MapScreen/MapControlButton";
 import { toUserRegion } from "@components/ui/map/MapScreen/constants/mapRegion";
@@ -162,8 +164,13 @@ export const MapScreen = () => {
   }, [retry, userRegion]);
 
   const openCheckInSheet = useCallback((): void => {
+    setZonesAtTap([]);
     setSelectedBottomTab("checkIn");
     setIsCheckInSheetVisible(true);
+  }, []);
+
+  const closeGeoZoneInfoSheet = useCallback((): void => {
+    setZonesAtTap([]);
   }, []);
 
   const closeCheckInSheet = useCallback((): void => {
@@ -220,7 +227,7 @@ export const MapScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
       {initialRegion ? (
         <MapView
           customMapStyle={appearance === "dark" ? blackGoogleMapStyle : []}
@@ -326,6 +333,11 @@ export const MapScreen = () => {
         onProfilePress={handleProfileBottomTabPress}
       />
 
+      <GeoZoneInfoSheet
+        zone={zonesAtTap[0] ?? null}
+        onClose={closeGeoZoneInfoSheet}
+      />
+
       <CheckInSheet
         appearance={appearance}
         isVisible={isCheckInSheetVisible}
@@ -333,6 +345,6 @@ export const MapScreen = () => {
         onClose={closeCheckInSheet}
         onSubmit={handleCreateCheckIn}
       />
-    </View>
+    </GestureHandlerRootView>
   );
 };
