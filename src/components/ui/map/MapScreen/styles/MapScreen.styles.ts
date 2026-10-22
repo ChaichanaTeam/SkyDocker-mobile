@@ -59,8 +59,11 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     gap: 12,
-    left: 16,
     padding: 14,
+  },
+  statusStack: {
+    gap: 8,
+    left: 16,
     position: "absolute",
     right: 16,
   },

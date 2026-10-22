@@ -7,6 +7,7 @@ import Eye from "@assets/icons/Eye.svg";
 import Facebook from "@assets/icons/Facebook.svg";
 import Google from "@assets/icons/Google.svg";
 import Mail from "@assets/icons/Mail.svg";
+import NoEntry from "@assets/icons/NoEntry.svg";
 import Phone from "@assets/icons/Phone.svg";
 import UserIcon from "@assets/icons/User.svg";
 import X from "@assets/icons/X.svg";
@@ -18,6 +19,7 @@ type IconName =
   | "Facebook"
   | "Google"
   | "Mail"
+  | "NoEntry"
   | "Phone"
   | "UserIcon"
   | "X";
@@ -28,10 +30,11 @@ export const icons: Record<IconName, FC<SvgProps>> = {
   X,
   Google,
   Mail,
+  NoEntry,
   Eye,
   EyeOff,
   DroneIcon,
   UserIcon,
 };
 
-export { DroneIcon, UserIcon };
+export { DroneIcon, NoEntry, UserIcon };

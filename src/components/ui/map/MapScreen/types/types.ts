@@ -4,6 +4,7 @@ import type { KeyboardTypeOptions } from "react-native";
 import type { MapType } from "react-native-maps";
 
 import type { CheckInDraftValues } from "@features/tracking";
+import type { GeoZoneFeature } from "@app/api/types/geoZone";
 
 export type MapAppearance = "light" | "dark";
 export type SessionMapType = Extract<MapType, "standard" | "satellite">;
@@ -63,6 +64,7 @@ export type CheckInFormProps = {
   appearance: MapAppearance;
   isCompactLayout: boolean;
   isVisible: boolean;
+  isMutationPending?: boolean;
   onSubmit: (values: CheckInDraftValues) => Promise<void>;
 };
 
@@ -87,6 +89,12 @@ export type CheckInDropdownProps = {
 export type CheckInSheetProps = {
   appearance: MapAppearance;
   isVisible: boolean;
+  isMutationPending?: boolean;
   onClose: () => void;
   onSubmit: (values: CheckInDraftValues) => Promise<void>;
+};
+
+export type GeoZoneInfoSheetProps = {
+  zone: GeoZoneFeature | null;
+  onClose: () => void;
 };

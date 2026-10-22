@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import type { LayoutChangeEvent } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import {
+  cancelAnimation,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -13,37 +14,43 @@ import {
   DISMISS_ANIMATION_DURATION_MS,
   DISMISS_DISTANCE_RATIO,
   DISMISS_VELOCITY_Y,
-} from "../constants/checkInSheet";
-
-type UseCheckInSheetGestureParams = {
-  isVisible: boolean;
-  onClose: () => void;
-  windowHeight: number;
-};
+} from "@/components/ui/map/MapScreen/constants/checkInSheet";
+import type { UseCheckInSheetGestureParams } from "@/components/ui/map/MapScreen/types/useCheckInSheetGesture";
 
 export const useCheckInSheetGesture = ({
   isVisible,
   onClose,
+  resetKey = null,
   windowHeight,
 }: UseCheckInSheetGestureParams) => {
   const onCloseRef = useRef(onClose);
+  const revisionRef = useRef(0);
+  const gestureRevision = useSharedValue(0);
   const sheetHeight = useSharedValue(0);
   const translateY = useSharedValue(0);
   const isDragDismissing = useSharedValue(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
 
-  useEffect(() => {
-    if (isVisible) {
-      translateY.value = 0;
-      isDragDismissing.value = false;
-    }
-  }, [isDragDismissing, isVisible, translateY]);
+  useLayoutEffect(() => {
+    revisionRef.current += 1;
+    gestureRevision.value = revisionRef.current;
+    cancelAnimation(translateY);
+    translateY.value = 0;
+    isDragDismissing.value = false;
 
-  const closeFromGesture = useCallback((): void => {
-    onCloseRef.current();
+    return () => {
+      revisionRef.current += 1;
+      cancelAnimation(translateY);
+    };
+  }, [gestureRevision, isDragDismissing, isVisible, resetKey, translateY]);
+
+  const closeFromGesture = useCallback((revision: number): void => {
+    if (revision === revisionRef.current) {
+      onCloseRef.current();
+    }
   }, []);
 
   const handleSheetLayout = useCallback(
@@ -81,12 +88,13 @@ export const useCheckInSheetGesture = ({
           }
 
           isDragDismissing.value = true;
+          const revision = gestureRevision.value;
           translateY.value = withTiming(
             measuredSheetHeight,
             { duration: DISMISS_ANIMATION_DURATION_MS },
             (finished) => {
               if (finished) {
-                scheduleOnRN(closeFromGesture);
+                scheduleOnRN(closeFromGesture, revision);
               }
             },
           );
@@ -98,6 +106,7 @@ export const useCheckInSheetGesture = ({
         }),
     [
       closeFromGesture,
+      gestureRevision,
       isDragDismissing,
       sheetHeight,
       translateY,

@@ -1,4 +1,8 @@
+import type { CheckInFeature, CreateDemoCheckInResponse } from "@app/api/types/checkIn";
 import type { UserCoordinates } from "./types";
+
+export type CheckInAction = "create" | "end" | "load";
+export type CheckInMutation = "create" | "end" | null;
 
 export type CheckInDraftValues = Record<
   | "category"
@@ -11,9 +15,12 @@ export type CheckInDraftValues = Record<
   string
 >;
 
-export type DemoCheckInRecord = {
-  coordinate: UserCoordinates;
-  createdAt: number;
-  id: string;
+export type DemoCheckInRecord = CreateDemoCheckInResponse & {
   values: CheckInDraftValues;
+};
+
+export type CheckInMapMarker = {
+  key: string;
+  coordinate: UserCoordinates;
+  properties: CheckInFeature["properties"];
 };
