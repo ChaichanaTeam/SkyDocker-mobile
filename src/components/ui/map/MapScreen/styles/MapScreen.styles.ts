@@ -48,6 +48,11 @@ export const styles = StyleSheet.create({
   map: {
     ...StyleSheet.absoluteFillObject,
   },
+  mapLoading: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   notice: {
     backgroundColor: colors.mapNoticeBackground,
     borderColor: colors.mapNoticeBorder,
