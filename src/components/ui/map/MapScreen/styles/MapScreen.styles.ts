@@ -53,6 +53,13 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  bottomTouchZone: {
+    backgroundColor: "transparent",
+    bottom: 0,
+    left: 0,
+    position: "absolute",
+    right: 0,
+  },
   notice: {
     backgroundColor: colors.mapNoticeBackground,
     borderColor: colors.mapNoticeBorder,
