@@ -1,5 +1,5 @@
-import type { ComponentProps } from "react";
 import type { Ionicons } from "@expo/vector-icons";
+import type { ComponentProps } from "react";
 import type { KeyboardTypeOptions } from "react-native";
 import type { MapType } from "react-native-maps";
 
@@ -9,8 +9,6 @@ export type MapAppearance = "light" | "dark";
 export type SessionMapType = Extract<MapType, "standard" | "satellite">;
 export type ControlIconName = ComponentProps<typeof Ionicons>["name"];
 
-export type MapBottomBarItemKey = "checkIn" | "map" | "profile";
-
 export type MapControlButtonProps = {
   accessibilityLabel: string;
   iconName: ControlIconName;
@@ -18,16 +16,23 @@ export type MapControlButtonProps = {
   onPress: () => void;
 };
 
-export type MapBottomBarItem = {
-  accessibilityLabel: string;
-  key: MapBottomBarItemKey;
+export type DroneInfo = {
+  name: string;
+  speedKmh?: number;
+  weightG?: number;
+  heightKm?: number;
+  rangeKm?: number;
+  missionsCount?: number;
+  flightTime?: string;
+  currentMission?: string;
 };
 
-export type MapBottomBarProps = {
-  activeItem: MapBottomBarItemKey;
-  bottomInset: number;
+export type DroneInfoSheetProps = {
+  drone?: DroneInfo | null;
+  isVisible: boolean;
+  onClose: () => void;
   onCheckInPress: () => void;
-  onMapPress: () => void;
+  onWikiPress: () => void;
   onProfilePress: () => void;
 };
 
