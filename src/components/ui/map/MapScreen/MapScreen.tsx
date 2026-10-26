@@ -3,21 +3,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Linking,
+  Pressable,
   Text,
   TouchableOpacity,
   useColorScheme,
   View,
 } from "react-native";
 import MapView, {
-  MapPressEvent,
   Marker,
   PROVIDER_GOOGLE,
   Region,
 } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 import { colors } from "@/theme";
-import { findZonesAtPoint } from "@/utils/geoConvert";
 import {
   blackGoogleMapStyle,
   useDemoCheckIns,
@@ -25,16 +23,15 @@ import {
 } from "@features/tracking";
 
 import { useGeoZones } from "@/hooks/useGeoZones";
-import { BoundingBox, GeoZoneFeature } from "@app/api/types/geoZone";
+import { BoundingBox } from "@app/api/types/geoZone";
 
 import { CheckInSheet } from "@components/ui/map/MapScreen/CheckInSheet";
-import { MapBottomBar } from "@components/ui/map/MapScreen/MapBottomBar";
+import { DroneInfoSheet } from "@components/ui/map/MapScreen/DroneInfoSheet";
 import { MapControlButton } from "@components/ui/map/MapScreen/MapControlButton";
 import { toUserRegion } from "@components/ui/map/MapScreen/constants/mapRegion";
 import { styles } from "@components/ui/map/MapScreen/styles/MapScreen.styles";
 import type {
   MapAppearance,
-  MapBottomBarItemKey,
   SessionMapType,
 } from "@components/ui/map/MapScreen/types/types";
 import type { CheckInDraftValues } from "@features/tracking";
@@ -70,12 +67,10 @@ export const MapScreen = () => {
   );
   const [isCheckInSheetVisible, setIsCheckInSheetVisible] =
     useState<boolean>(false);
-  const [selectedBottomTab, setSelectedBottomTab] =
-    useState<MapBottomBarItemKey>("map");
+  const [isDroneSheetVisible, setIsDroneSheetVisible] = useState(false);
   const [mapType, setMapType] = useState<SessionMapType>("standard");
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [initialRegion, setInitialRegion] = useState<Region | null>(null);
-  const [zonesAtTap, setZonesAtTap] = useState<GeoZoneFeature[]>([]);
   const [isZoomedOut, setIsZoomedOut] = useState<boolean>(false);
   const {
     error,
@@ -145,30 +140,26 @@ export const MapScreen = () => {
     mapRef.current?.animateToRegion(userRegion, 700);
   }, [retry, userRegion]);
 
+  const openDroneSheet = useCallback(
+    () => setIsDroneSheetVisible(true),
+    [],
+  );
+  const closeDroneSheet = useCallback(
+    () => setIsDroneSheetVisible(false),
+    [],
+  );
+
   const openCheckInSheet = useCallback((): void => {
-    setSelectedBottomTab("checkIn");
     setIsCheckInSheetVisible(true);
   }, []);
 
   const closeCheckInSheet = useCallback((): void => {
-    setSelectedBottomTab("map");
-    setIsCheckInSheetVisible(false);
-  }, []);
-
-  const handleMapBottomTabPress = useCallback((): void => {
-    setSelectedBottomTab("map");
-    recenterOnUser();
-  }, [recenterOnUser]);
-
-  const handleProfileBottomTabPress = useCallback((): void => {
-    setSelectedBottomTab("profile");
     setIsCheckInSheetVisible(false);
   }, []);
 
   const handleCreateCheckIn = useCallback(
     async (values: CheckInDraftValues): Promise<void> => {
       await submitCheckIn(values);
-      setSelectedBottomTab("map");
       setIsCheckInSheetVisible(false);
     },
     [submitCheckIn],
@@ -195,13 +186,9 @@ export const MapScreen = () => {
       ? "Open settings"
       : "Retry";
 
-  const handleMapPress = useCallback(
-    (event: MapPressEvent) => {
-      const { latitude, longitude } = event.nativeEvent.coordinate;
-      setZonesAtTap(findZonesAtPoint(zones, latitude, longitude));
-    },
-    [zones],
-  );
+  const handleMapPress = useCallback((): void => {
+    closeDroneSheet();
+  }, [closeDroneSheet]);
 
   return (
     <View style={styles.container}>
@@ -225,7 +212,6 @@ export const MapScreen = () => {
             <Marker
               coordinate={checkIn.coordinate}
               key={checkIn.id}
-              title="Drone check-in"
               tracksViewChanges={false}
             >
               <View style={styles.dronePin}>
@@ -280,7 +266,7 @@ export const MapScreen = () => {
           accessibilityLiveRegion="polite"
           style={[
             styles.notice,
-            { bottom: Math.max(insets.bottom + 104, 112) },
+            { bottom: Math.max(insets.bottom + 88, 96) },
           ]}
         >
           <Text style={styles.noticeText}>{noticeMessage}</Text>
@@ -304,19 +290,29 @@ export const MapScreen = () => {
         <View
           style={[
             styles.notice,
-            { bottom: Math.max(insets.bottom + 104, 112) },
+            { bottom: Math.max(insets.bottom + 88, 96) },
           ]}
         >
           <Text style={styles.noticeText}>Zoom in to see geo-zones</Text>
         </View>
       ) : null}
 
-      <MapBottomBar
-        activeItem={selectedBottomTab}
-        bottomInset={insets.bottom}
+      {!isDroneSheetVisible ? (
+        <Pressable
+          accessibilityLabel="Open drone info"
+          accessibilityRole="button"
+          onPress={openDroneSheet}
+          style={[styles.bottomTouchZone, { height: 72 + insets.bottom }]}
+        />
+      ) : null}
+
+      <DroneInfoSheet
+        drone={null}
+        isVisible={isDroneSheetVisible}
+        onClose={closeDroneSheet}
         onCheckInPress={openCheckInSheet}
-        onMapPress={handleMapBottomTabPress}
-        onProfilePress={handleProfileBottomTabPress}
+        onProfilePress={() => {}}
+        onWikiPress={() => {}}
       />
 
       <CheckInSheet
