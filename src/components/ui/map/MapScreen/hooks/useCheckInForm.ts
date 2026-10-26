@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { CheckInDraftValues } from "@features/tracking";
 
@@ -25,6 +25,12 @@ export const useCheckInForm = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const submitLock = useRef(false);
+  const mounted = useRef(true);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
 
   const isSubmitDisabled = useMemo(
     () =>
@@ -72,7 +78,7 @@ export const useCheckInForm = ({
   }, []);
 
   const submitForm = useCallback(async (): Promise<void> => {
-    if (isSubmitDisabled || submitLock.current) {
+    if (!mounted.current || isSubmitDisabled || submitLock.current) {
       return;
     }
 
@@ -82,9 +88,11 @@ export const useCheckInForm = ({
 
     try {
       await onSubmit(formValues);
+      if (!mounted.current) return;
       setFormValues(DEFAULT_CHECK_IN_FORM_VALUES);
       setActiveDropdown(null);
     } catch (error: unknown) {
+      if (!mounted.current) return;
       setSubmitError(
         error instanceof Error
           ? error.message
@@ -92,7 +100,7 @@ export const useCheckInForm = ({
       );
     } finally {
       submitLock.current = false;
-      setIsSubmitting(false);
+      if (mounted.current) setIsSubmitting(false);
     }
   }, [formValues, isSubmitDisabled, onSubmit]);
 
