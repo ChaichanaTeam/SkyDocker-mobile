@@ -23,6 +23,7 @@ import type { CheckInSheetProps } from "./types/types";
 export const CheckInSheet = ({
   appearance,
   isVisible,
+  isMutationPending,
   onClose,
   onSubmit,
 }: CheckInSheetProps) => {
@@ -102,6 +103,7 @@ export const CheckInSheet = ({
               appearance={appearance}
               isCompactLayout={isCompactLayout}
               isVisible={isVisible}
+              isMutationPending={isMutationPending}
               onSubmit={onSubmit}
             />
           </Animated.View>

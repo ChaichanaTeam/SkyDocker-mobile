@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { CheckInDraftValues } from "@features/tracking";
 
@@ -24,6 +24,13 @@ export const useCheckInForm = ({
   );
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const submitLock = useRef(false);
+  const mounted = useRef(true);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
 
   const isSubmitDisabled = useMemo(
     () =>
@@ -71,27 +78,31 @@ export const useCheckInForm = ({
   }, []);
 
   const submitForm = useCallback(async (): Promise<void> => {
-    if (isSubmitDisabled || isSubmitting) {
+    if (!mounted.current || isSubmitDisabled || submitLock.current) {
       return;
     }
 
+    submitLock.current = true;
     setIsSubmitting(true);
     setSubmitError(null);
 
     try {
       await onSubmit(formValues);
+      if (!mounted.current) return;
       setFormValues(DEFAULT_CHECK_IN_FORM_VALUES);
       setActiveDropdown(null);
     } catch (error: unknown) {
+      if (!mounted.current) return;
       setSubmitError(
         error instanceof Error
           ? error.message
           : "Could not create check-in. Please try again.",
       );
     } finally {
-      setIsSubmitting(false);
+      submitLock.current = false;
+      if (mounted.current) setIsSubmitting(false);
     }
-  }, [formValues, isSubmitDisabled, isSubmitting, onSubmit]);
+  }, [formValues, isSubmitDisabled, onSubmit]);
 
   return {
     activeDropdown,

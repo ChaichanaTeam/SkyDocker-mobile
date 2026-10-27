@@ -1,4 +1,4 @@
-﻿import { Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/theme";
 import {
   blackGoogleMapStyle,
+  useCheckInMap,
   useDemoCheckIns,
   useFocusedForegroundLocation,
 } from "@features/tracking";
@@ -81,8 +82,17 @@ export const MapScreen = () => {
     userCoordinates,
   } = useFocusedForegroundLocation();
   const { zones, onRegionChange } = useGeoZones();
-  const { checkIns, submitCheckIn } = useDemoCheckIns({
+  const {
+    markers: checkIns,
+    onRegionChange: onCheckInRegionChange,
+    refresh: refreshCheckIns,
+  } = useCheckInMap();
+  const {
+    mutation,
+    submitCheckIn,
+  } = useDemoCheckIns({
     getFreshCoordinates,
+    onChanged: refreshCheckIns,
   });
 
   const userRegion = useMemo(
@@ -100,6 +110,10 @@ export const MapScreen = () => {
     }
   }, [initialRegion, userRegion, error]);
 
+  useEffect(() => {
+    if (initialRegion) onCheckInRegionChange(regionToBoundingBox(initialRegion));
+  }, [initialRegion, onCheckInRegionChange]);
+
   const handleRegionChangeComplete = useCallback(
     (region: Region) => {
       if (
@@ -107,16 +121,18 @@ export const MapScreen = () => {
         region.longitudeDelta > MAX_ZONES_DELTA
       ) {
         setIsZoomedOut(true);
+        onCheckInRegionChange(null);
         return;
       }
 
       setIsZoomedOut(false);
+      onCheckInRegionChange(regionToBoundingBox(region));
       onRegionChange(regionToBoundingBox(region), {
         lon: userCoordinates?.longitude ?? region.longitude,
         lat: userCoordinates?.latitude ?? region.latitude,
       });
     },
-    [onRegionChange, userCoordinates],
+    [onRegionChange, onCheckInRegionChange, userCoordinates],
   );
 
   const toggleAppearance = useCallback((): void => {
@@ -221,12 +237,7 @@ export const MapScreen = () => {
           ))}
         </MapView>
       ) : (
-        <View
-          style={[
-            styles.map,
-            { alignItems: "center", justifyContent: "center" },
-          ]}
-        >
+        <View style={styles.mapLoading}>
           <ActivityIndicator size="large" />
         </View>
       )}
@@ -318,6 +329,7 @@ export const MapScreen = () => {
       <CheckInSheet
         appearance={appearance}
         isVisible={isCheckInSheetVisible}
+        isMutationPending={mutation !== null}
         onClose={closeCheckInSheet}
         onSubmit={handleCreateCheckIn}
       />

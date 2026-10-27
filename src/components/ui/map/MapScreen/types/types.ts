@@ -68,6 +68,7 @@ export type CheckInFormProps = {
   appearance: MapAppearance;
   isCompactLayout: boolean;
   isVisible: boolean;
+  isMutationPending?: boolean;
   onSubmit: (values: CheckInDraftValues) => Promise<void>;
 };
 
@@ -92,6 +93,7 @@ export type CheckInDropdownProps = {
 export type CheckInSheetProps = {
   appearance: MapAppearance;
   isVisible: boolean;
+  isMutationPending?: boolean;
   onClose: () => void;
   onSubmit: (values: CheckInDraftValues) => Promise<void>;
 };
