@@ -15,6 +15,8 @@ import MapView, {
   Region,
 } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 import { colors } from "@/theme";
 import {
   blackGoogleMapStyle,
@@ -27,6 +29,8 @@ import { useGeoZones } from "@/hooks/useGeoZones";
 import { BoundingBox } from "@app/api/types/geoZone";
 
 import { CheckInSheet } from "@components/ui/map/MapScreen/CheckInSheet";
+import { GeoZoneInfoSheet } from "@components/ui/map/MapScreen/GeoZoneInfoSheet";
+import { MapBottomBar } from "@components/ui/map/MapScreen/MapBottomBar";
 import { DroneInfoSheet } from "@components/ui/map/MapScreen/DroneInfoSheet";
 import { MapControlButton } from "@components/ui/map/MapScreen/MapControlButton";
 import { toUserRegion } from "@components/ui/map/MapScreen/constants/mapRegion";
@@ -166,7 +170,13 @@ export const MapScreen = () => {
   );
 
   const openCheckInSheet = useCallback((): void => {
+    setZonesAtTap([]);
+    setSelectedBottomTab("checkIn");
     setIsCheckInSheetVisible(true);
+  }, []);
+
+  const closeGeoZoneInfoSheet = useCallback((): void => {
+    setZonesAtTap([]);
   }, []);
 
   const closeCheckInSheet = useCallback((): void => {
@@ -207,7 +217,7 @@ export const MapScreen = () => {
   }, [closeDroneSheet]);
 
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
       {initialRegion ? (
         <MapView
           customMapStyle={appearance === "dark" ? blackGoogleMapStyle : []}
@@ -326,6 +336,11 @@ export const MapScreen = () => {
         onWikiPress={() => {}}
       />
 
+      <GeoZoneInfoSheet
+        zone={zonesAtTap[0] ?? null}
+        onClose={closeGeoZoneInfoSheet}
+      />
+
       <CheckInSheet
         appearance={appearance}
         isVisible={isCheckInSheetVisible}
@@ -333,6 +348,6 @@ export const MapScreen = () => {
         onClose={closeCheckInSheet}
         onSubmit={handleCreateCheckIn}
       />
-    </View>
+    </GestureHandlerRootView>
   );
 };
