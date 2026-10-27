@@ -36,6 +36,7 @@ export const useDemoCheckIns = ({
 
   const submitCheckIn = useCallback(
     async (values: CheckInDraftValues): Promise<void> => {
+      if (!mounted.current) return;
       if (mutationLock.current) {
         throw new Error("Please wait for the current check-in request to finish.");
       }
@@ -45,6 +46,7 @@ export const useDemoCheckIns = ({
       try {
         const validatedDraft = validateCheckInDraft(values);
         const coordinate = await getFreshCoordinates();
+        if (!mounted.current) return;
         const submittedAt = new Date();
         const payload = mapValidatedDraftToDemoCheckInRequest(
           validatedDraft,
@@ -59,6 +61,7 @@ export const useDemoCheckIns = ({
           onChanged();
         }
       } catch (error: unknown) {
+        if (!mounted.current) return;
         throw new Error(mapCheckInErrorToMessage(error));
       } finally {
         mutationLock.current = false;
