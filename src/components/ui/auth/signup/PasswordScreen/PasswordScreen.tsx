@@ -5,40 +5,27 @@ import { TextField } from "@/components/shared/ui/Text/TextField";
 import { PasswordRequirementList } from "@/components/ui/auth/signup/PasswordScreen/features/PasswordRequirementsList";
 import type { PasswordScreenProps } from "@/components/ui/auth/signup/PasswordScreen/types";
 import { colors } from "@/theme";
-import {
-  getEmailValidationError,
-  normalizeEmail,
-} from "@/validators/email.schema";
 import { isPasswordValid } from "@/validators/password.schema";
 import { useSignUp } from "@app/api/context/SignUpContext";
-import { signIn } from "@app/api/services/auth.service";
-import { isApiError } from "@app/api/types/apiError";
 import { icons } from "@assets/icons";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 
 export const PasswordScreen = ({
-  email = "",
-  mode = "multiple",
   variant = "default",
 }: PasswordScreenProps) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isSigningIn, setIsSigningIn] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [hasSubmitted, setHasSubmitted] = useState(false);
-  const isMultipleMode = mode === "multiple";
   const isForgotPassword = variant === "forgot-password";
   const {
     submitRegistration,
     isSubmitting: isRegistrationSubmitting,
     error: registrationError,
   } = useSignUp();
-  const normalizedEmail = normalizeEmail(email);
-  const emailError = getEmailValidationError(normalizedEmail);
 
   const content = isForgotPassword
     ? {
@@ -62,9 +49,7 @@ export const PasswordScreen = ({
   const passwordsMatch =
     confirmPassword.length > 0 && confirmPassword === password;
 
-  const shouldShowPasswordValidation = isMultipleMode
-    ? password.length > 0
-    : hasSubmitted || password.length > 0;
+  const shouldShowPasswordValidation = password.length > 0;
 
   const passwordBorderStyle = !shouldShowPasswordValidation
     ? null
@@ -84,38 +69,10 @@ export const PasswordScreen = ({
   };
 
   const handleNext = async () => {
-    setHasSubmitted(true);
     setFormError(null);
 
     if (isForgotPassword) {
       router.replace("/(auth)/signin");
-      return;
-    }
-
-    if (!isMultipleMode) {
-      if (emailError) {
-        setFormError(emailError);
-        return;
-      }
-
-      if (!passwordValid || isSigningIn) {
-        if (!passwordValid) {
-          setFormError("Enter a password that meets all requirements");
-        }
-        return;
-      }
-
-      setIsSigningIn(true);
-      try {
-        await signIn({ email: normalizedEmail, password });
-        router.replace("/(tabs)");
-      } catch (error) {
-        setFormError(
-          isApiError(error) ? error.message : "Unable to sign in right now",
-        );
-      } finally {
-        setIsSigningIn(false);
-      }
       return;
     }
 
@@ -205,88 +162,66 @@ export const PasswordScreen = ({
         </View>
       </View>
 
-      {!isMultipleMode && (
-        <Link href="/(auth)/forgot-password" asChild>
-          <Button
-            style={styles.forgotPasswordLink}
-            variant="text"
-            activeOpacity={0.7}
-          >
-            <TextField style={styles.forgotPasswordText}>
-              Forgot the password
-            </TextField>
-          </Button>
-        </Link>
-      )}
-
-      {!isMultipleMode && password.length > 0 && !passwordValid && (
-        <PasswordRequirementList password={password} />
-      )}
-
       {formError && (
         <TextField style={styles.errorText} variant="error">
           {formError}
         </TextField>
       )}
 
-      {isMultipleMode && registrationError && (
+      {registrationError && (
         <TextField style={styles.errorText} variant="error">
           {registrationError.message}
         </TextField>
       )}
 
-      {isMultipleMode && (
-        <>
-          <View style={[styles.inputWrapper, { marginTop: 20 }]}>
-            <View style={[styles.container, confirmBorderStyle]}>
-              <TextField style={styles.label} variant="label">
-                {content.confirmPasswordLabel}
-              </TextField>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingHorizontal: 16,
-                }}
-              >
-                <InputField
-                  style={[
-                    styles.passwordInput,
-                    { flex: 1, paddingLeft: 0, paddingRight: 0 },
-                  ]}
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  placeholder={content.confirmPasswordPlaceholder}
-                  placeholderTextColor={colors.backgroundWhite80}
-                  secureTextEntry={!showConfirmPassword}
+      <View style={[styles.inputWrapper, { marginTop: 20 }]}>
+        <View style={[styles.container, confirmBorderStyle]}>
+          <TextField style={styles.label} variant="label">
+            {content.confirmPasswordLabel}
+          </TextField>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingHorizontal: 16,
+            }}
+          >
+            <InputField
+              style={[
+                styles.passwordInput,
+                { flex: 1, paddingLeft: 0, paddingRight: 0 },
+              ]}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              placeholder={content.confirmPasswordPlaceholder}
+              placeholderTextColor={colors.backgroundWhite80}
+              secureTextEntry={!showConfirmPassword}
+            />
+            <Button
+              variant="text"
+              activeOpacity={0.7}
+              onPress={() => setShowConfirmPassword((prev) => !prev)}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              {showConfirmPassword ? (
+                <EyeIcon
+                  width={20}
+                  height={20}
+                  color={colors.backgroundWhite80}
                 />
-                <Button
-                  variant="text"
-                  activeOpacity={0.7}
-                  onPress={() => setShowConfirmPassword((prev) => !prev)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  {showConfirmPassword ? (
-                    <EyeIcon
-                      width={20}
-                      height={20}
-                      color={colors.backgroundWhite80}
-                    />
-                  ) : (
-                    <EyeOffIcon
-                      width={20}
-                      height={20}
-                      color={colors.backgroundWhite80}
-                    />
-                  )}
-                </Button>
-              </View>
-            </View>
+              ) : (
+                <EyeOffIcon
+                  width={20}
+                  height={20}
+                  color={colors.backgroundWhite80}
+                />
+              )}
+            </Button>
           </View>
+        </View>
+      </View>
 
-          <PasswordRequirementList password={password} />
-        </>
-      )}
+      <PasswordRequirementList password={password} />
 
       <View style={styles.bottomRow}>
         <Button
@@ -299,13 +234,9 @@ export const PasswordScreen = ({
 
         <Button
           text={"Next"}
-          loading={isMultipleMode ? isRegistrationSubmitting : isSigningIn}
+          loading={isRegistrationSubmitting}
           activeOpacity={0.8}
-          disabled={
-            isMultipleMode
-              ? !passwordValid || !passwordsMatch || isRegistrationSubmitting
-              : !passwordValid || isSigningIn
-          }
+          disabled={!passwordValid || !passwordsMatch || isRegistrationSubmitting}
           onPress={handleNext}
           size="small"
           variant="secondary"
