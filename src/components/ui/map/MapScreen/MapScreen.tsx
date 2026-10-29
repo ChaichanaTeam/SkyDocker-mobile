@@ -9,13 +9,14 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MapView, {
+  MapPressEvent,
   Marker,
   PROVIDER_GOOGLE,
   Region,
 } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { colors } from "@/theme";
 import {
@@ -26,12 +27,12 @@ import {
 } from "@features/tracking";
 
 import { useGeoZones } from "@/hooks/useGeoZones";
-import { BoundingBox } from "@app/api/types/geoZone";
+import { findZonesAtPoint } from "@/utils/geoConvert";
+import { BoundingBox, GeoZoneFeature } from "@app/api/types/geoZone";
 
 import { CheckInSheet } from "@components/ui/map/MapScreen/CheckInSheet";
-import { GeoZoneInfoSheet } from "@components/ui/map/MapScreen/GeoZoneInfoSheet";
-import { MapBottomBar } from "@components/ui/map/MapScreen/MapBottomBar";
 import { DroneInfoSheet } from "@components/ui/map/MapScreen/DroneInfoSheet";
+import { GeoZoneInfoSheet } from "@components/ui/map/MapScreen/GeoZoneInfoSheet";
 import { MapControlButton } from "@components/ui/map/MapScreen/MapControlButton";
 import { toUserRegion } from "@components/ui/map/MapScreen/constants/mapRegion";
 import { styles } from "@components/ui/map/MapScreen/styles/MapScreen.styles";
@@ -77,6 +78,7 @@ export const MapScreen = () => {
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [initialRegion, setInitialRegion] = useState<Region | null>(null);
   const [isZoomedOut, setIsZoomedOut] = useState<boolean>(false);
+  const [zonesAtTap, setZonesAtTap] = useState<GeoZoneFeature[]>([]);
   const {
     error,
     getFreshCoordinates,
@@ -171,7 +173,6 @@ export const MapScreen = () => {
 
   const openCheckInSheet = useCallback((): void => {
     setZonesAtTap([]);
-    setSelectedBottomTab("checkIn");
     setIsCheckInSheetVisible(true);
   }, []);
 
@@ -212,9 +213,14 @@ export const MapScreen = () => {
       ? "Open settings"
       : "Retry";
 
-  const handleMapPress = useCallback((): void => {
-    closeDroneSheet();
-  }, [closeDroneSheet]);
+  const handleMapPress = useCallback(
+    (event: MapPressEvent): void => {
+      closeDroneSheet();
+      const { latitude, longitude } = event.nativeEvent.coordinate;
+      setZonesAtTap(findZonesAtPoint(zones, latitude, longitude));
+    },
+    [closeDroneSheet, zones],
+  );
 
   return (
     <GestureHandlerRootView style={styles.container}>
@@ -237,7 +243,7 @@ export const MapScreen = () => {
           {checkIns.map((checkIn) => (
             <Marker
               coordinate={checkIn.coordinate}
-              key={checkIn.id}
+              key={checkIn.key}
               tracksViewChanges={false}
             >
               <View style={styles.dronePin}>
