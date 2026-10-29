@@ -27,12 +27,16 @@ export const PasswordScreen = ({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const isMultipleMode = mode === "multiple";
   const isForgotPassword = variant === "forgot-password";
-  const { setPassword: savePassword } = useSignUp();
+  const {
+    submitRegistration,
+    isSubmitting: isRegistrationSubmitting,
+    error: registrationError,
+  } = useSignUp();
   const normalizedEmail = normalizeEmail(email);
   const emailError = getEmailValidationError(normalizedEmail);
 
@@ -94,14 +98,14 @@ export const PasswordScreen = ({
         return;
       }
 
-      if (!passwordValid || isSubmitting) {
+      if (!passwordValid || isSigningIn) {
         if (!passwordValid) {
           setFormError("Enter a password that meets all requirements");
         }
         return;
       }
 
-      setIsSubmitting(true);
+      setIsSigningIn(true);
       try {
         await signIn({ email: normalizedEmail, password });
         router.replace("/(tabs)");
@@ -110,13 +114,27 @@ export const PasswordScreen = ({
           isApiError(error) ? error.message : "Unable to sign in right now",
         );
       } finally {
-        setIsSubmitting(false);
+        setIsSigningIn(false);
       }
       return;
     }
 
-    savePassword(password);
-    router.push("/(auth)/fullnamscreen");
+    if (!passwordValid) {
+      setFormError("Enter a password that meets all requirements");
+      return;
+    }
+
+    if (!passwordsMatch) {
+      setFormError("Passwords do not match");
+      return;
+    }
+
+    if (isRegistrationSubmitting) return;
+
+    try {
+      await submitRegistration(password);
+      router.replace("/(auth)/signin");
+    } catch {}
   };
 
   const EyeIcon = icons.Eye;
@@ -211,6 +229,12 @@ export const PasswordScreen = ({
         </TextField>
       )}
 
+      {isMultipleMode && registrationError && (
+        <TextField style={styles.errorText} variant="error">
+          {registrationError.message}
+        </TextField>
+      )}
+
       {isMultipleMode && (
         <>
           <View style={[styles.inputWrapper, { marginTop: 20 }]}>
@@ -274,11 +298,13 @@ export const PasswordScreen = ({
         />
 
         <Button
-          text="Next"
-          loading={isSubmitting}
+          text={"Next"}
+          loading={isMultipleMode ? isRegistrationSubmitting : isSigningIn}
           activeOpacity={0.8}
           disabled={
-            isMultipleMode ? !passwordValid || !passwordsMatch : !passwordValid
+            isMultipleMode
+              ? !passwordValid || !passwordsMatch || isRegistrationSubmitting
+              : !passwordValid || isSigningIn
           }
           onPress={handleNext}
           size="small"

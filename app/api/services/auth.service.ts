@@ -35,9 +35,18 @@ export const verifyOtp = async (
 };
 
 export const signup = async (
-  payload: RegisterPayload,
+  password: string,
   registrationToken: string,
 ): Promise<RegisterResponse> => {
+  // Remove these placeholders when the backend accepts registration without phone and name fields.
+  const createSixDigitSuffix = () => Math.floor(100000 + Math.random() * 900000);
+  const payload: RegisterPayload = {
+    password,
+    phone_number: "+380666168366",
+    first_name: `Demo${createSixDigitSuffix()}`,
+    last_name: `User${createSixDigitSuffix()}`,
+  };
+
   const data = await apiRequest<RegisterResponse>(AUTH_CONFIG.SIGNUP(), {
     method: "POST",
     body: payload,

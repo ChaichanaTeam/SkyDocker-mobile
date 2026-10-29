@@ -1,32 +1,17 @@
 import { requestOtp, signup, verifyOtp } from "@app/api/services/auth.service";
+import type { SignUpContextValue } from "@app/api/context/types/SignUpContext.types";
 import { isApiError } from "@app/api/types/apiError";
 import type { ApiError } from "@app/api/types/apiError";
-import {
-  RegisterPayload,
-  RegistrationDraft,
-  RegistrationStep,
-} from "@app/api/types/auth";
+import type { RegistrationDraft, RegistrationStep } from "@app/api/types/auth";
 import {
   createContext,
   ReactNode,
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
 } from "react";
-
-interface SignUpContextValue {
-  step: RegistrationStep;
-  draft: RegistrationDraft;
-  isSubmitting: boolean;
-  error: ApiError | null;
-  setEmail: (email: string) => Promise<void>;
-  setPhone: (phone: string) => void;
-  setPassword: (password: string) => void;
-  submitProfile: (firstName: string, lastName: string) => Promise<void>;
-  confirmOtp: (otp: string) => Promise<void>;
-  resendOtp: () => Promise<void>;
-}
 
 const SignUpContext = createContext<SignUpContextValue | undefined>(undefined);
 
@@ -43,6 +28,7 @@ export const SignUpProvider = ({ children }: { children: ReactNode }) => {
   const [step, setStep] = useState<RegistrationStep>("email");
   const [draft, setDraft] = useState<RegistrationDraft>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isRegistrationSubmittingRef = useRef(false);
   const [error, setError] = useState<ApiError | null>(null);
 
   const setEmail = useCallback(async (email: string) => {
@@ -59,18 +45,6 @@ export const SignUpProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setIsSubmitting(false);
     }
-  }, []);
-
-  const setPhone = useCallback((phone: string) => {
-    setDraft((prev) => ({ ...prev, phone_number: phone }));
-    setError(null);
-    setStep("password");
-  }, []);
-
-  const setPassword = useCallback((password: string) => {
-    setDraft((prev) => ({ ...prev, password }));
-    setError(null);
-    setStep("name");
   }, []);
 
   const confirmOtp = useCallback(
@@ -93,7 +67,7 @@ export const SignUpProvider = ({ children }: { children: ReactNode }) => {
           otp,
           registration_token: res.token,
         }));
-        setStep("phone");
+        setStep("password");
       } catch (e) {
         const apiError = toApiError(e);
         setError(apiError);
@@ -122,18 +96,8 @@ export const SignUpProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [draft.email]);
 
-  const submitProfile = useCallback(
-    async (firstName: string, lastName: string) => {
-      if (!draft.phone_number || !draft.password) {
-        const incompleteError: ApiError = {
-          kind: "configuration",
-          status: 0,
-          message: "Not all data has been filled in.",
-        };
-        setError(incompleteError);
-        throw incompleteError;
-      }
-
+  const submitRegistration = useCallback(
+    async (password: string) => {
       if (!draft.registration_token) {
         const tokenError: ApiError = {
           kind: "configuration",
@@ -144,31 +108,23 @@ export const SignUpProvider = ({ children }: { children: ReactNode }) => {
         throw tokenError;
       }
 
-      const payload: RegisterPayload = {
-        phone_number: draft.phone_number,
-        password: draft.password,
-        first_name: firstName,
-        last_name: lastName,
-      };
+      if (isRegistrationSubmittingRef.current) return;
 
+      isRegistrationSubmittingRef.current = true;
       setIsSubmitting(true);
       setError(null);
       try {
-        await signup(payload, draft.registration_token);
-        setDraft((prev) => ({
-          ...prev,
-          first_name: firstName,
-          last_name: lastName,
-        }));
+        await signup(password, draft.registration_token);
       } catch (e) {
         const apiError = toApiError(e);
         setError(apiError);
         throw apiError;
       } finally {
+        isRegistrationSubmittingRef.current = false;
         setIsSubmitting(false);
       }
     },
-    [draft.phone_number, draft.password, draft.registration_token],
+    [draft.registration_token],
   );
 
   const value = useMemo<SignUpContextValue>(
@@ -178,9 +134,7 @@ export const SignUpProvider = ({ children }: { children: ReactNode }) => {
       isSubmitting,
       error,
       setEmail,
-      setPhone,
-      setPassword,
-      submitProfile,
+      submitRegistration,
       confirmOtp,
       resendOtp,
     }),
@@ -190,9 +144,7 @@ export const SignUpProvider = ({ children }: { children: ReactNode }) => {
       isSubmitting,
       error,
       setEmail,
-      setPhone,
-      setPassword,
-      submitProfile,
+      submitRegistration,
       confirmOtp,
       resendOtp,
     ],

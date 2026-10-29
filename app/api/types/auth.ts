@@ -40,9 +40,9 @@ export interface LoginResponse {
   expires_in: number;
 }
 
-export type RegistrationStep = "email" | "otp" | "phone" | "password" | "name";
+export type RegistrationStep = "email" | "otp" | "password";
 
-export interface RegistrationDraft extends Partial<RegisterPayload> {
+export interface RegistrationDraft {
   email?: string;
   otp?: string;
   verify_token?: string;
