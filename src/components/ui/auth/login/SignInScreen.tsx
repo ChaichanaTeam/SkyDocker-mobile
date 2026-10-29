@@ -190,24 +190,6 @@ export const SignInScreen = () => {
           color={colors.backgroundWhite}
           onPress={() => {}}
         />
-        <SocialButton
-          style={{ width: "100%" }}
-          label="Continue with Facebook"
-          Icon={icons.Facebook}
-          iconWidth={20}
-          iconHeight={20}
-          color={colors.backgroundWhite}
-          onPress={() => {}}
-        />
-        <SocialButton
-          style={{ width: "100%" }}
-          label="Continue with X"
-          Icon={icons.X}
-          iconWidth={20}
-          iconHeight={18}
-          color={colors.backgroundWhite}
-          onPress={() => {}}
-        />
       </View>
     </ScrollView>
   );
