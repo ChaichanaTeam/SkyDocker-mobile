@@ -1,5 +1,5 @@
 import { socialButtonStyles as styles } from "@/components/shared/auth/SocialButton/socialButtonStyles";
-import { Text, TouchableOpacity, View } from "react-native";
+import { StyleProp, Text, TouchableOpacity, View, ViewStyle } from "react-native";
 import { SvgProps } from "react-native-svg";
 
 type SocialButtonProps = {
@@ -9,6 +9,7 @@ type SocialButtonProps = {
   iconWidth?: number;
   iconHeight?: number;
   color?: string;
+  style?: StyleProp<ViewStyle>;
 };
 
 export const SocialButton = ({
@@ -18,10 +19,11 @@ export const SocialButton = ({
   iconHeight = 20,
   iconWidth = 20,
   color,
+  style,
 }: SocialButtonProps) => {
   return (
     <TouchableOpacity
-      style={styles.button}
+      style={[styles.button, style]}
       activeOpacity={0.7}
       onPress={onPress}
     >

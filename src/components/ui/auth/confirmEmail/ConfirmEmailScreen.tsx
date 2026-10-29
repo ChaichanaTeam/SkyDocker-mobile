@@ -9,6 +9,7 @@ import {
   isOtpCodeComplete,
 } from "@/components/ui/auth/confirmEmail/otpCode";
 import { styles } from "@/components/ui/auth/confirmEmail/styles/ConfirmEmailScreen.styles";
+import type { ConfirmEmailScreenProps } from "@/components/ui/auth/confirmEmail/types";
 import { useSignUp } from "@app/api/context/SignUpContext";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -22,10 +23,6 @@ import {
 } from "react-native";
 
 const CODE_LENGTH = 6;
-
-type ConfirmEmailScreenProps = {
-  nextRoute?: string;
-};
 
 export const ConfirmEmailScreen = ({
   nextRoute = "/(tabs)",
@@ -100,7 +97,7 @@ export const ConfirmEmailScreen = ({
 
     try {
       await confirmOtp(code.join(""));
-      router.replace(nextRoute as any);
+      router.replace(nextRoute);
     } catch {}
   };
 

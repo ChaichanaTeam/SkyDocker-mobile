@@ -1,5 +1,7 @@
 import { ConfirmEmailScreen } from "@/components/ui/auth/confirmEmail/ConfirmEmailScreen";
 
-export default function ConfirmEmail() {
-  return <ConfirmEmailScreen nextRoute="/(auth)/phonenumscreen" />;
-}
+const ConfirmEmail = () => {
+  return <ConfirmEmailScreen nextRoute="/(auth)/passcreen" />;
+};
+
+export default ConfirmEmail;
