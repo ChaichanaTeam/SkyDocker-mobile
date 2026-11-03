@@ -12,7 +12,6 @@ import {
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MapView, {
   MapPressEvent,
-  Marker,
   PROVIDER_GOOGLE,
   Region,
 } from "react-native-maps";
@@ -30,6 +29,7 @@ import { useGeoZones } from "@/hooks/useGeoZones";
 import { findZonesAtPoint } from "@/utils/geoConvert";
 import { BoundingBox, GeoZoneFeature } from "@app/api/types/geoZone";
 
+import { CheckInMarker } from "@components/ui/map/MapScreen/CheckInMarker";
 import { CheckInSheet } from "@components/ui/map/MapScreen/CheckInSheet";
 import { DroneInfoSheet } from "@components/ui/map/MapScreen/DroneInfoSheet";
 import { GeoZoneInfoSheet } from "@components/ui/map/MapScreen/GeoZoneInfoSheet";
@@ -241,15 +241,7 @@ export const MapScreen = () => {
           <GeoZonesLayer zones={zones} />
 
           {checkIns.map((checkIn) => (
-            <Marker
-              coordinate={checkIn.coordinate}
-              key={checkIn.key}
-              tracksViewChanges={false}
-            >
-              <View style={styles.dronePin}>
-                <Ionicons color={colors.text2} name="airplane" size={22} />
-              </View>
-            </Marker>
+            <CheckInMarker checkIn={checkIn} key={checkIn.key} />
           ))}
         </MapView>
       ) : (
