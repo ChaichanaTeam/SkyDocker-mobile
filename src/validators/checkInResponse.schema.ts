@@ -34,7 +34,11 @@ export const parseCreatedCheckIn = (value: unknown): CreateDemoCheckInResponse =
   return value as CreateDemoCheckInResponse;
 };
 
-const isFeature = (value: unknown): value is CheckInFeature => {
+type RawCheckInFeature = Omit<CheckInFeature, "properties"> & {
+  properties: Omit<CheckInFeature["properties"], "status"> & { status: string };
+};
+
+const isFeature = (value: unknown): value is RawCheckInFeature => {
   if (!isRecord(value) || value.type !== "Feature" ||
       !isRecord(value.geometry) || value.geometry.type !== "Point" ||
       !isPoint(value.geometry.coordinates) || !isRecord(value.properties)) return false;
@@ -44,7 +48,7 @@ const isFeature = (value: unknown): value is CheckInFeature => {
     typeof properties.contact === "string" && isInteger(properties.range) &&
     isInteger(properties.height) && isInteger(properties.time) &&
     typeof properties.start_at === "string" && Number.isFinite(Date.parse(properties.start_at)) &&
-    CHECK_IN_STATUSES.some(status => status === properties.status);
+    typeof properties.status === "string";
 };
 
 export const parseCheckInCollection = (value: unknown): CheckInCollection => {
@@ -52,7 +56,16 @@ export const parseCheckInCollection = (value: unknown): CheckInCollection => {
       !Array.isArray(value.features) || !value.features.every(isFeature)) {
     throw invalidResponse();
   }
-  return { type: "FeatureCollection", features: value.features };
+  return {
+    type: "FeatureCollection",
+    features: value.features.map(feature => ({
+      ...feature,
+      properties: {
+        ...feature.properties,
+        status: CHECK_IN_STATUSES.find(status => status === feature.properties.status) ?? "unknown",
+      },
+    })),
+  };
 };
 
 export const parseEndedCheckIn = (value: unknown, id: number): EndDemoCheckInResponse => {

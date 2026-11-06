@@ -4,7 +4,7 @@ import { AppState, type AppStateStatus } from "react-native";
 
 import { fetchDemoCheckIns } from "@app/api/services/checkIn.service";
 import type { BoundingBox } from "@app/api/types/geoZone";
-import { CHECK_IN_MAP_DEBOUNCE_MS, OPEN_CHECK_IN_STATUSES } from "@features/tracking/constants/checkIn";
+import { CHECK_IN_MAP_DEBOUNCE_MS, CHECK_IN_STATUS_CONFIG } from "@features/tracking/constants/checkIn";
 import { mapCheckInErrorToMessage } from "@features/tracking/mappers/checkInErrorMapper";
 import type { CheckInMapMarker } from "@features/tracking/types/demoCheckIn";
 
@@ -36,7 +36,7 @@ export const useCheckInMap = () => {
       .then(collection => {
         if (generation.current !== requestGeneration) return;
         setMarkers(collection.features
-          .filter(feature => OPEN_CHECK_IN_STATUSES.has(feature.properties.status))
+          .filter(feature => CHECK_IN_STATUS_CONFIG[feature.properties.status].visible)
           .map((feature, index) => {
             const [longitude, latitude] = feature.geometry.coordinates;
             return {
