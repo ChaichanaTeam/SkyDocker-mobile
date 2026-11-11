@@ -71,6 +71,9 @@ export const styles = StyleSheet.create({
     top: -11,
     zIndex: 1,
   },
+  outlinedLabelAccent: {
+    color: colors.checkInFormAccent,
+  },
   outlinedLabelDark: {
     backgroundColor: colors.backgroundMain,
   },

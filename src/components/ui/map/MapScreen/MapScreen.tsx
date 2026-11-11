@@ -30,7 +30,6 @@ import { findZonesAtPoint } from "@/utils/geoConvert";
 import { BoundingBox, GeoZoneFeature } from "@app/api/types/geoZone";
 
 import { CheckInMarker } from "@components/ui/map/MapScreen/CheckInMarker";
-import { CheckInSheet } from "@components/ui/map/MapScreen/CheckInSheet";
 import { DroneInfoSheet } from "@components/ui/map/MapScreen/DroneInfoSheet";
 import { GeoZoneInfoSheet } from "@components/ui/map/MapScreen/GeoZoneInfoSheet";
 import { MapControlButton } from "@components/ui/map/MapScreen/MapControlButton";
@@ -71,8 +70,6 @@ export const MapScreen = () => {
   const [appearance, setAppearance] = useState<MapAppearance>(
     colorScheme === "dark" ? "dark" : "light",
   );
-  const [isCheckInSheetVisible, setIsCheckInSheetVisible] =
-    useState<boolean>(false);
   const [isDroneSheetVisible, setIsDroneSheetVisible] = useState(false);
   const [mapType, setMapType] = useState<SessionMapType>("standard");
   const [settingsError, setSettingsError] = useState<string | null>(null);
@@ -171,23 +168,14 @@ export const MapScreen = () => {
     [],
   );
 
-  const openCheckInSheet = useCallback((): void => {
-    setZonesAtTap([]);
-    setIsCheckInSheetVisible(true);
-  }, []);
-
   const closeGeoZoneInfoSheet = useCallback((): void => {
     setZonesAtTap([]);
-  }, []);
-
-  const closeCheckInSheet = useCallback((): void => {
-    setIsCheckInSheetVisible(false);
   }, []);
 
   const handleCreateCheckIn = useCallback(
     async (values: CheckInDraftValues): Promise<void> => {
       await submitCheckIn(values);
-      setIsCheckInSheetVisible(false);
+      setIsDroneSheetVisible(false);
     },
     [submitCheckIn],
   );
@@ -328,8 +316,10 @@ export const MapScreen = () => {
       <DroneInfoSheet
         drone={null}
         isVisible={isDroneSheetVisible}
+        isMutationPending={mutation !== null}
         onClose={closeDroneSheet}
-        onCheckInPress={openCheckInSheet}
+        onCheckInPress={() => setZonesAtTap([])}
+        onSubmit={handleCreateCheckIn}
         onProfilePress={() => {}}
         onWikiPress={() => {}}
       />
@@ -339,13 +329,6 @@ export const MapScreen = () => {
         onClose={closeGeoZoneInfoSheet}
       />
 
-      <CheckInSheet
-        appearance={appearance}
-        isVisible={isCheckInSheetVisible}
-        isMutationPending={mutation !== null}
-        onClose={closeCheckInSheet}
-        onSubmit={handleCreateCheckIn}
-      />
     </GestureHandlerRootView>
   );
 };

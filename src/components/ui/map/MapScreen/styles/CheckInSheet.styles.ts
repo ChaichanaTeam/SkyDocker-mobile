@@ -20,10 +20,10 @@ export const styles = StyleSheet.create({
     width: 180,
   },
   buttonSpacer: {
-    height: 40,
+    height: 56,
   },
   buttonSpacerCompact: {
-    height: 24,
+    height: 40,
   },
   dropdownStack: {
     gap: 14,
@@ -87,7 +87,7 @@ export const styles = StyleSheet.create({
     paddingTop: 6,
   },
   sheetContent: {
-    flex: 1,
+    flexGrow: 1,
   },
   sheetContentCompact: {
     gap: 0,

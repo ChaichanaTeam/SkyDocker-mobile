@@ -31,6 +31,7 @@ export const CheckInTextField = ({
       <TextField
         style={[
           styles.outlinedLabel,
+          isLight ? styles.outlinedLabelAccent : null,
           isLight ? styles.outlinedLabelLight : styles.outlinedLabelDark,
         ]}
         variant="label"
