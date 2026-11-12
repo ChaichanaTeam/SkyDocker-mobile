@@ -11,8 +11,13 @@ export interface BoundingBox {
 }
 
 export interface GeoZoneRequestParams {
+  country_tag: string;
   bounding_box: BoundingBox;
   user_pos: LatLon;
+}
+
+export interface CountryAtPoint {
+  country_tag: string;
 }
 
 export type GeoJsonPosition = [lon: number, lat: number];
