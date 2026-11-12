@@ -1,25 +1,33 @@
+import { Button } from "@/components/shared/ui/Button/Button";
 import { TextField } from "@/components/shared/ui/Text/TextField";
-import { SheetTabs } from "@/components/ui/map/MapScreen/SheetTabs";
 import {
-  COLLAPSED_Y,
-  EXPANDED_Y,
-  HIDDEN_Y,
-  styles,
-} from "@/components/ui/map/MapScreen/styles/DroneInfoSheet.styles";
-import { DroneInfoSheetProps } from "@/components/ui/map/MapScreen/types/types";
+  DRONE_INFO_COLLAPSED_HEIGHT,
+  DRONE_INFO_DETAILS_HEIGHT,
+  DRONE_INFO_FORM_MAX_HEIGHT,
+  DRONE_INFO_HIDDEN_OFFSET,
+  DRONE_INFO_SNAP_POINTS,
+  DRONE_INFO_TOP_GAP,
+} from "@/components/ui/map/MapScreen/constants/droneInfoSheet";
+import { styles } from "@/components/ui/map/MapScreen/styles/DroneInfoSheet.styles";
+import type {
+  DroneInfoSheetProps,
+  DroneInfoSheetSnap,
+} from "@/components/ui/map/MapScreen/types/types";
 import { colors } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
-import { Animated, PanResponder, View } from "react-native";
+import {
+  Animated,
+  KeyboardAvoidingView,
+  PanResponder,
+  Platform,
+  ScrollView,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-type Snap = "hidden" | "collapsed" | "expanded";
-
-const SNAP_Y: Record<Snap, number> = {
-  expanded: EXPANDED_Y,
-  collapsed: COLLAPSED_Y,
-  hidden: HIDDEN_Y,
-};
-const SNAP_POINTS: Snap[] = ["expanded", "collapsed", "hidden"];
+import { CheckInForm } from "./CheckInForm";
 
 const EMPTY = "—";
 const withUnit = (value: number | undefined, unit: string) =>
@@ -28,17 +36,44 @@ const withUnit = (value: number | undefined, unit: string) =>
 export const DroneInfoSheet = ({
   drone,
   isVisible,
+  isMutationPending,
   onClose,
   onCheckInPress,
+  onSubmit,
   onWikiPress,
   onProfilePress,
 }: DroneInfoSheetProps) => {
-  const translateY = useRef(new Animated.Value(HIDDEN_Y)).current;
-  const currentY = useRef(HIDDEN_Y);
-  const startY = useRef(HIDDEN_Y);
-  const snapRef = useRef<Snap>("hidden");
+  const { height: windowHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const [showCheckIn, setShowCheckIn] = useState(false);
+  const sheetHeight = showCheckIn
+    ? Math.min(
+        windowHeight - insets.top - DRONE_INFO_TOP_GAP,
+        DRONE_INFO_FORM_MAX_HEIGHT,
+      )
+    : DRONE_INFO_DETAILS_HEIGHT;
+  const snapY: Record<DroneInfoSheetSnap, number> = {
+    expanded: 0,
+    collapsed: sheetHeight - DRONE_INFO_COLLAPSED_HEIGHT,
+    hidden: sheetHeight + DRONE_INFO_HIDDEN_OFFSET,
+  };
+  const snapYRef = useRef(snapY);
+  snapYRef.current = snapY;
+  const previousSheetHeight = useRef(sheetHeight);
+  const translateY = useRef(
+    new Animated.Value(
+      DRONE_INFO_DETAILS_HEIGHT + DRONE_INFO_HIDDEN_OFFSET,
+    ),
+  ).current;
+  const currentY = useRef(
+    DRONE_INFO_DETAILS_HEIGHT + DRONE_INFO_HIDDEN_OFFSET,
+  );
+  const startY = useRef(
+    DRONE_INFO_DETAILS_HEIGHT + DRONE_INFO_HIDDEN_OFFSET,
+  );
+  const snapRef = useRef<DroneInfoSheetSnap>("hidden");
   const onCloseRef = useRef(onClose);
-  const [snap, setSnap] = useState<Snap>("hidden");
+  const [snap, setSnap] = useState<DroneInfoSheetSnap>("hidden");
 
   onCloseRef.current = onClose;
 
@@ -49,14 +84,14 @@ export const DroneInfoSheet = ({
     return () => translateY.removeListener(id);
   }, [translateY]);
 
-  const snapTo = useRef((target: Snap) => {
+  const snapTo = useRef((target: DroneInfoSheetSnap) => {
     const previous = snapRef.current;
     snapRef.current = target;
     setSnap(target);
     Animated.spring(translateY, {
       bounciness: 0,
       speed: 14,
-      toValue: SNAP_Y[target],
+      toValue: snapYRef.current[target],
       useNativeDriver: true,
     }).start();
 
@@ -65,8 +100,20 @@ export const DroneInfoSheet = ({
 
   useEffect(() => {
     if (isVisible && snapRef.current === "hidden") snapTo("collapsed");
-    if (!isVisible && snapRef.current !== "hidden") snapTo("hidden");
+    if (!isVisible) {
+      if (snapRef.current !== "hidden") snapTo("hidden");
+      setShowCheckIn(false);
+    }
   }, [isVisible, snapTo]);
+
+  useEffect(() => {
+    if (previousSheetHeight.current !== sheetHeight) {
+      previousSheetHeight.current = sheetHeight;
+      if (snapRef.current === "collapsed") {
+        translateY.setValue(snapYRef.current.collapsed);
+      }
+    }
+  }, [sheetHeight, translateY]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -77,15 +124,16 @@ export const DroneInfoSheet = ({
       },
       onPanResponderMove: (_, { dy }) => {
         const next = Math.min(
-          Math.max(startY.current + dy, EXPANDED_Y),
-          HIDDEN_Y,
+          Math.max(startY.current + dy, snapYRef.current.expanded),
+          snapYRef.current.hidden,
         );
         translateY.setValue(next);
       },
       onPanResponderRelease: (_, { vy }) => {
         const projected = currentY.current + vy * 150;
-        const target = SNAP_POINTS.reduce((best, key) =>
-          Math.abs(SNAP_Y[key] - projected) < Math.abs(SNAP_Y[best] - projected)
+        const target = DRONE_INFO_SNAP_POINTS.reduce((best, key) =>
+          Math.abs(snapYRef.current[key] - projected) <
+          Math.abs(snapYRef.current[best] - projected)
             ? key
             : best,
         );
@@ -96,12 +144,12 @@ export const DroneInfoSheet = ({
 
   const collapsedOpacity = translateY.interpolate({
     extrapolate: "clamp",
-    inputRange: [EXPANDED_Y, COLLAPSED_Y],
+    inputRange: [snapY.expanded, snapY.collapsed],
     outputRange: [0, 1],
   });
   const expandedOpacity = translateY.interpolate({
     extrapolate: "clamp",
-    inputRange: [EXPANDED_Y, COLLAPSED_Y],
+    inputRange: [snapY.expanded, snapY.collapsed],
     outputRange: [1, 0],
   });
 
@@ -124,64 +172,128 @@ export const DroneInfoSheet = ({
     },
   ] as const;
 
+  const actions = [
+    {
+      icon: "airplane-outline",
+      label: "Check in",
+      onPress: () => {
+        onCheckInPress();
+        setShowCheckIn(true);
+      },
+    },
+    { icon: "book-outline", label: "Wiki", onPress: onWikiPress },
+    { icon: "person-outline", label: "Profile", onPress: onProfilePress },
+  ] as const;
+
   const droneName = drone?.name ?? EMPTY;
 
   return (
-    <Animated.View
-      {...panResponder.panHandlers}
-      pointerEvents={snap === "hidden" ? "none" : "auto"}
-      style={[styles.sheet, { transform: [{ translateY }] }]}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      pointerEvents="box-none"
+      style={styles.keyboardContainer}
     >
-      <View style={styles.handle} />
-
       <Animated.View
-        pointerEvents={snap === "collapsed" ? "auto" : "none"}
-        style={[styles.collapsed, { opacity: collapsedOpacity }]}
+        pointerEvents={snap === "hidden" ? "none" : "auto"}
+        style={[styles.sheet, { height: sheetHeight, transform: [{ translateY }] }]}
       >
-        <View style={styles.summaryRow}>
-          <TextField style={styles.summaryText}>
-            <TextField style={styles.summaryLabel}>Missions: </TextField>
-            {drone?.missionsCount ?? "None"}
-          </TextField>
-          <TextField style={styles.summaryText}>
-            <TextField style={styles.summaryLabel}>Flight Time: </TextField>
-            {drone?.flightTime ?? "None"}
-          </TextField>
+        <View {...panResponder.panHandlers} style={styles.handleTouchArea}>
+          <View style={styles.handle} />
         </View>
-        <TextField style={styles.droneName}>{droneName}</TextField>
+
+        <Animated.View
+          pointerEvents={snap === "collapsed" ? "auto" : "none"}
+          style={[styles.collapsed, { opacity: collapsedOpacity }]}
+        >
+          <View style={styles.summaryRow}>
+            <TextField style={styles.summaryText}>
+              <TextField style={styles.summaryLabel}>Missions: </TextField>
+              {drone?.missionsCount ?? "None"}
+            </TextField>
+            <TextField style={styles.summaryText}>
+              <TextField style={styles.summaryLabel}>Flight Time: </TextField>
+              {drone?.flightTime ?? "None"}
+            </TextField>
+          </View>
+          <TextField style={styles.droneName}>{droneName}</TextField>
+        </Animated.View>
+
+        <Animated.View
+          pointerEvents={snap === "expanded" ? "auto" : "none"}
+          style={[
+            styles.expanded,
+            showCheckIn && { paddingBottom: Math.max(insets.bottom, 16) },
+            { opacity: expandedOpacity },
+          ]}
+        >
+          <View style={styles.actions}>
+            {actions.map((action, index) => (
+              <Button
+                key={action.label}
+                onPress={action.onPress}
+                size="small"
+                style={[styles.action, index > 0 && styles.actionDivider]}
+                variant="text"
+              >
+                <Ionicons
+                  color={
+                    action.label === "Wiki" ? colors.startupLogo : colors.text5
+                  }
+                  name={action.icon}
+                  size={16}
+                />
+                <TextField
+                  style={[
+                    styles.actionText,
+                    action.label === "Wiki" && styles.actionTextEmphasized,
+                  ]}
+                >
+                  {action.label}
+                </TextField>
+              </Button>
+            ))}
+          </View>
+
+          {showCheckIn ? (
+            <ScrollView
+              contentContainerStyle={styles.formScrollContent}
+              keyboardShouldPersistTaps="handled"
+              style={styles.formScroll}
+            >
+              <CheckInForm
+                appearance="light"
+                isCompactLayout={windowHeight < 700}
+                isVisible={isVisible}
+                isMutationPending={isMutationPending}
+                onSubmit={onSubmit}
+              />
+            </ScrollView>
+          ) : (
+            <>
+              <View style={styles.imageCard}>
+                <Ionicons color={colors.text5} name="airplane" size={56} />
+              </View>
+
+              <TextField style={styles.droneName}>{droneName}</TextField>
+
+              <View style={styles.specsGrid}>
+                {specs.map((spec) => (
+                  <View key={spec.text} style={styles.specItem}>
+                    <Ionicons color={colors.text5} name={spec.icon} size={16} />
+                    <TextField style={styles.specText}>{spec.text}</TextField>
+                  </View>
+                ))}
+              </View>
+
+              <TextField style={styles.currentMission}>
+                <TextField style={styles.summaryLabel}>Current Missions: </TextField>
+                {drone?.currentMission ?? "None"}
+              </TextField>
+            </>
+          )}
+        </Animated.View>
+
       </Animated.View>
-
-      <Animated.View
-        pointerEvents={snap === "expanded" ? "auto" : "none"}
-        style={[styles.expanded, { opacity: expandedOpacity }]}
-      >
-        <SheetTabs
-          active="checkin"
-          onCheckInPress={onCheckInPress}
-          onWikiPress={onWikiPress}
-          onProfilePress={onProfilePress}
-        />
-
-        <View style={styles.imageCard}>
-          <Ionicons color={colors.text5} name="airplane" size={56} />
-        </View>
-
-        <TextField style={styles.droneName}>{droneName}</TextField>
-
-        <View style={styles.specsGrid}>
-          {specs.map((spec) => (
-            <View key={spec.text} style={styles.specItem}>
-              <Ionicons color={colors.text5} name={spec.icon} size={16} />
-              <TextField style={styles.specText}>{spec.text}</TextField>
-            </View>
-          ))}
-        </View>
-
-        <TextField style={styles.currentMission}>
-          <TextField style={styles.summaryLabel}>Current Missions: </TextField>
-          {drone?.currentMission ?? "None"}
-        </TextField>
-      </Animated.View>
-    </Animated.View>
+    </KeyboardAvoidingView>
   );
 };

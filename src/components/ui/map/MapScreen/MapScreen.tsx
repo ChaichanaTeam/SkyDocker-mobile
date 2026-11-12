@@ -12,7 +12,6 @@ import {
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MapView, {
   MapPressEvent,
-  Marker,
   PROVIDER_GOOGLE,
   Region,
 } from "react-native-maps";
@@ -30,7 +29,7 @@ import { useGeoZones } from "@/hooks/useGeoZones";
 import { findZonesAtPoint } from "@/utils/geoConvert";
 import { BoundingBox, GeoZoneFeature } from "@app/api/types/geoZone";
 
-import { CheckInSheet } from "@components/ui/map/MapScreen/CheckInSheet";
+import { CheckInMarker } from "@components/ui/map/MapScreen/CheckInMarker";
 import { DroneInfoSheet } from "@components/ui/map/MapScreen/DroneInfoSheet";
 import { GeoZoneInfoSheet } from "@components/ui/map/MapScreen/GeoZoneInfoSheet";
 import { MapControlButton } from "@components/ui/map/MapScreen/MapControlButton";
@@ -72,8 +71,6 @@ export const MapScreen = () => {
   const [appearance, setAppearance] = useState<MapAppearance>(
     colorScheme === "dark" ? "dark" : "light",
   );
-  const [isCheckInSheetVisible, setIsCheckInSheetVisible] =
-    useState<boolean>(false);
   const [isDroneSheetVisible, setIsDroneSheetVisible] = useState(false);
   const [isProfileSheetVisible, setIsProfileSheetVisible] = useState(false);
   const [mapType, setMapType] = useState<SessionMapType>("standard");
@@ -184,27 +181,20 @@ export const MapScreen = () => {
     [],
   );
 
-  const openCheckInSheet = useCallback((): void => {
-    setZonesAtTap([]);
-    setIsCheckInSheetVisible(true);
-  }, []);
   const openCheckInFromProfile = useCallback((): void => {
+    setZonesAtTap([]);
     closeProfileSheet();
-    openCheckInSheet();
-  }, [closeProfileSheet, openCheckInSheet]);
+    setIsDroneSheetVisible(true);
+  }, [closeProfileSheet]);
 
   const closeGeoZoneInfoSheet = useCallback((): void => {
     setZonesAtTap([]);
   }, []);
 
-  const closeCheckInSheet = useCallback((): void => {
-    setIsCheckInSheetVisible(false);
-  }, []);
-
   const handleCreateCheckIn = useCallback(
     async (values: CheckInDraftValues): Promise<void> => {
       await submitCheckIn(values);
-      setIsCheckInSheetVisible(false);
+      setIsDroneSheetVisible(false);
     },
     [submitCheckIn],
   );
@@ -259,15 +249,7 @@ export const MapScreen = () => {
           <GeoZonesLayer zones={zones} />
 
           {checkIns.map((checkIn) => (
-            <Marker
-              coordinate={checkIn.coordinate}
-              key={checkIn.key}
-              tracksViewChanges={false}
-            >
-              <View style={styles.dronePin}>
-                <Ionicons color={colors.text2} name="airplane" size={22} />
-              </View>
-            </Marker>
+            <CheckInMarker checkIn={checkIn} key={checkIn.key} />
           ))}
         </MapView>
       ) : (
@@ -354,9 +336,11 @@ export const MapScreen = () => {
       <DroneInfoSheet
         drone={null}
         isVisible={isDroneSheetVisible}
+        isMutationPending={mutation !== null}
         onClose={closeDroneSheet}
-        onCheckInPress={openCheckInSheet}
+        onCheckInPress={() => setZonesAtTap([])}
         onProfilePress={openProfileSheet}
+        onSubmit={handleCreateCheckIn}
         onWikiPress={() => {}}
       />
 
@@ -372,13 +356,6 @@ export const MapScreen = () => {
         onClose={closeGeoZoneInfoSheet}
       />
 
-      <CheckInSheet
-        appearance={appearance}
-        isVisible={isCheckInSheetVisible}
-        isMutationPending={mutation !== null}
-        onClose={closeCheckInSheet}
-        onSubmit={handleCreateCheckIn}
-      />
     </GestureHandlerRootView>
   );
 };

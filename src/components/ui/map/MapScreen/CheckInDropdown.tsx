@@ -22,6 +22,8 @@ export const CheckInDropdown = ({
     appearance === "light" ? colors.checkInLightText : colors.text2;
   const borderColor =
     appearance === "light" ? colors.checkInLightBorder : colors.text1;
+  const labelColor =
+    appearance === "light" ? colors.checkInFormAccent : colors.text1;
   const placeholderColor =
     appearance === "light" ? colors.checkInLightText : colors.text1;
   const selectedOption = field.options.find((option) => option.value === value);
@@ -50,7 +52,7 @@ export const CheckInDropdown = ({
         ]}
       >
         <TextField
-          color={colors.text1}
+          color={labelColor}
           style={[
             styles.outlinedLabel,
             { backgroundColor: surfaceColor },
