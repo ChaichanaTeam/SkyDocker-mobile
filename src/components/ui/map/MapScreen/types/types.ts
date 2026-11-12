@@ -28,11 +28,15 @@ export type DroneInfo = {
   currentMission?: string;
 };
 
+export type DroneInfoSheetSnap = "hidden" | "collapsed" | "expanded";
+
 export type DroneInfoSheetProps = {
   drone?: DroneInfo | null;
   isVisible: boolean;
+  isMutationPending?: boolean;
   onClose: () => void;
   onCheckInPress: () => void;
+  onSubmit: (values: CheckInDraftValues) => Promise<void>;
   onWikiPress: () => void;
   onProfilePress: () => void;
 };
