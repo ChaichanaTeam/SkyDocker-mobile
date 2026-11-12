@@ -11,6 +11,9 @@ import NoEntry from "@assets/icons/NoEntry.svg";
 import Phone from "@assets/icons/Phone.svg";
 import CheckIn from "@assets/icons/CheckIn.svg";
 import UserIcon from "@assets/icons/User.svg";
+import Gear from "@assets/icons/Gear.svg";
+import Documents from "@assets/icons/Documents.svg";
+import Calendar from "@assets/icons/Calendar.svg";
 import X from "@assets/icons/X.svg";
 
 type IconName =
@@ -24,7 +27,10 @@ type IconName =
   | "Phone"
   | "UserIcon"
   | "X"
-  | "CheckIn";
+  | "CheckIn"
+  | "Gear"
+  | "Documents"
+  | "Calendar";
 
 export const icons: Record<IconName, FC<SvgProps>> = {
   Phone,
@@ -37,6 +43,9 @@ export const icons: Record<IconName, FC<SvgProps>> = {
   EyeOff,
   DroneIcon,
   UserIcon,
+  Gear,
+  Documents,
+  Calendar,
   CheckIn,
 };
 

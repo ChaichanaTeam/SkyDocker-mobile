@@ -1,14 +1,13 @@
+import { TextField } from "@/components/shared/ui/Text/TextField";
+import { SheetTabs } from "@/components/ui/map/MapScreen/SheetTabs";
 import {
   COLLAPSED_Y,
   EXPANDED_Y,
   HIDDEN_Y,
   styles,
 } from "@/components/ui/map/MapScreen/styles/DroneInfoSheet.styles";
-import { TextField } from "@/components/shared/ui/Text/TextField";
 import { DroneInfoSheetProps } from "@/components/ui/map/MapScreen/types/types";
-import { Button } from "@/components/shared/ui/Button/Button";
 import { colors } from "@/theme";
-import { CheckIn } from "@assets/icons";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
 import { Animated, PanResponder, View } from "react-native";
@@ -86,8 +85,7 @@ export const DroneInfoSheet = ({
       onPanResponderRelease: (_, { vy }) => {
         const projected = currentY.current + vy * 150;
         const target = SNAP_POINTS.reduce((best, key) =>
-          Math.abs(SNAP_Y[key] - projected) <
-          Math.abs(SNAP_Y[best] - projected)
+          Math.abs(SNAP_Y[key] - projected) < Math.abs(SNAP_Y[best] - projected)
             ? key
             : best,
         );
@@ -126,12 +124,6 @@ export const DroneInfoSheet = ({
     },
   ] as const;
 
-  const actions = [
-    { icon: "airplane-outline", label: "Check in", onPress: onCheckInPress },
-    { icon: "book-outline", label: "Wiki", onPress: onWikiPress },
-    { icon: "person-outline", label: "Profile", onPress: onProfilePress },
-  ] as const;
-
   const droneName = drone?.name ?? EMPTY;
 
   return (
@@ -163,35 +155,12 @@ export const DroneInfoSheet = ({
         pointerEvents={snap === "expanded" ? "auto" : "none"}
         style={[styles.expanded, { opacity: expandedOpacity }]}
       >
-        <View style={styles.actions}>
-          {actions.map((action, index) => (
-            <Button
-              key={action.label}
-              onPress={action.onPress}
-              size="small"
-              style={[styles.action, index > 0 && styles.actionDivider]}
-              variant="text"
-            >
-              {action.label === "Check in" ? (
-                <CheckIn height={16} width={16} />
-              ) : (
-                <Ionicons
-                  color={action.label === "Wiki" ? colors.startupLogo : colors.text5}
-                  name={action.icon}
-                  size={16}
-                />
-              )}
-              <TextField
-                style={[
-                  styles.actionText,
-                  action.label === "Wiki" && styles.actionTextEmphasized,
-                ]}
-              >
-                {action.label}
-              </TextField>
-            </Button>
-          ))}
-        </View>
+        <SheetTabs
+          active="checkin"
+          onCheckInPress={onCheckInPress}
+          onWikiPress={onWikiPress}
+          onProfilePress={onProfilePress}
+        />
 
         <View style={styles.imageCard}>
           <Ionicons color={colors.text5} name="airplane" size={56} />

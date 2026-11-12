@@ -186,6 +186,24 @@ export const useFocusedForegroundLocation =
             return;
           }
 
+          try {
+            const currentPosition = await getCurrentPositionAsync({
+              accuracy: Accuracy.Balanced,
+            });
+
+            if (isActive) {
+              setUserCoordinates(toUserCoordinates(currentPosition));
+              setError(null);
+            }
+          } catch {
+            if (isActive) {
+              setError({
+                message: currentPositionFailedMessage,
+                reason: "current-position-failed",
+              });
+            }
+          }
+
           const nextLocationSubscription = await watchPositionAsync(
             {
               accuracy: Accuracy.Balanced,

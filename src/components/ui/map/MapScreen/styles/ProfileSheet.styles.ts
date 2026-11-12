@@ -1,0 +1,243 @@
+import { StyleSheet } from "react-native";
+
+import { colors, typography } from "@/theme";
+
+export const PROFILE_HEIGHT = 700;
+
+export const profileStyles = StyleSheet.create({
+  sheet: {
+    backgroundColor: "#F6F2F1",
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    bottom: 0,
+    height: PROFILE_HEIGHT,
+    left: 0,
+    paddingHorizontal: 16,
+    position: "absolute",
+    right: 0,
+    overflow: "hidden",
+    shadowColor: colors.startupLogo,
+    shadowOffset: { height: -2, width: 0 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 12,
+  },
+  handle: {
+    alignSelf: "center",
+    backgroundColor: colors.pressableActive1,
+    borderRadius: 3,
+    height: 5,
+    marginTop: 12,
+    width: 120,
+  },
+  handleArea: {
+    alignItems: "center",
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  tabsWrapper: {
+    marginTop: 12,
+  },
+  content: {
+    flex: 1,
+  },
+  contentContainer: {
+    paddingBottom: 24,
+  },
+  backRow: {
+    alignItems: "center",
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    marginTop: 16,
+  },
+  backText: {
+    color: "#1B2340",
+    fontFamily: typography.interRegular,
+    fontSize: 14,
+    marginLeft: 2,
+  },
+
+  header: {
+    alignItems: "center",
+    marginTop: 24,
+  },
+  settingsButton: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    height: 40,
+    justifyContent: "center",
+    position: "absolute",
+    right: 4,
+    top: 16,
+    width: 40,
+    shadowColor: "#000",
+    shadowOffset: { height: 2, width: 0 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  avatar: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 52,
+    height: 104,
+    justifyContent: "center",
+    width: 104,
+    shadowColor: "#000",
+    shadowOffset: { height: 4, width: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  userId: {
+    color: "#1B2340",
+    fontFamily: typography.interRegular,
+    fontSize: 24,
+    fontWeight: "800",
+    marginTop: 16,
+  },
+  phone: {
+    color: "#6B6B6B",
+    fontFamily: typography.interRegular,
+    fontSize: 14,
+    marginTop: 4,
+  },
+
+  sectionTitle: {
+    color: "#1B2340",
+    fontFamily: typography.interRegular,
+    fontSize: 16,
+    fontWeight: "700",
+    marginTop: 24,
+  },
+  list: {
+    gap: 16,
+    marginTop: 12,
+  },
+
+  emptyText: {
+    color: "#6B6B6B",
+    fontFamily: typography.interRegular,
+    fontSize: 14,
+    marginTop: 24,
+    textAlign: "center",
+  },
+  card: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    flexDirection: "row",
+    padding: 14,
+    shadowColor: "#000",
+    shadowOffset: { height: 2, width: 0 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  iconBox: {
+    alignItems: "center",
+    backgroundColor: "#F6F2F1",
+    borderRadius: 12,
+    height: 52,
+    justifyContent: "center",
+    width: 52,
+  },
+  cardTexts: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  cardTitle: {
+    color: "#1B2340",
+    fontFamily: typography.interRegular,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  cardSubtitle: {
+    color: "#6B6B6B",
+    fontFamily: typography.interRegular,
+    fontSize: 13,
+    marginTop: 2,
+  },
+
+  form: {
+    gap: 12,
+    marginTop: 12,
+  },
+  input: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    color: "#000000",
+  },
+  selectRow: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  selectList: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    marginTop: 6,
+    overflow: "hidden",
+  },
+  selectOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  selectValue: {
+    color: "#1B2340",
+    fontFamily: typography.interRegular,
+    fontSize: 14,
+  },
+  selectPlaceholder: {
+    color: "#9A9A9A",
+    fontFamily: typography.interRegular,
+    fontSize: 14,
+  },
+  fileRow: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    flexDirection: "row",
+    gap: 12,
+    padding: 14,
+  },
+  fileRowText: {
+    color: "#1B2340",
+    flex: 1,
+    fontFamily: typography.interRegular,
+    fontSize: 14,
+  },
+  switchRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+  },
+  switchText: {
+    color: "#6B6B6B",
+    flex: 1,
+    fontFamily: typography.interRegular,
+    fontSize: 13,
+  },
+  errorText: {
+    color: "#D64545",
+    fontFamily: typography.interRegular,
+    fontSize: 13,
+  },
+  successBox: {
+    alignItems: "center",
+    gap: 12,
+    marginTop: 48,
+  },
+  successText: {
+    color: "#6B6B6B",
+    fontFamily: typography.interRegular,
+    fontSize: 14,
+    textAlign: "center",
+  },
+});

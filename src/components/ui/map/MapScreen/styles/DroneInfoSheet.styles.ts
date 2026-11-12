@@ -67,38 +67,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 32,
   },
-  actions: {
-    borderColor: colors.main3,
-    borderRadius: 28,
-    borderWidth: 1,
-    flexDirection: "row",
-    overflow: "hidden",
-    height: 52,
-  },
-  action: {
-    alignItems: "center",
-    flex: 1,
-    flexDirection: "row",
-    gap: 8,
-    justifyContent: "center",
-    paddingHorizontal: 4,
-    height: "100%",
-    borderRadius: 0,
-  },
-  actionDivider: {
-    borderLeftColor: colors.main3,
-    borderLeftWidth: 1,
-  },
-  actionText: {
-    color: colors.text5,
-    fontFamily: typography.interRegular,
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  actionTextEmphasized: {
-    color: colors.startupLogo,
-    fontWeight: "800",
-  },
   imageCard: {
     alignItems: "center",
     alignSelf: "center",
