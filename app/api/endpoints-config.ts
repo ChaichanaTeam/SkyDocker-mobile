@@ -7,6 +7,7 @@ export const AUTH_CONFIG = {
 
 export const GEO_ZONE_CONFIG = {
   GEOZONE: () => "api/v1/geo-zone/",
+  COUNTRY: () => "api/v1/geo-zone/country",
 } as const;
 
 export const DEMO_CHECK_IN_CONFIG = {
