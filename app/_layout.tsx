@@ -1,9 +1,14 @@
 import { Stack } from "expo-router";
+import { requestForegroundPermissionsAsync } from "expo-location";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
 import { StartupGate } from "@/features/startup";
+
+const requestLocationPermission = async (): Promise<void> => {
+  await requestForegroundPermissionsAsync();
+};
 
 SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({
@@ -17,7 +22,7 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   return (
-    <StartupGate>
+    <StartupGate bootstrap={requestLocationPermission}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(tabs)" />

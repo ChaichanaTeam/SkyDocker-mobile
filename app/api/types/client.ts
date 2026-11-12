@@ -7,4 +7,5 @@ export type RequestOptions = {
   timeoutMs?: number;
   signal?: AbortSignal;
   token?: string;
+  headers?: Record<string, string>;
 };

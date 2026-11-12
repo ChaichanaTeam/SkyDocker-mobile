@@ -1,4 +1,4 @@
-import { styles } from "@/components/ui/map/MapScreen/styles/DroneInfoSheet.styles";
+import { Button } from "@/components/shared/ui/Button/Button";
 import { TextField } from "@/components/shared/ui/Text/TextField";
 import {
   DRONE_INFO_COLLAPSED_HEIGHT,
@@ -8,13 +8,12 @@ import {
   DRONE_INFO_SNAP_POINTS,
   DRONE_INFO_TOP_GAP,
 } from "@/components/ui/map/MapScreen/constants/droneInfoSheet";
+import { styles } from "@/components/ui/map/MapScreen/styles/DroneInfoSheet.styles";
 import type {
   DroneInfoSheetProps,
   DroneInfoSheetSnap,
 } from "@/components/ui/map/MapScreen/types/types";
-import { Button } from "@/components/shared/ui/Button/Button";
 import { colors } from "@/theme";
-import { CheckIn } from "@assets/icons";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -236,15 +235,13 @@ export const DroneInfoSheet = ({
                 style={[styles.action, index > 0 && styles.actionDivider]}
                 variant="text"
               >
-                {action.label === "Check in" ? (
-                  <CheckIn height={16} width={16} />
-                ) : (
-                  <Ionicons
-                    color={action.label === "Wiki" ? colors.startupLogo : colors.text5}
-                    name={action.icon}
-                    size={16}
-                  />
-                )}
+                <Ionicons
+                  color={
+                    action.label === "Wiki" ? colors.startupLogo : colors.text5
+                  }
+                  name={action.icon}
+                  size={16}
+                />
                 <TextField
                   style={[
                     styles.actionText,
@@ -295,6 +292,7 @@ export const DroneInfoSheet = ({
             </>
           )}
         </Animated.View>
+
       </Animated.View>
     </KeyboardAvoidingView>
   );

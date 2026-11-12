@@ -54,10 +54,13 @@ export const apiRequest = async <T>(
     timeoutMs = DEFAULT_TIMEOUT_MS,
     signal,
     token,
+    headers: requestHeaders = {},
   }: RequestOptions,
 ): Promise<T> => {
+  const isFormData = body instanceof FormData;
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
+    ...requestHeaders,
   };
 
   if (token) {
@@ -81,7 +84,12 @@ export const apiRequest = async <T>(
     response = await fetch(requestUrl, {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body:
+        body === undefined
+          ? undefined
+          : isFormData
+            ? body
+            : JSON.stringify(body),
       signal: requestSignal,
     });
   } catch (error: unknown) {

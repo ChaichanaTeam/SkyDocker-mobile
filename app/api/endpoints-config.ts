@@ -14,3 +14,14 @@ export const DEMO_CHECK_IN_CONFIG = {
   BBOX: () => "api/demo/check-in/bbox",
   END: (id: number) => `api/demo/check-in/${id}/end`,
 } as const;
+
+export const PILOTS_CONFIG = {
+  ME: () => "api/v1/pilots/me",
+  UPDATE_ME: () => "api/v1/pilots/me",
+  DOCUMENTS: () => "api/v1/pilots/me/documents",
+} as const;
+
+export const VERIFICATION_CONFIG = {
+  PREVIEW: () => "api/v1/verification-requests/preview",
+  CREATE: () => "api/v1/verification-requests/",
+} as const;

@@ -33,6 +33,7 @@ import { CheckInMarker } from "@components/ui/map/MapScreen/CheckInMarker";
 import { DroneInfoSheet } from "@components/ui/map/MapScreen/DroneInfoSheet";
 import { GeoZoneInfoSheet } from "@components/ui/map/MapScreen/GeoZoneInfoSheet";
 import { MapControlButton } from "@components/ui/map/MapScreen/MapControlButton";
+import { ProfileSheet } from "@components/ui/map/MapScreen/ProfileSheet";
 import { toUserRegion } from "@components/ui/map/MapScreen/constants/mapRegion";
 import { styles } from "@components/ui/map/MapScreen/styles/MapScreen.styles";
 import type {
@@ -71,6 +72,7 @@ export const MapScreen = () => {
     colorScheme === "dark" ? "dark" : "light",
   );
   const [isDroneSheetVisible, setIsDroneSheetVisible] = useState(false);
+  const [isProfileSheetVisible, setIsProfileSheetVisible] = useState(false);
   const [mapType, setMapType] = useState<SessionMapType>("standard");
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [initialRegion, setInitialRegion] = useState<Region | null>(null);
@@ -104,11 +106,14 @@ export const MapScreen = () => {
   );
 
   useEffect(() => {
-    if (initialRegion) return;
-
     if (userRegion) {
-      setInitialRegion(userRegion);
-    } else if (error) {
+      if (!initialRegion) {
+        setInitialRegion(userRegion);
+      } else if (initialRegion === DEFAULT_REGION) {
+        mapRef.current?.animateToRegion(userRegion, 700);
+        setInitialRegion(userRegion);
+      }
+    } else if (!initialRegion && error) {
       setInitialRegion(DEFAULT_REGION);
     }
   }, [initialRegion, userRegion, error]);
@@ -167,6 +172,20 @@ export const MapScreen = () => {
     () => setIsDroneSheetVisible(false),
     [],
   );
+  const openProfileSheet = useCallback((): void => {
+    setIsDroneSheetVisible(false);
+    setIsProfileSheetVisible(true);
+  }, []);
+  const closeProfileSheet = useCallback(
+    () => setIsProfileSheetVisible(false),
+    [],
+  );
+
+  const openCheckInFromProfile = useCallback((): void => {
+    setZonesAtTap([]);
+    closeProfileSheet();
+    setIsDroneSheetVisible(true);
+  }, [closeProfileSheet]);
 
   const closeGeoZoneInfoSheet = useCallback((): void => {
     setZonesAtTap([]);
@@ -204,10 +223,11 @@ export const MapScreen = () => {
   const handleMapPress = useCallback(
     (event: MapPressEvent): void => {
       closeDroneSheet();
+      closeProfileSheet();
       const { latitude, longitude } = event.nativeEvent.coordinate;
       setZonesAtTap(findZonesAtPoint(zones, latitude, longitude));
     },
-    [closeDroneSheet, zones],
+    [closeDroneSheet, closeProfileSheet, zones],
   );
 
   return (
@@ -319,10 +339,17 @@ export const MapScreen = () => {
         isMutationPending={mutation !== null}
         onClose={closeDroneSheet}
         onCheckInPress={() => setZonesAtTap([])}
+        onProfilePress={openProfileSheet}
         onSubmit={handleCreateCheckIn}
-        onProfilePress={() => {}}
         onWikiPress={() => {}}
       />
+
+      {isProfileSheetVisible ? (
+        <ProfileSheet
+          onCheckInPress={openCheckInFromProfile}
+          onClose={closeProfileSheet}
+        />
+      ) : null}
 
       <GeoZoneInfoSheet
         zone={zonesAtTap[0] ?? null}

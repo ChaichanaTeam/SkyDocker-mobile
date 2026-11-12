@@ -5,7 +5,7 @@ const androidGoogleMapsApiKey = process.env.GOOGLE_MAPS_ANDROID_API_KEY;
 const iosGoogleMapsApiKey = process.env.GOOGLE_MAPS_IOS_API_KEY;
 
 const locationPermission =
-  "SkyDocker uses your location while the map is open to show your current position.";
+  "SkyDocker uses your location while you use the app to show your current position on the map.";
 
 const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -20,9 +20,7 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: appBundleId,
     config: {
       ...config.ios?.config,
-      ...(iosGoogleMapsApiKey
-        ? { googleMapsApiKey: iosGoogleMapsApiKey }
-        : {}),
+      ...(iosGoogleMapsApiKey ? { googleMapsApiKey: iosGoogleMapsApiKey } : {}),
     },
     supportsTablet: true,
   },
@@ -62,6 +60,13 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
     ...config.experiments,
     typedRoutes: true,
     reactCompiler: true,
+  },
+  extra: {
+    ...config.extra,
+    eas: {
+      ...config.extra?.eas,
+      projectId: "4c137ef6-5239-4dfc-9358-9573796c0e43",
+    },
   },
 });
 
