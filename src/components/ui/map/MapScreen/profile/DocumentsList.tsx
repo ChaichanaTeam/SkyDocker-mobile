@@ -1,15 +1,44 @@
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, Pressable, View } from "react-native";
+import * as WebBrowser from "expo-web-browser";
+import { ActivityIndicator, Alert, Pressable, View } from "react-native";
 
 import { useDocuments } from "@/hooks/useDocuments";
 import { TextField } from "@/components/shared/ui/Text/TextField";
 import { colors } from "@/theme";
-import type { VerificationDocumentType } from "@app/api/types/pilots";
+import { getMyDocuments } from "@app/api/services/pilots.service";
+import type {
+  PilotDocument,
+  VerificationDocumentType,
+} from "@app/api/types/pilots";
 import { profileStyles as styles } from "@components/ui/map/MapScreen/styles/ProfileSheet.styles";
 import { DOCUMENT_TYPE_TITLES } from "@/validators/types/documentTypes";
+import { getApiErrorMessages } from "@/utils/apiErrorMessages";
 
 export const DocumentsList = () => {
   const { data, loading, error, reload } = useDocuments();
+
+  const openDocument = async (document: PilotDocument) => {
+    try {
+      const documents = await getMyDocuments();
+      const freshDocument = documents.find(
+        (item) =>
+          item.document_type === document.document_type &&
+          item.size === document.size &&
+          item.uploaded_at === document.uploaded_at,
+      );
+
+      if (!freshDocument) {
+        throw new Error("This document is no longer available.");
+      }
+
+      await WebBrowser.openBrowserAsync(freshDocument.url);
+    } catch (openError: unknown) {
+      Alert.alert(
+        "Unable to open document",
+        getApiErrorMessages(openError)[0],
+      );
+    }
+  };
 
   return (
     <>
@@ -32,7 +61,13 @@ export const DocumentsList = () => {
       {!loading && !error && data && data.length > 0 && (
         <View style={styles.list}>
           {data.map((document) => (
-            <View key={document.url} style={styles.card}>
+            <Pressable
+              key={document.url}
+              accessibilityRole="button"
+              accessibilityLabel={`Open ${document.document_type} document`}
+              onPress={() => openDocument(document)}
+              style={styles.card}
+            >
               <View style={styles.iconBox}>
                 <Ionicons
                   color={colors.pressableActive1}
@@ -55,7 +90,8 @@ export const DocumentsList = () => {
                   Uploaded {new Date(document.uploaded_at).toLocaleDateString()}
                 </TextField>
               </View>
-            </View>
+              <Ionicons color="#9A9A9A" name="chevron-forward" size={18} />
+            </Pressable>
           ))}
         </View>
       )}
