@@ -1,138 +1,216 @@
-﻿import { DEFAULT_TIMEOUT_MS } from "@app/api/constants/client";
-import { getAccessToken } from "@app/api/storage/tokenStorage";
-import type { ApiError } from "@app/api/types/apiError";
-import type { RequestOptions } from "@app/api/types/client";
+import { DEFAULT_TIMEOUT_MS } from "@app/api/constants/client";
+import { AUTH_CONFIG } from "@app/api/endpoints-config";
+import {
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  saveTokens,
+} from "@app/api/storage/tokenStorage";
+import { isApiError, type ApiError } from "@app/api/types/apiError";
+import type { HttpResult, RequestOptions } from "@app/api/types/client";
 
-const parseErrorResponse = async (response: Response): Promise<ApiError> => {
-  let detail: unknown = undefined;
-
-  try {
-    const json = await response.json();
-    detail = json?.detail;
-  } catch {
-    detail = undefined;
-  }
-
-  const message = typeof detail === "string" ? detail : "Something go wrong";
-
-  return {
-    kind: "http",
-    status: response.status,
-    message,
-    details: Array.isArray(detail) ? detail : undefined,
-  };
-};
-
-const joinUrl = (baseUrl: string, path: string): string => {
-  const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
-  const normalizedPath = path.replace(/^\/+/, "");
-
-  return `${normalizedBaseUrl}/${normalizedPath}`;
-};
+const fail = (
+  kind: ApiError["kind"],
+  message: string,
+  status = 0,
+  details?: unknown,
+): ApiError => ({ kind, message, status, details });
 
 const getApiUrl = (path: string): string => {
-  const baseUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
+  const base = process.env.EXPO_PUBLIC_API_URL?.trim();
+  if (!base)
+    throw fail("configuration", "SkyDocker API URL is not configured.");
+  return `${base.replace(/\/+$/, "")}/${path.replace(/^\/+/, "")}`;
+};
 
-  if (!baseUrl) {
-    const configurationError: ApiError = {
-      kind: "configuration",
-      status: 0,
-      message: "SkyDocker API URL is not configured.",
-    };
-    throw configurationError;
+const responseError = ({ body, status }: HttpResult): ApiError => {
+  const detail =
+    typeof body === "object" && body !== null && "detail" in body
+      ? body.detail
+      : undefined;
+  return fail(
+    "http",
+    typeof detail === "string" ? detail : "Something go wrong",
+    status,
+    Array.isArray(detail) ? detail : undefined,
+  );
+};
+
+const send = async (
+  path: string,
+  options: RequestOptions,
+  accessToken: string | null,
+): Promise<HttpResult> => {
+  const requestUrl = getApiUrl(path);
+  const isFormData = options.body instanceof FormData;
+  const headers: Record<string, string> = {
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
+    ...options.headers,
+  };
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  let onAbort: (() => void) | undefined;
+  const aborted = new Promise<never>((_, reject) => {
+    onAbort = () =>
+      reject(
+        fail(
+          "timeout",
+          options.signal?.aborted
+            ? "Request was cancelled."
+            : "Request timed out.",
+        ),
+      );
+  });
+  if (onAbort) controller.signal.addEventListener("abort", onAbort, { once: true });
+  options.signal?.addEventListener("abort", abort, { once: true });
+  if (options.signal?.aborted) abort();
+  const timer = setTimeout(abort, options.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+
+  try {
+    return await Promise.race([
+      (async (): Promise<HttpResult> => {
+        const response = await fetch(requestUrl, {
+          method: options.method,
+          headers,
+          body:
+            options.body === undefined
+              ? undefined
+              : isFormData
+                ? (options.body as FormData)
+                : JSON.stringify(options.body),
+          signal: controller.signal,
+        });
+        let body: unknown;
+        try {
+          body = await response.json();
+        } catch {
+          if (controller.signal.aborted)
+            throw fail(
+              "timeout",
+              options.signal?.aborted
+                ? "Request was cancelled."
+                : "Request timed out.",
+            );
+          if (response.ok)
+            throw fail(
+              "invalid-response",
+              "Server returned an invalid response.",
+            );
+          body = null;
+        }
+        return { ok: response.ok, status: response.status, body };
+      })(),
+      aborted,
+    ]);
+  } catch (error) {
+    if (isApiError(error)) throw error;
+    if (error instanceof Error && error.name === "AbortError") {
+      throw fail(
+        "timeout",
+        options.signal?.aborted
+          ? "Request was cancelled."
+          : "Request timed out.",
+      );
+    }
+    throw fail("network", "Not connect to server");
+  } finally {
+    clearTimeout(timer);
+    if (onAbort) controller.signal.removeEventListener("abort", onAbort);
+    options.signal?.removeEventListener("abort", abort);
   }
+};
 
-  return joinUrl(baseUrl, path);
+let refreshPromise: Promise<string> | null = null;
+
+const refreshAccessToken = async (
+  failedToken: string | null,
+): Promise<string> => {
+  const current = await getAccessToken();
+  if (current && current !== failedToken) return current;
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    const refreshToken = await getRefreshToken();
+    if (!refreshToken) {
+      await clearTokens();
+      throw fail(
+        "http",
+        "Your session has expired. Please sign in again.",
+        401,
+      );
+    }
+    const response = await send(
+      AUTH_CONFIG.REFRESH(),
+      {
+        method: "POST",
+        body: { refresh_token: refreshToken },
+        requiresAuth: false,
+      },
+      null,
+    );
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 422) {
+        await clearTokens();
+        throw fail(
+          "http",
+          "Your session has expired. Please sign in again.",
+          401,
+        );
+      }
+      throw responseError(response);
+    }
+    const value = response.body;
+    if (
+      typeof value !== "object" ||
+      value === null ||
+      !("access_token" in value) ||
+      typeof value.access_token !== "string" ||
+      !value.access_token ||
+      !("refresh_token" in value) ||
+      typeof value.refresh_token !== "string" ||
+      !value.refresh_token
+    ) {
+      throw fail("invalid-response", "Server returned invalid session data.");
+    }
+    await saveTokens(value.access_token, value.refresh_token);
+    return value.access_token;
+  })();
+  try {
+    return await refreshPromise;
+  } finally {
+    refreshPromise = null;
+  }
 };
 
 export const apiRequest = async <T>(
   path: string,
-  {
-    method,
-    body,
-    requiresAuth = true,
-    timeoutMs = DEFAULT_TIMEOUT_MS,
-    signal,
-    token,
-    headers: requestHeaders = {},
-  }: RequestOptions,
+  options: RequestOptions,
+  parseResponse: (body: unknown) => T,
 ): Promise<T> => {
-  const isFormData = body instanceof FormData;
-  const headers: Record<string, string> = {
-    ...(isFormData ? {} : { "Content-Type": "application/json" }),
-    ...requestHeaders,
-  };
+  const shouldRefresh =
+    options.requiresAuth !== false &&
+    !options.token &&
+    path !== AUTH_CONFIG.REFRESH();
+  let accessToken =
+    options.token ?? (shouldRefresh ? await getAccessToken() : null);
+  if (shouldRefresh && !accessToken)
+    accessToken = await refreshAccessToken(null);
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  } else if (requiresAuth) {
-    const storedToken = await getAccessToken();
-    if (storedToken) {
-      headers.Authorization = `Bearer ${storedToken}`;
-    }
+  let response = await send(path, options, accessToken);
+  if (shouldRefresh && response.status === 401 && !options.signal?.aborted) {
+    accessToken = await refreshAccessToken(accessToken);
+    response = await send(path, options, accessToken);
+    if (response.status === 401 && (await getAccessToken()) === accessToken)
+      await clearTokens();
   }
-
-  const requestUrl = getApiUrl(path);
-  const controller = new AbortController();
-  const requestSignal = signal ?? controller.signal;
-  const timeoutId = setTimeout(() => {
-    controller.abort();
-  }, timeoutMs);
-
-  let response: Response;
+  if (!response.ok) throw responseError(response);
+  if (response.status === 204)
+    throw fail("invalid-response", "Server returned an empty response.", 204);
   try {
-    response = await fetch(requestUrl, {
-      method,
-      headers,
-      body:
-        body === undefined
-          ? undefined
-          : isFormData
-            ? body
-            : JSON.stringify(body),
-      signal: requestSignal,
-    });
-  } catch (error: unknown) {
-    if (error instanceof Error && error.name === "AbortError") {
-      const timeoutError: ApiError = {
-        kind: "timeout",
-        status: 0,
-        message: "Request timed out.",
-      };
-      throw timeoutError;
-    }
-
-    const networkError: ApiError = {
-      kind: "network",
-      status: 0,
-      message: "Not connect to server",
-    };
-    throw networkError;
-  } finally {
-    clearTimeout(timeoutId);
-  }
-
-  if (!response.ok) {
-    throw await parseErrorResponse(response);
-  }
-
-  if (response.status === 204) {
-    const invalidResponseError: ApiError = {
-      kind: "invalid-response",
-      status: 204,
-      message: "Server returned an empty response.",
-    };
-    throw invalidResponseError;
-  }
-
-  try {
-    return (await response.json()) as T;
+    return parseResponse(response.body);
   } catch {
-    const invalidResponseError: ApiError = {
-      kind: "invalid-response",
-      status: 0,
-      message: "Server returned an invalid response.",
-    };
-    throw invalidResponseError;
+    throw fail("invalid-response", "Server returned an invalid response.", response.status);
   }
 };

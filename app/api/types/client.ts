@@ -1,5 +1,11 @@
 export type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
 
+export type HttpResult = {
+  ok: boolean;
+  status: number;
+  body: unknown;
+};
+
 export type RequestOptions = {
   method: HttpMethod;
   body?: unknown;

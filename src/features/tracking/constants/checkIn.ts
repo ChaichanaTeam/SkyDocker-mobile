@@ -1,11 +1,5 @@
 import type { CheckInStatus } from "@app/api/types/checkIn";
-
-type CheckInStatusAppearance = {
-  backgroundColor: string;
-  iconColor: string;
-  label: string;
-  visible: boolean;
-};
+import type { CheckInStatusAppearance } from "@features/tracking/types/checkInMap";
 
 export const CHECK_IN_STATUS_CONFIG = {
   created: { backgroundColor: "#FFFFFF", iconColor: "#1F2937", label: "Mission", visible: true },

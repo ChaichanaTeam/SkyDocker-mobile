@@ -21,7 +21,7 @@ import { colors } from "@/theme";
 import {
   blackGoogleMapStyle,
   useCheckInMap,
-  useDemoCheckIns,
+  useCheckIns,
   useFocusedForegroundLocation,
 } from "@features/tracking";
 
@@ -40,7 +40,6 @@ import type {
   MapAppearance,
   SessionMapType,
 } from "@components/ui/map/MapScreen/types/types";
-import type { CheckInDraftValues } from "@features/tracking";
 import { GeoZonesLayer } from "@features/tracking/GeoZonesLayer";
 
 const MAX_ZONES_DELTA = 0.5;
@@ -89,16 +88,11 @@ export const MapScreen = () => {
   const { zones, onRegionChange } = useGeoZones();
   const {
     markers: checkIns,
+    error: checkInMapError,
     onRegionChange: onCheckInRegionChange,
     refresh: refreshCheckIns,
   } = useCheckInMap();
-  const {
-    mutation,
-    submitCheckIn,
-  } = useDemoCheckIns({
-    getFreshCoordinates,
-    onChanged: refreshCheckIns,
-  });
+  const checkInSession = useCheckIns(getFreshCoordinates, refreshCheckIns);
 
   const userRegion = useMemo(
     () => (userCoordinates ? toUserRegion(userCoordinates) : null),
@@ -119,7 +113,7 @@ export const MapScreen = () => {
   }, [initialRegion, userRegion, error]);
 
   useEffect(() => {
-    if (initialRegion) onCheckInRegionChange(regionToBoundingBox(initialRegion));
+    if (initialRegion) onCheckInRegionChange(regionToBoundingBox(initialRegion), { lon: initialRegion.longitude, lat: initialRegion.latitude });
   }, [initialRegion, onCheckInRegionChange]);
 
   const handleRegionChangeComplete = useCallback(
@@ -134,7 +128,7 @@ export const MapScreen = () => {
       }
 
       setIsZoomedOut(false);
-      onCheckInRegionChange(regionToBoundingBox(region));
+      onCheckInRegionChange(regionToBoundingBox(region), { lon: region.longitude, lat: region.latitude });
       onRegionChange(regionToBoundingBox(region), {
         lon: userCoordinates?.longitude ?? region.longitude,
         lat: userCoordinates?.latitude ?? region.latitude,
@@ -190,14 +184,6 @@ export const MapScreen = () => {
   const closeGeoZoneInfoSheet = useCallback((): void => {
     setZonesAtTap([]);
   }, []);
-
-  const handleCreateCheckIn = useCallback(
-    async (values: CheckInDraftValues): Promise<void> => {
-      await submitCheckIn(values);
-      setIsDroneSheetVisible(false);
-    },
-    [submitCheckIn],
-  );
 
   const handleNoticeAction = useCallback((): void => {
     if (error?.reason === "permission-denied" && !permission.canAskAgain) {
@@ -313,6 +299,10 @@ export const MapScreen = () => {
             <Text style={styles.noticeActionText}>{noticeActionLabel}</Text>
           </TouchableOpacity>
         </View>
+      ) : checkInMapError ? (
+        <View style={[styles.notice, { bottom: Math.max(insets.bottom + 88, 96) }]}>
+          <Text style={styles.noticeText}>{checkInMapError}</Text>
+        </View>
       ) : isZoomedOut ? (
         <View
           style={[
@@ -336,11 +326,11 @@ export const MapScreen = () => {
       <DroneInfoSheet
         drone={null}
         isVisible={isDroneSheetVisible}
-        isMutationPending={mutation !== null}
+        isMutationPending={checkInSession.mutation !== null}
         onClose={closeDroneSheet}
         onCheckInPress={() => setZonesAtTap([])}
+        checkIns={checkInSession}
         onProfilePress={openProfileSheet}
-        onSubmit={handleCreateCheckIn}
         onWikiPress={() => {}}
       />
 

@@ -1,10 +1,9 @@
 export { blackGoogleMapStyle } from "./mapStyles";
 export type {
   CheckInDraftValues,
-  CheckInMutation,
-  DemoCheckInRecord,
-  CheckInMapMarker,
-} from "./types/demoCheckIn";
+  CheckInSession,
+} from "./types/checkIn";
+export type { CheckInMapMarker } from "./types/checkInMap";
 export type {
   FocusedForegroundLocationState,
   TrackingErrorReason,
@@ -12,10 +11,6 @@ export type {
   TrackingPermissionState,
   UserCoordinates,
 } from "./types/types";
-export { useDemoCheckIns } from "./hooks/useDemoCheckIns";
+export { useCheckIns } from "./hooks/useCheckIns";
 export { useCheckInMap } from "./hooks/useCheckInMap";
-export type {
-  UseDemoCheckInsParams,
-  UseDemoCheckInsResult,
-} from "./types/useDemoCheckIns";
 export { useFocusedForegroundLocation } from "./useFocusedForegroundLocation";

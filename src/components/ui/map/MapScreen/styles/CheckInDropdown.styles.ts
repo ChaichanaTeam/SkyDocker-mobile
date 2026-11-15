@@ -37,6 +37,9 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
   },
+  dropdownCategoryValue: {
+    fontSize: 14,
+  },
   outlinedDropdown: {
     borderRadius: 8,
     borderWidth: 1,
