@@ -1,10 +1,14 @@
-import type { FlyingPrivilege } from "@app/api/types/checkIn";
-import type { CheckInDraftValues } from "@features/tracking";
+import type { CheckInPreview } from "@app/api/types/checkIn";
 
-export type ValidatedCheckInDraft = {
-  category: FlyingPrivilege;
-  durationMinutes: number;
-  height: number;
-  range: number;
-  values: CheckInDraftValues;
+export type CheckInPoint = {
+  longitude: number;
+  latitude: number;
+};
+
+export type PilotContact = {
+  phone_number: string | null;
+};
+
+export type ReceivedCheckInPreview = CheckInPreview & {
+  receivedAt: number;
 };

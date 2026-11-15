@@ -5,11 +5,14 @@ import { Marker, type MapMarker } from "react-native-maps";
 import { DroneIcon } from "@assets/icons";
 import { styles } from "@components/ui/map/MapScreen/styles/CheckInMarker.styles";
 import { CHECK_IN_STATUS_CONFIG } from "@features/tracking/constants/checkIn";
-import type { CheckInMapMarker } from "@features/tracking/types/demoCheckIn";
+import type { CheckInMarkerProps } from "./types/CheckInMarker";
 
-export const CheckInMarker = ({ checkIn }: { checkIn: CheckInMapMarker }) => {
+export const CheckInMarker = ({
+  checkIn,
+}: CheckInMarkerProps): React.JSX.Element => {
   const markerRef = useRef<MapMarker>(null);
-  const { backgroundColor, iconColor, label } = CHECK_IN_STATUS_CONFIG[checkIn.properties.status];
+  const { backgroundColor, iconColor, label } =
+    CHECK_IN_STATUS_CONFIG[checkIn.properties.status];
   const redraw = useCallback(() => markerRef.current?.redraw(), []);
 
   useEffect(() => {

@@ -1,5 +1,6 @@
 import { apiRequest } from "@app/api/client";
 import { GEO_ZONE_CONFIG } from "@app/api/endpoints-config";
+import { parseCountryAtPoint, parseGeoZoneCollection } from "@app/api/validators/response";
 import type {
   BoundingBox,
   CountryAtPoint,
@@ -20,9 +21,10 @@ const fetchCountryAtPoint = (position: LatLon): Promise<CountryAtPoint> => {
     lon: String(position.lon),
     lat: String(position.lat),
   });
-  const request = apiRequest<CountryAtPoint>(
+  const request = apiRequest(
     `${GEO_ZONE_CONFIG.COUNTRY()}?${params.toString()}`,
     { method: "GET" },
+    parseCountryAtPoint,
   );
   cachedPositionKey = positionKey;
   cachedCountryRequest = request;
@@ -53,8 +55,9 @@ export const fetchGeoZones = async (
     max_lat: String(boundingBox.max_lat),
   });
 
-  return apiRequest<GeoZoneCollection>(
+  return apiRequest(
     `${GEO_ZONE_CONFIG.GEOZONE()}?${params.toString()}`,
     { method: "GET", signal },
+    parseGeoZoneCollection,
   );
 };

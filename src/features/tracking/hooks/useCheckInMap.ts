@@ -2,11 +2,11 @@ import { useFocusEffect } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { AppState, type AppStateStatus } from "react-native";
 
-import { fetchDemoCheckIns } from "@app/api/services/checkIn.service";
+import { fetchCheckIns, resolveCountry } from "@app/api/services/checkIn.service";
 import type { BoundingBox } from "@app/api/types/geoZone";
 import { CHECK_IN_MAP_DEBOUNCE_MS, CHECK_IN_STATUS_CONFIG } from "@features/tracking/constants/checkIn";
 import { mapCheckInErrorToMessage } from "@features/tracking/mappers/checkInErrorMapper";
-import type { CheckInMapMarker } from "@features/tracking/types/demoCheckIn";
+import type { CheckInMapMarker } from "@features/tracking/types/checkInMap";
 
 const isForeground = (state: AppStateStatus | null) => state !== "background" && state !== "inactive";
 
@@ -14,7 +14,8 @@ export const useCheckInMap = () => {
   const [markers, setMarkers] = useState<CheckInMapMarker[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const viewport = useRef<BoundingBox | null>(null);
+  const viewport = useRef<{ box: BoundingBox; center: { lon: number; lat: number } } | null>(null);
+  const country = useRef<string | null>(null);
   const focused = useRef(false);
   const appState = useRef(AppState.currentState);
   const generation = useRef(0);
@@ -28,20 +29,27 @@ export const useCheckInMap = () => {
 
   const refresh = useCallback(() => {
     invalidate();
-    const boundingBox = viewport.current;
-    if (!boundingBox || !focused.current || !isForeground(appState.current)) return;
+    const currentViewport = viewport.current;
+    if (!currentViewport || !focused.current || !isForeground(appState.current)) return;
     const requestGeneration = generation.current;
     setIsLoading(true);
-    void fetchDemoCheckIns(boundingBox)
+    void resolveCountry(currentViewport.center.lon, currentViewport.center.lat)
+      .then(tag => {
+        if (generation.current !== requestGeneration) return null;
+        if (country.current !== tag) {
+          country.current = tag;
+          setMarkers([]);
+        }
+        return fetchCheckIns(currentViewport.box, tag);
+      })
       .then(collection => {
-        if (generation.current !== requestGeneration) return;
+        if (generation.current !== requestGeneration || !collection) return;
         setMarkers(collection.features
           .filter(feature => CHECK_IN_STATUS_CONFIG[feature.properties.status].visible)
-          .map((feature, index) => {
+          .map((feature) => {
             const [longitude, latitude] = feature.geometry.coordinates;
             return {
-              // The API has no feature IDs; keys distinguish records within each snapshot.
-              key: `${longitude}:${latitude}:${feature.properties.start_at}:${index}`,
+              key: String(feature.properties.id),
               coordinate: { longitude, latitude },
               properties: feature.properties,
             };
@@ -50,6 +58,7 @@ export const useCheckInMap = () => {
       })
       .catch((caughtError: unknown) => {
         if (generation.current === requestGeneration) {
+          setMarkers([]);
           setError(mapCheckInErrorToMessage(caughtError, "load"));
         }
       })
@@ -58,10 +67,11 @@ export const useCheckInMap = () => {
       });
   }, [invalidate]);
 
-  const onRegionChange = useCallback((boundingBox: BoundingBox | null) => {
+  const onRegionChange = useCallback((boundingBox: BoundingBox | null, center?: { lon: number; lat: number }) => {
     invalidate();
-    viewport.current = boundingBox;
-    if (!boundingBox) {
+    setMarkers([]);
+    viewport.current = boundingBox && center ? { box: boundingBox, center } : null;
+    if (!viewport.current) {
       setMarkers([]);
       setError(null);
       setIsLoading(false);
