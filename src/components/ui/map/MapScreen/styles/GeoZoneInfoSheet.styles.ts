@@ -36,12 +36,32 @@ export const styles = StyleSheet.create({
     opacity: 0.16,
   },
   content: {
-    gap: 22,
+    gap: 16,
     paddingBottom: 14,
     paddingTop: 4,
   },
   contentScroll: {
     flexGrow: 0,
+  },
+  singleZone: {
+    gap: 22,
+  },
+  zoneCount: {
+    color: colors.textPrimary,
+    fontFamily: typography.interBold,
+    fontSize: 16,
+    textAlign: "center",
+  },
+  layer: {
+    gap: 10,
+    paddingBottom: 16,
+    borderBottomColor: colors.textPrimary,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  layerLabel: {
+    fontFamily: typography.interBold,
+    fontSize: 16,
+    textAlign: "center",
   },
   summaryRow: {
     alignItems: "center",
@@ -57,15 +77,15 @@ export const styles = StyleSheet.create({
   summaryText: {
     color: colors.textPrimary,
     fontFamily: typography.interBold,
-    fontSize: 18,
-    lineHeight: 26,
+    fontSize: 16,
+    lineHeight: 22,
     textAlign: "center",
   },
   description: {
     color: colors.textPrimary,
     fontFamily: typography.interBold,
-    fontSize: 20,
-    lineHeight: 28,
+    fontSize: 14,
+    lineHeight: 20,
     textAlign: "center",
   },
 });

@@ -113,6 +113,6 @@ export type CheckInSheetProps = {
 };
 
 export type GeoZoneInfoSheetProps = {
-  zone: GeoZoneFeature | null;
+  zones: GeoZoneFeature[];
   onClose: () => void;
 };

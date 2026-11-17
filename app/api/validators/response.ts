@@ -20,6 +20,8 @@ const number = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
 const nullableString = (value: unknown): value is string | null =>
   value === null || string(value);
+const optionalNullableString = (value: unknown): value is string | null | undefined =>
+  value === undefined || nullableString(value);
 
 const invalid = (): never => {
   throw new Error("The server returned an invalid response.");
@@ -77,9 +79,8 @@ const geoZoneFeature = (
   string(value.properties.country) &&
   string(value.properties.type) &&
   string(value.properties.tag) &&
-  number(value.properties.strength) &&
-  number(value.properties.height_agl) &&
-  nullableString(value.properties.activity_time);
+  optionalNullableString(value.properties.description_en) &&
+  optionalNullableString(value.properties.description_pl);
 
 export const parseGeoZoneCollection = (value: unknown): GeoZoneCollection =>
   record(value) &&
