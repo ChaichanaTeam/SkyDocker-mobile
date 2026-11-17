@@ -53,6 +53,14 @@ export const zoneContainsPoint = (
   return !holes.some((hole) => isInsideRing(lon, lat, hole));
 };
 
+// The first item is the polygon drawn highest on the map.
+export const compareGeoZonesTopFirst = (
+  a: GeoZoneFeature,
+  b: GeoZoneFeature,
+): number =>
+  polygonAreaDeg2(a.geometry) - polygonAreaDeg2(b.geometry) ||
+  a.properties.tag.localeCompare(b.properties.tag);
+
 export const findZonesAtPoint = (
   zones: Map<string, GeoZoneFeature>,
   lat: number,
@@ -60,7 +68,7 @@ export const findZonesAtPoint = (
 ): GeoZoneFeature[] =>
   Array.from(zones.values())
     .filter((zone) => zoneContainsPoint(zone.geometry, lon, lat))
-    .sort((a, b) => polygonAreaDeg2(a.geometry) - polygonAreaDeg2(b.geometry));
+    .sort(compareGeoZonesTopFirst);
 
 export const polygonGeometryToLatLngsWithHoles = (
   geometry: GeoZonePolygonGeometry,

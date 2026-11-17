@@ -56,6 +56,9 @@ export const styles = StyleSheet.create({
   outlinedInputLight: {
     color: colors.checkInLightText,
   },
+  outlinedInputLocked: {
+    opacity: 1,
+  },
   outlinedInputWithSuffix: {
     flexGrow: 0,
     flexShrink: 1,

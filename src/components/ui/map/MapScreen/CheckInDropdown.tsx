@@ -25,7 +25,7 @@ export const CheckInDropdown = ({
   const labelColor =
     appearance === "light" ? colors.checkInFormAccent : colors.text1;
   const placeholderColor =
-    appearance === "light" ? colors.checkInLightText : colors.text1;
+    appearance === "light" ? colors.checkInLightPlaceholder : colors.text1;
   const selectedOption = field.options.find((option) => option.value === value);
   const displayValue =
     selectedOption?.label ??
@@ -63,7 +63,10 @@ export const CheckInDropdown = ({
         </TextField>
         <TextField
           color={value ? textColor : placeholderColor}
-          style={styles.dropdownValue}
+          style={[
+            styles.dropdownValue,
+            field.key === "category" ? styles.dropdownCategoryValue : null,
+          ]}
         >
           {displayValue}
         </TextField>

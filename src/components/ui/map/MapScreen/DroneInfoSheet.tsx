@@ -39,7 +39,7 @@ export const DroneInfoSheet = ({
   isMutationPending,
   onClose,
   onCheckInPress,
-  onSubmit,
+  checkIns,
   onWikiPress,
   onProfilePress,
 }: DroneInfoSheetProps) => {
@@ -265,7 +265,7 @@ export const DroneInfoSheet = ({
                 isCompactLayout={windowHeight < 700}
                 isVisible={isVisible}
                 isMutationPending={isMutationPending}
-                onSubmit={onSubmit}
+                checkIns={checkIns}
               />
             </ScrollView>
           ) : (

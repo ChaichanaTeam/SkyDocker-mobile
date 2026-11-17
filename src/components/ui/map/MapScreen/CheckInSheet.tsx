@@ -25,7 +25,7 @@ export const CheckInSheet = ({
   isVisible,
   isMutationPending,
   onClose,
-  onSubmit,
+  checkIns,
 }: CheckInSheetProps) => {
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
@@ -104,7 +104,7 @@ export const CheckInSheet = ({
               isCompactLayout={isCompactLayout}
               isVisible={isVisible}
               isMutationPending={isMutationPending}
-              onSubmit={onSubmit}
+              checkIns={checkIns}
             />
           </Animated.View>
         </KeyboardAvoidingView>

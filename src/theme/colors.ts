@@ -34,6 +34,7 @@ export const colors = {
   checkInLightFieldBorder: "#555555",
   checkInFormAccent: "#7C29E2",
   checkInLightText: "#000000",
+  checkInLightPlaceholder: "#8A8A8A",
 
   //temp colors
   backgroundWhite: "#FFFFFF",

@@ -11,19 +11,13 @@ export const styles = StyleSheet.create({
     alignSelf: "flex-end",
     borderRadius: 28,
     height: 56,
-    marginTop: 0,
+    marginTop: 20,
     width: 200,
   },
   createListButtonCompact: {
     borderRadius: 24,
     height: 48,
     width: 180,
-  },
-  buttonSpacer: {
-    height: 56,
-  },
-  buttonSpacerCompact: {
-    height: 40,
   },
   dropdownStack: {
     gap: 14,
@@ -56,6 +50,13 @@ export const styles = StyleSheet.create({
     fontFamily: typography.interRegular,
     fontSize: 14,
     marginTop: 12,
+    textAlign: "right",
+  },
+  previewSummary: {
+    color: colors.text5,
+    fontFamily: typography.interRegular,
+    fontSize: 14,
+    marginTop: 10,
     textAlign: "right",
   },
   gestureRoot: {
