@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { CheckInDraftValues } from "@features/tracking/types/checkIn";
-
 import { DEFAULT_CHECK_IN_FORM_VALUES } from "../constants/checkInForm";
 import type {
   CheckInDropdownFieldKey,
@@ -44,7 +43,9 @@ export const useCheckInForm = ({
 
   const isSubmitDisabled = useMemo(
     () =>
-      !formValues.drone || (!formValues.mission &&
+      !formValues.drone ||
+      (formValues.drone === "custom" && !formValues.weight) ||
+      (!formValues.mission &&
         (!formValues.category || !formValues.height || !formValues.range || !formValues.duration)),
     [formValues],
   );

@@ -4,7 +4,6 @@ import { View } from "react-native";
 import { Button } from "@/components/shared/ui/Button/Button";
 import { TextField } from "@/components/shared/ui/Text/TextField";
 import { colors } from "@/theme";
-
 import { CheckInDropdown } from "./CheckInDropdown";
 import { ActiveCheckIn } from "./ActiveCheckIn";
 import { CheckInTextField } from "./CheckInTextField";
@@ -42,12 +41,7 @@ export const CheckInForm = ({
     submitForm,
     toggleDropdown,
     updateField,
-  } = useCheckInForm({ onSubmit: checkIns.prepare, onChange: handleDraftChange, drones: checkIns.drones, privileges: checkIns.privileges });
-  const runAction = async (action: () => Promise<unknown>) => {
-    setActionError(null);
-    try { await action(); }
-    catch (caught) { setActionError(caught instanceof Error ? caught.message : 'Could not update check-in.'); }
-  };
+  } = useCheckInForm({ onSubmit: checkIns.create, onChange: handleDraftChange, drones: checkIns.drones, privileges: checkIns.privileges });
   const titleColor =
     appearance === "light" ? colors.checkInLightText : colors.text2;
   const requiredDataError = !checkIns.loading && !checkIns.phone
@@ -59,7 +53,7 @@ export const CheckInForm = ({
     ?? requiredDataError
     ?? submitError
     ?? actionError
-    ?? (checkIns.uncertain ? 'Check-in status needs to be refreshed before another action.' : null);
+    ?? (checkIns.uncertain ? 'Check-in status will be checked before trying again.' : null);
   const activeError = checkIns.error ?? actionError;
 
   useEffect(() => {
@@ -83,7 +77,7 @@ export const CheckInForm = ({
         ]}
         variant="title"
       >
-        {checkIns.active ? 'Active check-in' : 'Create new check-in'}
+        {checkIns.active ? 'Active check-in' : 'Create new check in'}
       </TextField>
 
       {checkIns.loading ? <TextField>Loading pilot data…</TextField> : null}
@@ -96,19 +90,21 @@ export const CheckInForm = ({
           onActionError={setActionError}
         />
       ) : (
-      <>
-
+        <>
       <View
         style={[
           styles.dropdownStack,
+          activeDropdown === "mission" || activeDropdown === "drone"
+            ? styles.dropdownStackOpen
+            : null,
           isCompactLayout ? styles.dropdownStackCompact : null,
         ]}
       >
-        {CHECK_IN_DROPDOWNS.filter(field => field.key !== 'mission' || formValues.drone !== 'custom').map((field) => (
+        {CHECK_IN_DROPDOWNS.map((field) => (
           <CheckInDropdown
             field={{ ...field, options: field.key === 'drone'
               ? [...checkIns.drones.map(drone => ({ label: drone.label, value: String(drone.id) })), { label: 'Custom', value: 'custom' }]
-              : [{ label: 'No mission — enter flight details', value: '' }, ...(formValues.drone === 'custom' ? [] : checkIns.missions.filter(mission => mission.droneId === Number(formValues.drone)).map(mission => ({ label: mission.label, value: String(mission.id) })))] }}
+              : [{ label: 'No mission — enter flight details', value: '' }, ...checkIns.missions.filter(mission => mission.droneId === Number(formValues.drone)).map(mission => ({ label: mission.label, value: String(mission.id) }))] }}
             appearance={appearance}
             isCompact={isCompactLayout}
             isOpen={activeDropdown === field.key}
@@ -147,10 +143,10 @@ export const CheckInForm = ({
             ) : (
               <CheckInTextField
                 appearance={appearance}
+                editable={field.key !== "weight" || formValues.drone === "custom"}
                 field={field}
                 isCompact={isCompactLayout}
                 onChangeText={updateField(field.key)}
-                editable={field.key !== 'weight' || formValues.drone === 'custom'}
                 value={formValues[field.key]}
               />
             )}
@@ -165,31 +161,22 @@ export const CheckInForm = ({
         </TextField>
       ) : null}
 
-      {checkIns.prepared ? (
-        <View>
-          <TextField style={styles.previewSummary}>
-            Preview ready · confirm before {new Date(checkIns.prepared.expiresAt).toLocaleTimeString()}
-          </TextField>
-        </View>
-      ) : null}
-      {checkIns.uncertain ? <Button disabled={isMutationPending} onPress={() => void runAction(checkIns.refreshActive)} size="small" variant="text"><TextField>Refresh check-in status</TextField></Button> : null}
-
-      <Button
-        disabled={(!checkIns.prepared && isSubmitDisabled) || isMutationPending || checkIns.loading || !!checkIns.error || !checkIns.phone || checkIns.uncertain}
-        loading={checkIns.prepared ? checkIns.mutation === 'create' : isSubmitting}
-        onPress={checkIns.prepared ? () => void runAction(checkIns.confirm) : submitForm}
-        size="large"
-        style={[
-          styles.createListButton,
-          isCompactLayout ? styles.createListButtonCompact : null,
-        ]}
-        variant="secondary"
-      >
-        <TextField color={colors.text2}>
-          {checkIns.prepared ? 'Confirm check-in' : 'Review flight'}
-        </TextField>
-      </Button>
-      </>
+          <View style={styles.actionFooter}>
+            <Button
+              disabled={isSubmitDisabled || isMutationPending || isSubmitting || checkIns.loading || !!checkIns.error || !checkIns.phone}
+              loading={isSubmitting}
+              onPress={submitForm}
+              size="large"
+              style={[
+                styles.createListButton,
+                isCompactLayout ? styles.createListButtonCompact : null,
+              ]}
+              variant="secondary"
+            >
+              <TextField color={colors.backgroundWhite}>Create new list</TextField>
+            </Button>
+          </View>
+        </>
       )}
     </View>
   );

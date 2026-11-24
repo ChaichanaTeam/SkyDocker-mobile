@@ -26,7 +26,10 @@ export const mapCheckInErrorToMessage = (
     return "SkyDocker could not connect to the server. Please check your connection and try again.";
   }
 
-  if (error.kind === "http" && error.status === 422) {
+  if (
+    error.kind === "http" &&
+    (error.status === 400 || error.status === 422)
+  ) {
     if (Array.isArray(error.details)) {
       const messages = error.details
         .filter(
@@ -39,7 +42,7 @@ export const mapCheckInErrorToMessage = (
         .map((detail) => detail.msg);
       if (messages.length) return messages.join("\n");
     }
-    return "The server could not validate this check-in. Please review the fields and try again.";
+    return error.message || "The server could not validate this check-in. Please review the fields and try again.";
   }
 
   if (

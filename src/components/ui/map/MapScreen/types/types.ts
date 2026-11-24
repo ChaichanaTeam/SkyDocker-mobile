@@ -96,6 +96,7 @@ export type CheckInTextFieldProps = {
 
 export type CheckInDropdownProps = {
   appearance: MapAppearance;
+  disabled?: boolean;
   field: CheckInDropdownField;
   isCompact: boolean;
   isOpen: boolean;

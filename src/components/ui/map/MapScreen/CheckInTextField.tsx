@@ -24,16 +24,12 @@ export const CheckInTextField = ({
   return (
     <View
       style={[
-        styles.outlinedField,
-        isCompact ? styles.outlinedFieldCompact : null,
-        isLight ? styles.outlinedFieldLight : styles.outlinedFieldDark,
+        styles.fieldContainer,
       ]}
     >
       <TextField
         style={[
-          styles.outlinedLabel,
-          isLight ? styles.outlinedLabelAccent : null,
-          isLight ? styles.outlinedLabelLight : styles.outlinedLabelDark,
+          styles.fieldLabel,
         ]}
         variant="label"
       >

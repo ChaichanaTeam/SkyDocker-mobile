@@ -11,8 +11,16 @@ export const styles = StyleSheet.create({
     alignSelf: "flex-end",
     borderRadius: 28,
     height: 56,
-    marginTop: 20,
+    opacity: 1,
+    shadowColor: colors.checkInShadow,
+    shadowOffset: { height: 4, width: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
     width: 200,
+  },
+  actionFooter: {
+    paddingTop: 20,
   },
   createListButtonCompact: {
     borderRadius: 24,
@@ -23,11 +31,15 @@ export const styles = StyleSheet.create({
     gap: 14,
     zIndex: 2,
   },
+  dropdownStackOpen: {
+    elevation: 12,
+    zIndex: 20,
+  },
   dropdownStackCompact: {
     gap: 7,
   },
   fieldCell: {
-    width: "31%",
+    width: "30%",
   },
   fieldCellOpen: {
     zIndex: 20,
@@ -35,7 +47,7 @@ export const styles = StyleSheet.create({
   fieldGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    columnGap: 8,
+    columnGap: 0,
     rowGap: 14,
     justifyContent: "space-between",
     paddingTop: 22,
@@ -50,13 +62,6 @@ export const styles = StyleSheet.create({
     fontFamily: typography.interRegular,
     fontSize: 14,
     marginTop: 12,
-    textAlign: "right",
-  },
-  previewSummary: {
-    color: colors.text5,
-    fontFamily: typography.interRegular,
-    fontSize: 14,
-    marginTop: 10,
     textAlign: "right",
   },
   gestureRoot: {
@@ -97,12 +102,13 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.backgroundMain,
   },
   sheetLight: {
-    backgroundColor: colors.checkInLightSurface,
+    backgroundColor: colors.main1,
   },
   title: {
     fontFamily: typography.interBold,
     fontSize: 30,
     marginBottom: 22,
+    marginLeft: 8,
   },
   titleCompact: {
     marginBottom: 10,
