@@ -7,7 +7,6 @@ import { styles } from "./styles/CheckInSheet.styles";
 import type { ActiveCheckInProps } from "./types/types";
 
 export const ActiveCheckIn = ({
-  active,
   checkIns,
   error,
   isMutationPending,
@@ -26,12 +25,6 @@ export const ActiveCheckIn = ({
 
   return (
     <View>
-      <TextField>
-        Flight #{active.properties.id} · {active.properties.status}
-      </TextField>
-      <TextField>
-        Started {new Date(active.properties.start_at).toLocaleString()}
-      </TextField>
       {checkIns.uncertain ? (
         <TextField style={styles.formError}>
           Check-in status needs to be refreshed before another action.
@@ -45,14 +38,6 @@ export const ActiveCheckIn = ({
         variant="secondary"
       >
         <TextField>End check-in</TextField>
-      </Button>
-      <Button
-        disabled={isMutationPending}
-        onPress={() => void runAction(checkIns.refreshActive)}
-        size="small"
-        variant="text"
-      >
-        <TextField>Refresh status</TextField>
       </Button>
       {error ? <TextField style={styles.formError}>{error}</TextField> : null}
     </View>

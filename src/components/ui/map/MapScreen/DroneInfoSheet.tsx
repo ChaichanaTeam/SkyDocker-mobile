@@ -247,7 +247,9 @@ export const DroneInfoSheet = ({
             </TextField>
             <TextField style={styles.summaryText}>
               <TextField style={styles.summaryLabel}>Flight Time: </TextField>
-              {drone?.flightTime ?? "None"}
+              {drone?.flightTimeMinutes === undefined
+                ? "None"
+                : `${drone.flightTimeMinutes} min`}
             </TextField>
           </View>
           <TextField style={styles.droneName}>{droneName}</TextField>

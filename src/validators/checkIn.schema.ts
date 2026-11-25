@@ -27,6 +27,7 @@ import type {
   PilotContact,
   ReceivedCheckInPreview,
 } from "./types/checkIn";
+import { z } from "zod";
 
 const record = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -152,26 +153,26 @@ export const parsePilot = (value: unknown): PilotContact =>
   (typeof value.phone_number === "string" || value.phone_number === null)
     ? { phone_number: value.phone_number }
     : invalid();
+const droneSchema = z.object({
+  id: z.number().int().positive(),
+  serial_number: z.string(),
+  model: z.object({
+    manufacturer: z.string(),
+    model_name: z.string(),
+    mtom: z.number().positive(),
+    max_height: z.number().min(CHECK_IN_LIMITS.height.min),
+    max_range: z.number().min(CHECK_IN_LIMITS.range.min),
+  }),
+  mtom_override: z.number().positive().nullable(),
+});
 export const parseDrone = (item: unknown): DroneOption => {
-  if (
-    !record(item) ||
-    !id(item.id) ||
-    typeof item.serial_number !== "string" ||
-    !record(item.model) ||
-    typeof item.model.manufacturer !== "string" ||
-    typeof item.model.model_name !== "string" ||
-    typeof item.model.mtom !== "number" ||
-    typeof item.model.max_height !== "number" ||
-    typeof item.model.max_range !== "number" ||
-    !(item.mtom_override === null || typeof item.mtom_override === "number")
-  )
-    return invalid();
+  const parsed = droneSchema.parse(item);
   return {
-    id: item.id,
-    label: `${item.model.manufacturer} ${item.model.model_name} (${item.serial_number})`,
-    weightG: item.mtom_override ?? item.model.mtom,
-    maxHeightM: item.model.max_height,
-    maxRangeM: item.model.max_range,
+    id: parsed.id,
+    label: `${parsed.model.manufacturer} ${parsed.model.model_name} (${parsed.serial_number})`,
+    weightG: parsed.mtom_override ?? parsed.model.mtom,
+    maxHeightM: parsed.model.max_height,
+    maxRangeM: parsed.model.max_range,
   };
 };
 export const parseDrones = (value: unknown): DroneOption[] => {

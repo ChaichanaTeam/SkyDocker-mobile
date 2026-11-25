@@ -24,7 +24,7 @@ export type DroneInfo = {
   heightKm?: number;
   rangeKm?: number;
   missionsCount?: number;
-  flightTime?: string;
+  flightTimeMinutes?: number;
   currentMission?: string;
 };
 
@@ -78,7 +78,6 @@ export type CheckInFormProps = {
 };
 
 export type ActiveCheckInProps = {
-  active: NonNullable<CheckInSession["active"]>;
   checkIns: CheckInSession;
   error: string | null;
   isMutationPending: boolean;

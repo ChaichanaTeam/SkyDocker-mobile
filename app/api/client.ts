@@ -50,75 +50,56 @@ const send = async (
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
   const controller = new AbortController();
-  const abort = () => controller.abort();
-  let onAbort: (() => void) | undefined;
-  const aborted = new Promise<never>((_, reject) => {
-    onAbort = () =>
-      reject(
-        fail(
-          "timeout",
-          options.signal?.aborted
-            ? "Request was cancelled."
-            : "Request timed out.",
-        ),
-      );
-  });
-  if (onAbort) controller.signal.addEventListener("abort", onAbort, { once: true });
-  options.signal?.addEventListener("abort", abort, { once: true });
-  if (options.signal?.aborted) abort();
-  const timer = setTimeout(abort, options.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+  let abortReason: "timeout" | "cancelled" | null = null;
+  const abort = (reason: "timeout" | "cancelled") => {
+    if (controller.signal.aborted) return;
+    abortReason = reason;
+    controller.abort();
+  };
+  const onAbort = () => abort("cancelled");
+  const abortError = () =>
+    abortReason === "cancelled"
+      ? fail("cancelled", "Request was cancelled.")
+      : fail("timeout", "Request timed out.");
+  options.signal?.addEventListener("abort", onAbort, { once: true });
+  if (options.signal?.aborted) onAbort();
+  const timer = setTimeout(
+    () => abort("timeout"),
+    options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+  );
 
   try {
-    return await Promise.race([
-      (async (): Promise<HttpResult> => {
-        const response = await fetch(requestUrl, {
-          method: options.method,
-          headers,
-          body:
-            options.body === undefined
-              ? undefined
-              : isFormData
-                ? (options.body as FormData)
-                : JSON.stringify(options.body),
-          signal: controller.signal,
-        });
-        let body: unknown;
-        try {
-          body = await response.json();
-        } catch {
-          if (controller.signal.aborted)
-            throw fail(
-              "timeout",
-              options.signal?.aborted
-                ? "Request was cancelled."
-                : "Request timed out.",
-            );
-          if (response.ok)
-            throw fail(
-              "invalid-response",
-              "Server returned an invalid response.",
-            );
-          body = null;
-        }
-        return { ok: response.ok, status: response.status, body };
-      })(),
-      aborted,
-    ]);
+    const response = await fetch(requestUrl, {
+      method: options.method,
+      headers,
+      body:
+        options.body === undefined
+          ? undefined
+          : isFormData
+            ? (options.body as FormData)
+            : JSON.stringify(options.body),
+      signal: controller.signal,
+    });
+    let body: unknown;
+    try {
+      body = await response.json();
+    } catch {
+      if (controller.signal.aborted) throw abortError();
+      if (response.ok)
+        throw fail(
+          "invalid-response",
+          "Server returned an invalid response.",
+        );
+      body = null;
+    }
+    return { ok: response.ok, status: response.status, body };
   } catch (error) {
     if (isApiError(error)) throw error;
-    if (error instanceof Error && error.name === "AbortError") {
-      throw fail(
-        "timeout",
-        options.signal?.aborted
-          ? "Request was cancelled."
-          : "Request timed out.",
-      );
-    }
+    if (controller.signal.aborted) throw abortError();
     throw fail("network", "Not connect to server");
   } finally {
     clearTimeout(timer);
-    if (onAbort) controller.signal.removeEventListener("abort", onAbort);
-    options.signal?.removeEventListener("abort", abort);
+    options.signal?.removeEventListener("abort", onAbort);
   }
 };
 
@@ -128,7 +109,7 @@ const refreshAccessToken = async (
   failedToken: string | null,
 ): Promise<string> => {
   const current = await getAccessToken();
-  if (current && current !== failedToken) return current;
+  if (failedToken !== null && current && current !== failedToken) return current;
   if (refreshPromise) return refreshPromise;
 
   refreshPromise = (async () => {

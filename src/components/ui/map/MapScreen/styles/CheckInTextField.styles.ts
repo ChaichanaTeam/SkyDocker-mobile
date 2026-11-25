@@ -7,7 +7,8 @@ export const styles = StyleSheet.create({
     fontFamily: typography.interRegular,
     fontSize: 16,
     lineHeight: 20,
-    marginLeft: 2,
+    position: "absolute",
+    right: 12,
   },
   inputSuffixDark: {
     color: colors.text2,
@@ -58,6 +59,6 @@ export const styles = StyleSheet.create({
     opacity: 1,
   },
   outlinedInputWithSuffix: {
-    flex: 1,
+    paddingHorizontal: 32,
   },
 });

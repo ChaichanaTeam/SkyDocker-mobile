@@ -79,15 +79,17 @@ export const useCheckInForm = ({
         setSubmitError(null);
         setFormValues((current) => {
           if (fieldKey !== "drone") return { ...current, [fieldKey]: option.value };
-          if (option.value === "custom") return { ...DEFAULT_CHECK_IN_FORM_VALUES, drone: "custom" };
           const drone = drones.find(item => String(item.id) === option.value);
-          if (!drone) return { ...current, drone: option.value, height: "", range: "" };
-          return { ...DEFAULT_CHECK_IN_FORM_VALUES, drone: option.value, weight: String(drone.weightG),
-            category: privileges.length === 1 ? privileges[0] : "" };
+          return {
+            ...current,
+            drone: option.value,
+            mission: "",
+            weight: drone ? String(drone.weightG) : "",
+          };
         });
         setActiveDropdown(null);
       },
-    [drones, onChange, privileges],
+    [drones, onChange],
   );
 
   const resetTransientState = useCallback((): void => {

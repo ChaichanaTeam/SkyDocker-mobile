@@ -53,8 +53,18 @@ export const CheckInForm = ({
     ?? requiredDataError
     ?? submitError
     ?? actionError
-    ?? (checkIns.uncertain ? 'Check-in status will be checked before trying again.' : null);
+    ?? (checkIns.uncertain ? 'Check-in status is uncertain. Refresh status first.' : null);
   const activeError = checkIns.error ?? actionError;
+  const refreshStatus = async (): Promise<void> => {
+    setActionError(null);
+    try {
+      await checkIns.refreshActive();
+    } catch (caught) {
+      setActionError(
+        caught instanceof Error ? caught.message : "Could not refresh check-in status.",
+      );
+    }
+  };
 
   useEffect(() => {
     if (!isVisible) {
@@ -83,7 +93,6 @@ export const CheckInForm = ({
       {checkIns.loading ? <TextField>Loading pilot data…</TextField> : null}
       {checkIns.active ? (
         <ActiveCheckIn
-          active={checkIns.active}
           checkIns={checkIns}
           error={activeError}
           isMutationPending={isMutationPending}
@@ -161,9 +170,20 @@ export const CheckInForm = ({
         </TextField>
       ) : null}
 
+          {checkIns.uncertain ? (
+            <Button
+              disabled={isMutationPending}
+              onPress={() => void refreshStatus()}
+              size="small"
+              variant="text"
+            >
+              <TextField>Refresh status</TextField>
+            </Button>
+          ) : null}
+
           <View style={styles.actionFooter}>
             <Button
-              disabled={isSubmitDisabled || isMutationPending || isSubmitting || checkIns.loading || !!checkIns.error || !checkIns.phone}
+              disabled={isSubmitDisabled || isMutationPending || isSubmitting || checkIns.loading || !!checkIns.error || !checkIns.phone || checkIns.uncertain}
               loading={isSubmitting}
               onPress={submitForm}
               size="large"

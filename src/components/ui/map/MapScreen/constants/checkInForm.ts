@@ -27,7 +27,8 @@ export const CHECK_IN_FIELDS: readonly CheckInFormField[] = [
     key: "height",
     keyboardType: "numeric",
     label: "Height",
-    placeholder: "100m AGL",
+    placeholder: "100",
+    suffix: "m",
   },
   {
     key: "category",
@@ -39,13 +40,15 @@ export const CHECK_IN_FIELDS: readonly CheckInFormField[] = [
     key: "range",
     keyboardType: "numeric",
     label: "Range",
-    placeholder: "100m",
+    placeholder: "100",
+    suffix: "m",
   },
   {
     key: "duration",
     keyboardType: "numeric",
     label: "Duration",
-    placeholder: "30 min",
+    placeholder: "30",
+    suffix: "min",
   },
 ];
 

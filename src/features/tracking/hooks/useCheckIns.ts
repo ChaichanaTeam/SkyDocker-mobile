@@ -35,6 +35,7 @@ import {
 const isAmbiguousMutationFailure = (error: unknown): boolean =>
   isApiError(error) &&
   (error.kind === "timeout" ||
+    error.kind === "cancelled" ||
     error.kind === "network" ||
     error.kind === "invalid-response");
 
@@ -91,6 +92,7 @@ export const useCheckIns = (
       let current = true;
       setLoading(true);
       setError(null);
+      customDrone.current = null;
       revision.current += 1;
       const activeRequest = fetchActiveCheckIn()
         .then((activeCheckIn) => {
@@ -135,6 +137,8 @@ export const useCheckIns = (
       onCustomDroneCreated?: (drone: DroneOption) => void,
     ): Promise<void> => {
       if (lock.current) return;
+      if (uncertain)
+        throw new Error("Check-in status is uncertain. Refresh status first.");
       if (active)
         throw new Error("End your active check-in before starting another.");
       if (!phone?.trim())
@@ -148,13 +152,6 @@ export const useCheckIns = (
       const previewRevision = revision.current;
       let createStarted = false;
       try {
-        if (uncertain) {
-          const current = await reconcileActive();
-          if (current) {
-            onChanged();
-            return;
-          }
-        }
         let previewValues = values;
         let previewDrones = drones;
         if (values.drone === "custom") {
@@ -162,12 +159,13 @@ export const useCheckIns = (
             throw new Error("Select a valid flying category.");
           }
           const savedDrone =
-            customDrone.current?.weight === values.weight
+            customDrone.current?.weight === values.weight &&
+            drones.some((drone) => drone.id === customDrone.current?.drone.id)
               ? customDrone.current.drone
               : await createCustomDrone(
                   buildCustomDroneCreateRequest(
                     values.weight,
-                    `TEST-CUSTOM-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`,
+                    `CUSTOM-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`,
                   ),
                 );
           customDrone.current = { weight: values.weight, drone: savedDrone };
@@ -250,7 +248,9 @@ export const useCheckIns = (
   );
 
   const finish = useCallback(async (): Promise<void> => {
-    if (lock.current || uncertain || !active) return;
+    if (lock.current || !active) return;
+    if (uncertain)
+      throw new Error("Check-in status is uncertain. Refresh status first.");
     lock.current = true;
     revision.current += 1;
     setMutation("end");
