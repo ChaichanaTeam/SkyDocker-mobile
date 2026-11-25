@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Linking,
-  Pressable,
   Text,
   TouchableOpacity,
   useColorScheme,
@@ -71,7 +70,8 @@ export const MapScreen = () => {
   const [appearance, setAppearance] = useState<MapAppearance>(
     colorScheme === "dark" ? "dark" : "light",
   );
-  const [isDroneSheetVisible, setIsDroneSheetVisible] = useState(false);
+  const [isDroneSheetVisible, setIsDroneSheetVisible] = useState(true);
+  const [collapseToken, setCollapseToken] = useState(0);
   const [isProfileSheetVisible, setIsProfileSheetVisible] = useState(false);
   const [mapType, setMapType] = useState<SessionMapType>("standard");
   const [settingsError, setSettingsError] = useState<string | null>(null);
@@ -92,10 +92,7 @@ export const MapScreen = () => {
     onRegionChange: onCheckInRegionChange,
     refresh: refreshCheckIns,
   } = useCheckInMap();
-  const {
-    mutation,
-    submitCheckIn,
-  } = useDemoCheckIns({
+  const { mutation, submitCheckIn } = useDemoCheckIns({
     getFreshCoordinates,
     onChanged: refreshCheckIns,
   });
@@ -119,7 +116,8 @@ export const MapScreen = () => {
   }, [initialRegion, userRegion, error]);
 
   useEffect(() => {
-    if (initialRegion) onCheckInRegionChange(regionToBoundingBox(initialRegion));
+    if (initialRegion)
+      onCheckInRegionChange(regionToBoundingBox(initialRegion));
   }, [initialRegion, onCheckInRegionChange]);
 
   const handleRegionChangeComplete = useCallback(
@@ -164,12 +162,10 @@ export const MapScreen = () => {
     mapRef.current?.animateToRegion(userRegion, 700);
   }, [retry, userRegion]);
 
-  const openDroneSheet = useCallback(
-    () => setIsDroneSheetVisible(true),
-    [],
-  );
-  const closeDroneSheet = useCallback(
-    () => setIsDroneSheetVisible(false),
+  const openDroneSheet = useCallback(() => setIsDroneSheetVisible(true), []);
+  const closeDroneSheet = useCallback(() => setIsDroneSheetVisible(false), []);
+  const collapseDroneSheet = useCallback(
+    () => setCollapseToken((token) => token + 1),
     [],
   );
   const openProfileSheet = useCallback((): void => {
@@ -180,12 +176,16 @@ export const MapScreen = () => {
     () => setIsProfileSheetVisible(false),
     [],
   );
+  const handleProfileSheetClose = useCallback((): void => {
+    closeProfileSheet();
+    openDroneSheet();
+  }, [closeProfileSheet, openDroneSheet]);
 
   const openCheckInFromProfile = useCallback((): void => {
     setZonesAtTap([]);
     closeProfileSheet();
-    setIsDroneSheetVisible(true);
-  }, [closeProfileSheet]);
+    openDroneSheet();
+  }, [closeProfileSheet, openDroneSheet]);
 
   const closeGeoZoneInfoSheet = useCallback((): void => {
     setZonesAtTap([]);
@@ -194,9 +194,9 @@ export const MapScreen = () => {
   const handleCreateCheckIn = useCallback(
     async (values: CheckInDraftValues): Promise<void> => {
       await submitCheckIn(values);
-      setIsDroneSheetVisible(false);
+      collapseDroneSheet();
     },
-    [submitCheckIn],
+    [collapseDroneSheet, submitCheckIn],
   );
 
   const handleNoticeAction = useCallback((): void => {
@@ -222,12 +222,12 @@ export const MapScreen = () => {
 
   const handleMapPress = useCallback(
     (event: MapPressEvent): void => {
-      closeDroneSheet();
+      collapseDroneSheet();
       closeProfileSheet();
       const { latitude, longitude } = event.nativeEvent.coordinate;
       setZonesAtTap(findZonesAtPoint(zones, latitude, longitude));
     },
-    [closeDroneSheet, closeProfileSheet, zones],
+    [collapseDroneSheet, closeProfileSheet, zones],
   );
 
   return (
@@ -291,10 +291,7 @@ export const MapScreen = () => {
       {noticeMessage ? (
         <View
           accessibilityLiveRegion="polite"
-          style={[
-            styles.notice,
-            { bottom: Math.max(insets.bottom + 88, 96) },
-          ]}
+          style={[styles.notice, { bottom: Math.max(insets.bottom + 88, 96) }]}
         >
           <Text style={styles.noticeText}>{noticeMessage}</Text>
           <TouchableOpacity
@@ -315,25 +312,14 @@ export const MapScreen = () => {
         </View>
       ) : isZoomedOut ? (
         <View
-          style={[
-            styles.notice,
-            { bottom: Math.max(insets.bottom + 88, 96) },
-          ]}
+          style={[styles.notice, { bottom: Math.max(insets.bottom + 88, 96) }]}
         >
           <Text style={styles.noticeText}>Zoom in to see geo-zones</Text>
         </View>
       ) : null}
 
-      {!isDroneSheetVisible ? (
-        <Pressable
-          accessibilityLabel="Open drone info"
-          accessibilityRole="button"
-          onPress={openDroneSheet}
-          style={[styles.bottomTouchZone, { height: 72 + insets.bottom }]}
-        />
-      ) : null}
-
       <DroneInfoSheet
+        collapseToken={collapseToken}
         drone={null}
         isVisible={isDroneSheetVisible}
         isMutationPending={mutation !== null}
@@ -347,7 +333,7 @@ export const MapScreen = () => {
       {isProfileSheetVisible ? (
         <ProfileSheet
           onCheckInPress={openCheckInFromProfile}
-          onClose={closeProfileSheet}
+          onClose={handleProfileSheetClose}
         />
       ) : null}
 
@@ -355,7 +341,6 @@ export const MapScreen = () => {
         zone={zonesAtTap[0] ?? null}
         onClose={closeGeoZoneInfoSheet}
       />
-
     </GestureHandlerRootView>
   );
 };

@@ -31,6 +31,7 @@ export type DroneInfo = {
 export type DroneInfoSheetSnap = "hidden" | "collapsed" | "expanded";
 
 export type DroneInfoSheetProps = {
+  collapseToken?: number;
   drone?: DroneInfo | null;
   isVisible: boolean;
   isMutationPending?: boolean;
