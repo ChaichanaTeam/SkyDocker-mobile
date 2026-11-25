@@ -32,21 +32,6 @@ export const styles = StyleSheet.create({
     zIndex: 2,
   },
 
-  collapsed: {
-    ...StyleSheet.absoluteFillObject,
-    paddingHorizontal: 24,
-    paddingTop: 44,
-  },
-  summaryRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  summaryText: {
-    color: "#000000",
-    fontFamily: typography.interRegular,
-    fontSize: 15,
-    fontWeight: "700",
-  },
   summaryLabel: {
     color: "#6B6B6B",
     fontWeight: "600",
