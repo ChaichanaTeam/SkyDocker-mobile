@@ -4,7 +4,6 @@ import {
   DRONE_INFO_COLLAPSED_HEIGHT,
   DRONE_INFO_DETAILS_HEIGHT,
   DRONE_INFO_HIDDEN_OFFSET,
-  DRONE_INFO_SNAP_POINTS,
   DRONE_INFO_TOP_GAP,
 } from "@/components/ui/map/MapScreen/constants/droneInfoSheet";
 import { CHECK_IN_CHROME_HEIGHT } from "@/components/ui/map/MapScreen/constants/checkInSheet";
@@ -39,9 +38,12 @@ const EMPTY = "—";
 const withUnit = (value: number | undefined, unit: string) =>
   value === undefined ? EMPTY : `${value}${unit}`;
 
+const SWIPE_SNAP_POINTS = ["expanded", "collapsed"] as const;
+
 export const DroneInfoSheet = ({
   drone,
   isVisible,
+  collapseToken,
   isMutationPending,
   onClose,
   onCheckInPress,
@@ -69,28 +71,21 @@ export const DroneInfoSheet = ({
         })
       : availableCheckInHeight
     : DRONE_INFO_DETAILS_HEIGHT;
+  const collapsedY = sheetHeight - DRONE_INFO_COLLAPSED_HEIGHT - insets.bottom;
   const snapY: Record<DroneInfoSheetSnap, number> = {
     expanded: 0,
-    collapsed: sheetHeight - DRONE_INFO_COLLAPSED_HEIGHT,
+    collapsed: collapsedY,
     hidden: sheetHeight + DRONE_INFO_HIDDEN_OFFSET,
   };
   const snapYRef = useRef(snapY);
   snapYRef.current = snapY;
-  const previousSheetHeight = useRef(sheetHeight);
-  const translateY = useRef(
-    new Animated.Value(
-      DRONE_INFO_DETAILS_HEIGHT + DRONE_INFO_HIDDEN_OFFSET,
-    ),
-  ).current;
-  const currentY = useRef(
-    DRONE_INFO_DETAILS_HEIGHT + DRONE_INFO_HIDDEN_OFFSET,
-  );
-  const startY = useRef(
-    DRONE_INFO_DETAILS_HEIGHT + DRONE_INFO_HIDDEN_OFFSET,
-  );
-  const snapRef = useRef<DroneInfoSheetSnap>("hidden");
+  const previousCollapsedY = useRef(collapsedY);
+  const translateY = useRef(new Animated.Value(collapsedY)).current;
+  const currentY = useRef(collapsedY);
+  const startY = useRef(collapsedY);
+  const snapRef = useRef<DroneInfoSheetSnap>("collapsed");
   const onCloseRef = useRef(onClose);
-  const [snap, setSnap] = useState<DroneInfoSheetSnap>("hidden");
+  const [snap, setSnap] = useState<DroneInfoSheetSnap>("collapsed");
 
   onCloseRef.current = onClose;
 
@@ -137,13 +132,21 @@ export const DroneInfoSheet = ({
   }, [isVisible, snapTo]);
 
   useEffect(() => {
-    if (previousSheetHeight.current !== sheetHeight) {
-      previousSheetHeight.current = sheetHeight;
+    if (collapseToken === undefined) return;
+    if (snapRef.current !== "hidden") snapTo("collapsed");
+    setShowCheckIn(false);
+  }, [collapseToken, snapTo]);
+
+  useEffect(() => {
+    if (previousCollapsedY.current !== collapsedY) {
+      previousCollapsedY.current = collapsedY;
       if (snapRef.current === "collapsed") {
-        translateY.setValue(snapYRef.current.collapsed);
+        translateY.setValue(collapsedY);
+        currentY.current = collapsedY;
+        startY.current = collapsedY;
       }
     }
-  }, [sheetHeight, translateY]);
+  }, [collapsedY, translateY]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -155,13 +158,13 @@ export const DroneInfoSheet = ({
       onPanResponderMove: (_, { dy }) => {
         const next = Math.min(
           Math.max(startY.current + dy, snapYRef.current.expanded),
-          snapYRef.current.hidden,
+          snapYRef.current.collapsed,
         );
         translateY.setValue(next);
       },
       onPanResponderRelease: (_, { vy }) => {
         const projected = currentY.current + vy * 150;
-        const target = DRONE_INFO_SNAP_POINTS.reduce((best, key) =>
+        const target = SWIPE_SNAP_POINTS.reduce((best, key) =>
           Math.abs(snapYRef.current[key] - projected) <
           Math.abs(snapYRef.current[best] - projected)
             ? key
@@ -172,11 +175,6 @@ export const DroneInfoSheet = ({
     }),
   ).current;
 
-  const collapsedOpacity = translateY.interpolate({
-    extrapolate: "clamp",
-    inputRange: [snapY.expanded, snapY.collapsed],
-    outputRange: [0, 1],
-  });
   const expandedOpacity = translateY.interpolate({
     extrapolate: "clamp",
     inputRange: [snapY.expanded, snapY.collapsed],
@@ -235,25 +233,6 @@ export const DroneInfoSheet = ({
         <View {...panResponder.panHandlers} style={styles.handleTouchArea}>
           <View style={styles.handle} />
         </View>
-
-        <Animated.View
-          pointerEvents={snap === "collapsed" ? "auto" : "none"}
-          style={[styles.collapsed, { opacity: collapsedOpacity }]}
-        >
-          <View style={styles.summaryRow}>
-            <TextField style={styles.summaryText}>
-              <TextField style={styles.summaryLabel}>Missions: </TextField>
-              {drone?.missionsCount ?? "None"}
-            </TextField>
-            <TextField style={styles.summaryText}>
-              <TextField style={styles.summaryLabel}>Flight Time: </TextField>
-              {drone?.flightTimeMinutes === undefined
-                ? "None"
-                : `${drone.flightTimeMinutes} min`}
-            </TextField>
-          </View>
-          <TextField style={styles.droneName}>{droneName}</TextField>
-        </Animated.View>
 
         <Animated.View
           pointerEvents={snap === "expanded" ? "auto" : "none"}
@@ -337,13 +316,14 @@ export const DroneInfoSheet = ({
               </View>
 
               <TextField style={styles.currentMission}>
-                <TextField style={styles.summaryLabel}>Current Missions: </TextField>
+                <TextField style={styles.summaryLabel}>
+                  Current Missions:{" "}
+                </TextField>
                 {drone?.currentMission ?? "None"}
               </TextField>
             </>
           )}
         </Animated.View>
-
       </Animated.View>
     </KeyboardAvoidingView>
   );
