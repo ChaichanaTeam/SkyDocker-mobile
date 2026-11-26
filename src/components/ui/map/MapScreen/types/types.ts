@@ -32,6 +32,7 @@ export type DroneInfoSheetSnap = "hidden" | "collapsed" | "expanded";
 
 export type DroneInfoSheetProps = {
   collapseToken?: number;
+  openCheckInToken?: number;
   drone?: DroneInfo | null;
   isVisible: boolean;
   isMutationPending?: boolean;
@@ -40,6 +41,7 @@ export type DroneInfoSheetProps = {
   checkIns: CheckInSession;
   onWikiPress: () => void;
   onProfilePress: () => void;
+  onDraftRangeChange?: (rangeM: number | null) => void;
 };
 
 export type CheckInDropdownFieldKey = "mission" | "drone" | "category";
@@ -76,6 +78,7 @@ export type CheckInFormProps = {
   isVisible: boolean;
   isMutationPending?: boolean;
   checkIns: CheckInSession;
+  onDraftRangeChange?: (rangeM: number | null) => void;
 };
 
 export type ActiveCheckInProps = {

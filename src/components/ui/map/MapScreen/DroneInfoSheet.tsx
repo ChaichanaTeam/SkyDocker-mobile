@@ -1,4 +1,3 @@
-import { Button } from "@/components/shared/ui/Button/Button";
 import { TextField } from "@/components/shared/ui/Text/TextField";
 import {
   DRONE_INFO_COLLAPSED_HEIGHT,
@@ -8,6 +7,7 @@ import {
 } from "@/components/ui/map/MapScreen/constants/droneInfoSheet";
 import { CHECK_IN_CHROME_HEIGHT } from "@/components/ui/map/MapScreen/constants/checkInSheet";
 import { styles } from "@/components/ui/map/MapScreen/styles/DroneInfoSheet.styles";
+import { tabsStyles } from "@/components/ui/map/MapScreen/styles/SheetTabs.styles";
 import type {
   DroneInfoSheetProps,
   DroneInfoSheetSnap,
@@ -18,9 +18,9 @@ import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Keyboard,
-  KeyboardAvoidingView,
   PanResponder,
   Platform,
+  Pressable,
   ScrollView,
   useWindowDimensions,
   View,
@@ -44,20 +44,25 @@ export const DroneInfoSheet = ({
   drone,
   isVisible,
   collapseToken,
+  openCheckInToken,
   isMutationPending,
   onClose,
   onCheckInPress,
   checkIns,
   onWikiPress,
   onProfilePress,
+  onDraftRangeChange,
 }: DroneInfoSheetProps) => {
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [showCheckIn, setShowCheckIn] = useState(false);
   const [checkInContentHeight, setCheckInContentHeight] = useState(0);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  // iOS: the sheet is lifted by the keyboard height instead of KeyboardAvoidingView,
+  // so the lift is applied once. Android resizes the window itself.
+  const keyboardOffset = Platform.OS === "ios" ? keyboardHeight : 0;
   const availableCheckInHeight = getAvailableCheckInHeight({
-    keyboardHeight,
+    keyboardHeight: keyboardOffset,
     topGap: DRONE_INFO_TOP_GAP,
     topInset: insets.top,
     windowHeight,
@@ -136,6 +141,13 @@ export const DroneInfoSheet = ({
     if (snapRef.current !== "hidden") snapTo("collapsed");
     setShowCheckIn(false);
   }, [collapseToken, snapTo]);
+
+  useEffect(() => {
+    if (!openCheckInToken) return;
+    setCheckInContentHeight(0);
+    setShowCheckIn(true);
+    snapTo("expanded");
+  }, [openCheckInToken, snapTo]);
 
   useEffect(() => {
     if (previousCollapsedY.current !== collapsedY) {
@@ -217,10 +229,9 @@ export const DroneInfoSheet = ({
   const droneName = drone?.name ?? EMPTY;
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    <View
       pointerEvents="box-none"
-      style={styles.keyboardContainer}
+      style={[styles.keyboardContainer, { bottom: keyboardOffset }]}
     >
       <Animated.View
         pointerEvents={snap === "hidden" ? "none" : "auto"}
@@ -253,38 +264,35 @@ export const DroneInfoSheet = ({
               />
             </View>
           ) : (
-            <View style={styles.actions}>
+            <View style={tabsStyles.container}>
               {actions.map((action, index) => (
-                <Button
+                <Pressable
                   key={action.label}
                   onPress={action.onPress}
-                  size="small"
-                  style={[styles.action, index > 0 && styles.actionDivider]}
-                  variant="text"
+                  style={[tabsStyles.tab, index > 0 && tabsStyles.tabDivider]}
                 >
                   <Ionicons
                     color={
                       action.label === "Wiki" ? colors.startupLogo : colors.text5
                     }
                     name={action.icon}
-                    size={16}
+                    size={14}
                   />
                   <TextField
                     style={[
-                      styles.actionText,
+                      tabsStyles.text,
                       action.label === "Wiki" && styles.actionTextEmphasized,
                     ]}
                   >
                     {action.label}
                   </TextField>
-                </Button>
+                </Pressable>
               ))}
             </View>
           )}
 
           {showCheckIn ? (
             <ScrollView
-              automaticallyAdjustKeyboardInsets
               contentContainerStyle={styles.formScrollContent}
               keyboardShouldPersistTaps="handled"
               onContentSizeChange={(_, height) => setCheckInContentHeight(height)}
@@ -296,6 +304,7 @@ export const DroneInfoSheet = ({
                 isVisible={isVisible}
                 isMutationPending={isMutationPending}
                 checkIns={checkIns}
+                onDraftRangeChange={onDraftRangeChange}
               />
             </ScrollView>
           ) : (
@@ -325,6 +334,6 @@ export const DroneInfoSheet = ({
           )}
         </Animated.View>
       </Animated.View>
-    </KeyboardAvoidingView>
+    </View>
   );
 };

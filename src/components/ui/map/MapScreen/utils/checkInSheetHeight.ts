@@ -16,4 +16,4 @@ export const getAvailableCheckInHeight = ({
   topInset,
   windowHeight,
 }: AvailableCheckInHeightParams): number =>
-  Math.max(0, windowHeight - Math.max(topInset, keyboardHeight) - topGap);
+  Math.max(0, windowHeight - keyboardHeight - topInset - topGap);

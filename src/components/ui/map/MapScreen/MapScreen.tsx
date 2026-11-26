@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MapView, {
+  Circle,
   MapPressEvent,
   PROVIDER_GOOGLE,
   Region,
@@ -72,6 +73,8 @@ export const MapScreen = () => {
   const [isDroneSheetVisible, setIsDroneSheetVisible] = useState(true);
   const [collapseToken, setCollapseToken] = useState(0);
   const [isProfileSheetVisible, setIsProfileSheetVisible] = useState(false);
+  const [checkInOpenToken, setCheckInOpenToken] = useState(0);
+  const [draftRangeM, setDraftRangeM] = useState<number | null>(null);
   const [mapType, setMapType] = useState<SessionMapType>("standard");
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [initialRegion, setInitialRegion] = useState<Region | null>(null);
@@ -98,6 +101,25 @@ export const MapScreen = () => {
     () => (userCoordinates ? toUserRegion(userCoordinates) : null),
     [userCoordinates],
   );
+
+  const activeCheckInFeature = checkInSession.active;
+  const rangeCircle = activeCheckInFeature
+    ? {
+        center: {
+          latitude: activeCheckInFeature.geometry.coordinates[1],
+          longitude: activeCheckInFeature.geometry.coordinates[0],
+        },
+        radius: activeCheckInFeature.properties.range,
+      }
+    : draftRangeM && userCoordinates
+      ? {
+          center: {
+            latitude: userCoordinates.latitude,
+            longitude: userCoordinates.longitude,
+          },
+          radius: draftRangeM,
+        }
+      : null;
 
   useEffect(() => {
     if (userRegion) {
@@ -188,6 +210,7 @@ export const MapScreen = () => {
   const openCheckInFromProfile = useCallback((): void => {
     setZonesAtTap([]);
     closeProfileSheet();
+    setCheckInOpenToken((token) => token + 1);
     openDroneSheet();
   }, [closeProfileSheet, openDroneSheet]);
 
@@ -247,6 +270,16 @@ export const MapScreen = () => {
           {checkIns.map((checkIn) => (
             <CheckInMarker checkIn={checkIn} key={checkIn.key} />
           ))}
+
+          {rangeCircle ? (
+            <Circle
+              center={rangeCircle.center}
+              fillColor="rgba(27, 35, 64, 0.12)"
+              radius={rangeCircle.radius}
+              strokeColor="#1B2340"
+              strokeWidth={2}
+            />
+          ) : null}
         </MapView>
       ) : (
         <View style={styles.mapLoading}>
@@ -322,6 +355,8 @@ export const MapScreen = () => {
 
       <DroneInfoSheet
         collapseToken={collapseToken}
+        onDraftRangeChange={setDraftRangeM}
+        openCheckInToken={checkInOpenToken}
         drone={null}
         isVisible={isDroneSheetVisible}
         isMutationPending={checkInSession.mutation !== null}
