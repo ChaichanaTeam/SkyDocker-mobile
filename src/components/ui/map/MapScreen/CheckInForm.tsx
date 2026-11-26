@@ -201,7 +201,7 @@ export const CheckInForm = ({
               ]}
               variant="secondary"
             >
-              <TextField color={colors.backgroundWhite}>Create new list</TextField>
+              <TextField color={colors.backgroundWhite}>Create new check-in</TextField>
             </Button>
           </View>
         </>

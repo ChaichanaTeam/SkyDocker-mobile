@@ -42,6 +42,7 @@ export const styles = StyleSheet.create({
     width: "30%",
   },
   fieldCellOpen: {
+    elevation: 20,
     zIndex: 20,
   },
   fieldGrid: {
