@@ -3,7 +3,7 @@ import type { ComponentProps } from "react";
 import type { KeyboardTypeOptions } from "react-native";
 import type { MapType } from "react-native-maps";
 
-import type { CheckInDraftValues } from "@features/tracking";
+import type { CheckInSession } from "@features/tracking";
 import type { GeoZoneFeature } from "@app/api/types/geoZone";
 
 export type MapAppearance = "light" | "dark";
@@ -24,7 +24,7 @@ export type DroneInfo = {
   heightKm?: number;
   rangeKm?: number;
   missionsCount?: number;
-  flightTime?: string;
+  flightTimeMinutes?: number;
   currentMission?: string;
 };
 
@@ -37,7 +37,7 @@ export type DroneInfoSheetProps = {
   isMutationPending?: boolean;
   onClose: () => void;
   onCheckInPress: () => void;
-  onSubmit: (values: CheckInDraftValues) => Promise<void>;
+  checkIns: CheckInSession;
   onWikiPress: () => void;
   onProfilePress: () => void;
 };
@@ -75,7 +75,14 @@ export type CheckInFormProps = {
   isCompactLayout: boolean;
   isVisible: boolean;
   isMutationPending?: boolean;
-  onSubmit: (values: CheckInDraftValues) => Promise<void>;
+  checkIns: CheckInSession;
+};
+
+export type ActiveCheckInProps = {
+  checkIns: CheckInSession;
+  error: string | null;
+  isMutationPending: boolean;
+  onActionError: (message: string | null) => void;
 };
 
 export type CheckInTextFieldProps = {
@@ -84,10 +91,12 @@ export type CheckInTextFieldProps = {
   isCompact: boolean;
   onChangeText: (value: string) => void;
   value: string;
+  editable?: boolean;
 };
 
 export type CheckInDropdownProps = {
   appearance: MapAppearance;
+  disabled?: boolean;
   field: CheckInDropdownField;
   isCompact: boolean;
   isOpen: boolean;
@@ -101,7 +110,7 @@ export type CheckInSheetProps = {
   isVisible: boolean;
   isMutationPending?: boolean;
   onClose: () => void;
-  onSubmit: (values: CheckInDraftValues) => Promise<void>;
+  checkIns: CheckInSession;
 };
 
 export type GeoZoneInfoSheetProps = {

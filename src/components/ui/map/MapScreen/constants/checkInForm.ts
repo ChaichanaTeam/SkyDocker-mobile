@@ -1,5 +1,4 @@
-import type { CheckInDraftValues } from "@features/tracking";
-import { FLYING_PRIVILEGES } from "@validators/constants/checkIn";
+import type { CheckInDraftValues } from "@features/tracking/types/checkIn";
 
 import type {
   CheckInDropdownField,
@@ -21,7 +20,7 @@ export const CHECK_IN_FIELDS: readonly CheckInFormField[] = [
     key: "weight",
     keyboardType: "numeric",
     label: "Weight",
-    placeholder: "<900",
+    placeholder: "1000",
     suffix: "g",
   },
   {
@@ -29,7 +28,7 @@ export const CHECK_IN_FIELDS: readonly CheckInFormField[] = [
     keyboardType: "numeric",
     label: "Height",
     placeholder: "100",
-    suffix: "m AGL",
+    suffix: "m",
   },
   {
     key: "category",
@@ -56,22 +55,21 @@ export const CHECK_IN_FIELDS: readonly CheckInFormField[] = [
 export const CHECK_IN_DROPDOWNS = [
   {
     key: "mission",
-    label: "List of missions",
-    options: [{ label: "Mission list", value: "Mission list" }],
+    label: "Mission",
+    placeholder: "Mission",
+    options: [],
   },
   {
     key: "drone",
-    label: "List of drones",
-    options: [{ label: "SkyDocker drone", value: "SkyDocker drone" }],
+    label: "Drone",
+    placeholder: "Drone",
+    options: [],
   },
 ] as const satisfies readonly CheckInDropdownField[];
 
 export const CHECK_IN_CATEGORY_DROPDOWN = {
   key: "category",
   label: "Category",
-  options: FLYING_PRIVILEGES.map((category) => ({
-    label: category.toUpperCase(),
-    value: category,
-  })),
+  options: [],
   placeholder: "A1",
 } as const satisfies CheckInDropdownField;

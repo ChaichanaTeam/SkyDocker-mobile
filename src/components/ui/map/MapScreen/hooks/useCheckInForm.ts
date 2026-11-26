@@ -1,21 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import type { CheckInDraftValues } from "@features/tracking";
-
+import type { CheckInDraftValues } from "@features/tracking/types/checkIn";
 import { DEFAULT_CHECK_IN_FORM_VALUES } from "../constants/checkInForm";
 import type {
   CheckInDropdownFieldKey,
   CheckInDropdownOption,
   CheckInFormFieldKey,
 } from "../types/types";
-import type { UseCheckInFormResult } from "../types/useCheckInForm";
-
-type UseCheckInFormParams = {
-  onSubmit: (values: CheckInDraftValues) => Promise<void>;
-};
+import type { UseCheckInFormParams, UseCheckInFormResult } from "../types/useCheckInForm";
 
 export const useCheckInForm = ({
   onSubmit,
+  onChange,
+  drones,
+  privileges,
 }: UseCheckInFormParams): UseCheckInFormResult => {
   const [activeDropdown, setActiveDropdown] =
     useState<CheckInDropdownFieldKey | null>(null);
@@ -28,27 +26,41 @@ export const useCheckInForm = ({
   const mounted = useRef(true);
 
   useEffect(() => {
+    if (formValues.drone || drones.length === 0) return;
+    if (drones.length === 1) {
+      const drone = drones[0];
+      onChange();
+      setFormValues(current => ({ ...current, drone: String(drone.id), mission: "",
+        weight: String(drone.weightG),
+        category: privileges.length === 1 ? privileges[0] : "" }));
+    }
+  }, [drones, formValues.drone, onChange, privileges]);
+
+  useEffect(() => {
     mounted.current = true;
     return () => { mounted.current = false; };
   }, []);
 
   const isSubmitDisabled = useMemo(
     () =>
-      Object.values(formValues).some(
-        (value) => value.trim().length === 0,
-      ),
+      !formValues.drone ||
+      (formValues.drone === "custom" && !formValues.weight) ||
+      (!formValues.mission &&
+        (!formValues.category || !formValues.height || !formValues.range || !formValues.duration)),
     [formValues],
   );
 
   const updateField = useCallback(
     (fieldKey: CheckInFormFieldKey) =>
       (value: string): void => {
+        onChange();
+        setSubmitError(null);
         setFormValues((currentValues) => ({
           ...currentValues,
           [fieldKey]: value,
         }));
       },
-    [],
+    [onChange],
   );
 
   const toggleDropdown = useCallback(
@@ -63,13 +75,21 @@ export const useCheckInForm = ({
   const selectDropdownOption = useCallback(
     (fieldKey: CheckInDropdownFieldKey) =>
       (option: CheckInDropdownOption): void => {
-        setFormValues((currentValues) => ({
-          ...currentValues,
-          [fieldKey]: option.value,
-        }));
+        onChange();
+        setSubmitError(null);
+        setFormValues((current) => {
+          if (fieldKey !== "drone") return { ...current, [fieldKey]: option.value };
+          const drone = drones.find(item => String(item.id) === option.value);
+          return {
+            ...current,
+            drone: option.value,
+            mission: "",
+            weight: drone ? String(drone.weightG) : "",
+          };
+        });
         setActiveDropdown(null);
       },
-    [],
+    [drones, onChange],
   );
 
   const resetTransientState = useCallback((): void => {
@@ -87,9 +107,12 @@ export const useCheckInForm = ({
     setSubmitError(null);
 
     try {
-      await onSubmit(formValues);
+      await onSubmit(formValues, (drone) => {
+        setFormValues(current => current.drone === 'custom' && current.weight === formValues.weight
+          ? { ...current, drone: String(drone.id), weight: String(drone.weightG) }
+          : current);
+      });
       if (!mounted.current) return;
-      setFormValues(DEFAULT_CHECK_IN_FORM_VALUES);
       setActiveDropdown(null);
     } catch (error: unknown) {
       if (!mounted.current) return;

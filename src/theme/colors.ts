@@ -29,11 +29,13 @@ export const colors = {
   mapNoticeBackground: "#10151FF2",
   mapNoticeBorder: "#FFFFFF2E",
   checkInBackdrop: "#00000066",
+  checkInShadow: "#000000",
   checkInLightSurface: "#FFFFFF",
   checkInLightBorder: "#153D80",
   checkInLightFieldBorder: "#555555",
-  checkInFormAccent: "#7C29E2",
-  checkInLightText: "#000000",
+  checkInFormAccent: "#536BBA",
+  checkInLightText: "#3A4252",
+  checkInLightPlaceholder: "#C9C3C3",
 
   //temp colors
   backgroundWhite: "#FFFFFF",

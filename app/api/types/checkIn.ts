@@ -1,35 +1,42 @@
 import type { CHECK_IN_STATUSES } from "@app/api/constants/checkIn";
 
-export type FlyingPrivilege = "a1" | "a2" | "a3" | "sts01" | "sts02";
-
-export type CreateDemoCheckInRequest = {
-  lon: number;
-  lat: number;
-  flying_privilege: FlyingPrivilege;
-  description: null;
+export type CheckInStatus = (typeof CHECK_IN_STATUSES)[number];
+type CheckInPreviewBase = {
+  country_tag: string;
+  home_point: { lon: number; lat: number };
+};
+type CheckInFlightProperties = {
+  category: string;
   height: number;
   range: number;
-  time: number;
-  starts_at: string;
+  duration: number;
 };
+export type CheckInPreviewRequest = CheckInPreviewBase &
+  (
+    | { drone_id: number; mission_id: number }
+    | ({ drone_id: number } & CheckInFlightProperties)
+  );
 
-export type CreateDemoCheckInResponse = {
-  message: string;
-  id: number;
-  pilot_id: number;
-  drone_id: number;
-  cancelled: number;
-  point: [number, number];
-  h3_index: string;
+export type CustomDroneCreateRequest = {
+  custom_model: {
+    manufacturer: string;
+    model_name: string;
+    speed: number;
+    mtom: number;
+    max_height: number;
+    max_range: number;
+  };
+  serial_number: string;
+  category: "pb";
+  is_drone_modified: false;
 };
-
-export type CheckInStatus = (typeof CHECK_IN_STATUSES)[number];
-
+export type CheckInPreview = { checkin_token: string; expires_in: number };
 export type CheckInFeature = {
   type: "Feature";
   geometry: { type: "Point"; coordinates: [number, number] };
   properties: {
-    country_id: number;
+    id: number;
+    country_tag: string;
     country: string;
     status: CheckInStatus;
     contact: string;
@@ -39,14 +46,7 @@ export type CheckInFeature = {
     time: number;
   };
 };
-
 export type CheckInCollection = {
   type: "FeatureCollection";
   features: CheckInFeature[];
-};
-
-export type EndDemoCheckInResponse = {
-  message: string;
-  id: number;
-  status: "ended_intime" | "late_end";
 };

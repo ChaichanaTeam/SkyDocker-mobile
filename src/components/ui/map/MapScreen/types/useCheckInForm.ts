@@ -1,10 +1,17 @@
-import type { CheckInDraftValues } from "@features/tracking";
+import type { CheckInDraftValues, DroneOption } from "@features/tracking/types/checkIn";
 
 import type {
   CheckInDropdownFieldKey,
   CheckInDropdownOption,
   CheckInFormFieldKey,
 } from "./types";
+
+export type UseCheckInFormParams = {
+  onSubmit: (values: CheckInDraftValues, onCustomDroneCreated: (drone: DroneOption) => void) => Promise<void>;
+  onChange: () => void;
+  drones: DroneOption[];
+  privileges: string[];
+};
 
 export type UseCheckInFormResult = {
   activeDropdown: CheckInDropdownFieldKey | null;

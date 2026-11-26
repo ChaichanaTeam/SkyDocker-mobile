@@ -44,7 +44,7 @@ export const SheetTabs = ({
             ]}
           >
             {tab.key === "checkin" ? (
-              <CheckIn height={14} width={14} />
+              <CheckIn color={iconColor} height={14} width={14} />
             ) : (
               <Ionicons
                 color={iconColor}

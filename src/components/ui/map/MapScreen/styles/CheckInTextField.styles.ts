@@ -7,7 +7,8 @@ export const styles = StyleSheet.create({
     fontFamily: typography.interRegular,
     fontSize: 16,
     lineHeight: 20,
-    marginLeft: 2,
+    position: "absolute",
+    right: 12,
   },
   inputSuffixDark: {
     color: colors.text2,
@@ -19,32 +20,30 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
-    paddingHorizontal: 8,
   },
-  outlinedField: {
-    borderRadius: 8,
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 54,
+  fieldContainer: {
+    width: "100%",
   },
-  outlinedFieldCompact: {
-    minHeight: 48,
-  },
-  outlinedFieldDark: {
-    backgroundColor: colors.backgroundMain,
-    borderColor: colors.text1,
-  },
-  outlinedFieldLight: {
-    backgroundColor: colors.checkInLightSurface,
-    borderColor: colors.checkInLightFieldBorder,
+  fieldLabel: {
+    color: colors.checkInLightText,
+    fontFamily: typography.interRegular,
+    fontSize: 14,
+    marginBottom: 5,
   },
   outlinedInput: {
-    backgroundColor: "transparent",
+    backgroundColor: colors.checkInLightSurface,
+    borderRadius: 10,
+    elevation: 2,
+    flex: 1,
     fontFamily: typography.interRegular,
-    fontSize: 16,
-    height: 50,
+    fontSize: 14,
+    height: 48,
     minWidth: 0,
-    paddingHorizontal: 0,
+    paddingHorizontal: 8,
+    shadowColor: colors.checkInShadow,
+    shadowOffset: { height: 2, width: 0 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
     textAlign: "center",
   },
   outlinedInputCompact: {
@@ -56,28 +55,10 @@ export const styles = StyleSheet.create({
   outlinedInputLight: {
     color: colors.checkInLightText,
   },
+  outlinedInputLocked: {
+    opacity: 1,
+  },
   outlinedInputWithSuffix: {
-    flexGrow: 0,
-    flexShrink: 1,
-    maxWidth: "70%",
-  },
-  outlinedLabel: {
-    color: colors.text1,
-    fontFamily: typography.interRegular,
-    fontSize: 14,
-    left: 12,
-    paddingHorizontal: 4,
-    position: "absolute",
-    top: -11,
-    zIndex: 1,
-  },
-  outlinedLabelAccent: {
-    color: colors.checkInFormAccent,
-  },
-  outlinedLabelDark: {
-    backgroundColor: colors.backgroundMain,
-  },
-  outlinedLabelLight: {
-    backgroundColor: colors.checkInLightSurface,
+    paddingHorizontal: 32,
   },
 });

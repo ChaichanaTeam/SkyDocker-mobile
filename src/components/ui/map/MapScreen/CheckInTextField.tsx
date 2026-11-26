@@ -14,25 +14,22 @@ export const CheckInTextField = ({
   isCompact,
   onChangeText,
   value,
+  editable = true,
 }: CheckInTextFieldProps) => {
   const isLight = appearance === "light";
   const placeholderTextColor = isLight
-    ? colors.checkInLightText
+    ? colors.checkInLightPlaceholder
     : colors.text1;
 
   return (
     <View
       style={[
-        styles.outlinedField,
-        isCompact ? styles.outlinedFieldCompact : null,
-        isLight ? styles.outlinedFieldLight : styles.outlinedFieldDark,
+        styles.fieldContainer,
       ]}
     >
       <TextField
         style={[
-          styles.outlinedLabel,
-          isLight ? styles.outlinedLabelAccent : null,
-          isLight ? styles.outlinedLabelLight : styles.outlinedLabelDark,
+          styles.fieldLabel,
         ]}
         variant="label"
       >
@@ -41,6 +38,7 @@ export const CheckInTextField = ({
       <View style={styles.inputValueRow}>
         <InputField
           autoCorrect={false}
+          editable={editable}
           keyboardType={field.keyboardType}
           onChangeText={onChangeText}
           placeholder={field.placeholder}
@@ -49,6 +47,7 @@ export const CheckInTextField = ({
             styles.outlinedInput,
             isCompact ? styles.outlinedInputCompact : null,
             isLight ? styles.outlinedInputLight : styles.outlinedInputDark,
+            !editable ? styles.outlinedInputLocked : null,
             field.suffix ? styles.outlinedInputWithSuffix : null,
           ]}
           value={value}

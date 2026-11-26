@@ -1,4 +1,5 @@
-import { TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { ScrollView, TouchableOpacity, View } from "react-native";
 
 import { TextField } from "@/components/shared/ui/Text/TextField";
 import { colors } from "@/theme";
@@ -9,6 +10,7 @@ import type { CheckInDropdownProps } from "./types/types";
 
 export const CheckInDropdown = ({
   appearance,
+  disabled = false,
   field,
   isCompact,
   isOpen,
@@ -25,8 +27,10 @@ export const CheckInDropdown = ({
   const labelColor =
     appearance === "light" ? colors.checkInFormAccent : colors.text1;
   const placeholderColor =
-    appearance === "light" ? colors.checkInLightText : colors.text1;
-  const selectedOption = field.options.find((option) => option.value === value);
+    appearance === "light" ? colors.checkInLightPlaceholder : colors.text1;
+  const selectedOption = value
+    ? field.options.find((option) => option.value === value)
+    : undefined;
   const displayValue =
     selectedOption?.label ??
     (value.length > 0 ? value : field.placeholder ?? "");
@@ -38,12 +42,16 @@ export const CheckInDropdown = ({
         isOpen ? styles.dropdownRootOpen : null,
       ]}
     >
+      <TextField color={textColor} style={styles.fieldLabel} variant="label">
+        {field.label}
+      </TextField>
       <TouchableOpacity
         accessibilityRole="button"
         activeOpacity={0.76}
+        disabled={disabled}
         onPress={onPress}
         style={[
-          styles.outlinedDropdown,
+          styles.dropdownTrigger,
           isCompact ? styles.outlinedDropdownCompact : null,
           {
             backgroundColor: surfaceColor,
@@ -52,47 +60,44 @@ export const CheckInDropdown = ({
         ]}
       >
         <TextField
-          color={labelColor}
-          style={[
-            styles.outlinedLabel,
-            { backgroundColor: surfaceColor },
-          ]}
-          variant="label"
-        >
-          {field.label}
-        </TextField>
-        <TextField
           color={value ? textColor : placeholderColor}
-          style={styles.dropdownValue}
+          style={[
+            styles.dropdownValue,
+            field.key === "category" ? styles.dropdownCategoryValue : null,
+          ]}
         >
           {displayValue}
         </TextField>
+        {field.key === "mission" || field.key === "drone" ? (
+          <Ionicons color={labelColor} name="chevron-down" size={18} />
+        ) : null}
       </TouchableOpacity>
 
       {isOpen ? (
         <View
           style={[
             styles.dropdownMenu,
-            isCompact ? styles.dropdownMenuCompact : null,
             {
               backgroundColor: surfaceColor,
               borderColor,
             },
           ]}
         >
-          {field.options.map((option) => (
-            <TouchableOpacity
-              accessibilityRole="button"
-              activeOpacity={0.76}
-              key={option.value}
-              onPress={() => onSelect(option)}
-              style={styles.dropdownOption}
-            >
-              <TextField color={textColor} style={styles.dropdownOptionText}>
-                {option.label}
-              </TextField>
-            </TouchableOpacity>
-          ))}
+          <ScrollView nestedScrollEnabled>
+            {field.options.map((option) => (
+              <TouchableOpacity
+                accessibilityRole="button"
+                activeOpacity={0.76}
+                key={option.value}
+                onPress={() => onSelect(option)}
+                style={styles.dropdownOption}
+              >
+                <TextField color={textColor} style={styles.dropdownOptionText}>
+                  {option.label}
+                </TextField>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
       ) : null}
     </View>
