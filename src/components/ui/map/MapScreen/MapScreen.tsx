@@ -277,7 +277,8 @@ export const MapScreen = () => {
               fillColor="rgba(27, 35, 64, 0.12)"
               radius={rangeCircle.radius}
               strokeColor="#1B2340"
-              strokeWidth={2}
+              strokeWidth={3}
+              zIndex={zones.size + 1}
             />
           ) : null}
         </MapView>

@@ -19,7 +19,6 @@ import {
   Animated,
   Keyboard,
   PanResponder,
-  Platform,
   Pressable,
   ScrollView,
   useWindowDimensions,
@@ -57,10 +56,13 @@ export const DroneInfoSheet = ({
   const insets = useSafeAreaInsets();
   const [showCheckIn, setShowCheckIn] = useState(false);
   const [checkInContentHeight, setCheckInContentHeight] = useState(0);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  // iOS: the sheet is lifted by the keyboard height instead of KeyboardAvoidingView,
-  // so the lift is applied once. Android resizes the window itself.
-  const keyboardOffset = Platform.OS === "ios" ? keyboardHeight : 0;
+  // Screen Y of the keyboard's top edge. Null while the keyboard is hidden.
+  // Edge-to-edge (Expo SDK 54 default) keeps the Android window full height, so the
+  // keyboard overlaps the sheet. Sizing from the keyboard's top edge keeps the sheet
+  // between the top gap and the keyboard on both platforms.
+  const [keyboardTop, setKeyboardTop] = useState<number | null>(null);
+  const keyboardOffset =
+    keyboardTop === null ? 0 : Math.max(0, windowHeight - keyboardTop);
   const availableCheckInHeight = getAvailableCheckInHeight({
     keyboardHeight: keyboardOffset,
     topGap: DRONE_INFO_TOP_GAP,
@@ -96,10 +98,10 @@ export const DroneInfoSheet = ({
 
   useEffect(() => {
     const show = Keyboard.addListener("keyboardDidShow", (event) =>
-      setKeyboardHeight(event.endCoordinates.height),
+      setKeyboardTop(event.endCoordinates.screenY),
     );
     const hide = Keyboard.addListener("keyboardDidHide", () =>
-      setKeyboardHeight(0),
+      setKeyboardTop(null),
     );
     return () => {
       show.remove();

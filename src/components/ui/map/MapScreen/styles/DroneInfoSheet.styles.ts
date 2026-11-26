@@ -6,12 +6,14 @@ export const styles = StyleSheet.create({
   keyboardContainer: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: "flex-end",
+    overflow: "hidden",
   },
   sheet: {
     backgroundColor: colors.backgroundWhite,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     maxHeight: "100%",
+    overflow: "hidden",
     width: "100%",
     shadowColor: colors.startupLogo,
     shadowOffset: { height: -2, width: 0 },
@@ -59,12 +61,14 @@ export const styles = StyleSheet.create({
     paddingTop: 40,
   },
   tabsWrapper: {
+    backgroundColor: colors.main1,
     marginTop: 0,
+    zIndex: 3,
   },
   formScroll: {
     flex: 1,
     marginTop: 24,
-    overflow: "visible",
+    overflow: "hidden",
   },
   formScrollContent: {
     paddingBottom: 16,
