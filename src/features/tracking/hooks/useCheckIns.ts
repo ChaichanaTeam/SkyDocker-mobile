@@ -24,8 +24,6 @@ import type {
   CheckInSession,
   DroneOption,
   MissionOption,
-  PreparedCheckIn,
-  ReceivedCheckInToken,
 } from "@features/tracking/types/checkIn";
 import type { UserCoordinates } from "@features/tracking/types/types";
 import {
@@ -37,8 +35,17 @@ import {
 const isAmbiguousMutationFailure = (error: unknown): boolean =>
   isApiError(error) &&
   (error.kind === "timeout" ||
+    error.kind === "cancelled" ||
     error.kind === "network" ||
     error.kind === "invalid-response");
+
+const isAmbiguousCreateFailure = (error: unknown): boolean =>
+  isAmbiguousMutationFailure(error) ||
+  (isApiError(error) &&
+    error.kind === "http" &&
+    (error.status === 408 ||
+      error.status === 409 ||
+      (error.status >= 500 && error.status < 600)));
 
 export const useCheckIns = (
   getFreshCoordinates: () => Promise<UserCoordinates>,
@@ -49,14 +56,12 @@ export const useCheckIns = (
   const [privileges, setPrivileges] = useState<string[]>([]);
   const [phone, setPhone] = useState<string | null>(null);
   const [active, setActive] = useState<CheckInFeature | null>(null);
-  const [prepared, setPrepared] = useState<PreparedCheckIn | null>(null);
   const [loading, setLoading] = useState(true);
   const [mutation, setMutation] = useState<CheckInMutation | null>(
     null,
   );
   const [error, setError] = useState<string | null>(null);
   const [uncertain, setUncertain] = useState(false);
-  const token = useRef<ReceivedCheckInToken | null>(null);
   const customDrone = useRef<CachedCustomDrone | null>(
     null,
   );
@@ -87,8 +92,7 @@ export const useCheckIns = (
       let current = true;
       setLoading(true);
       setError(null);
-      setPrepared(null);
-      token.current = null;
+      customDrone.current = null;
       revision.current += 1;
       const activeRequest = fetchActiveCheckIn()
         .then((activeCheckIn) => {
@@ -118,7 +122,6 @@ export const useCheckIns = (
       });
       return () => {
         current = false;
-        token.current = null;
         revision.current += 1;
       };
     }, []),
@@ -126,16 +129,16 @@ export const useCheckIns = (
 
   const invalidatePreview = useCallback(() => {
     revision.current += 1;
-    token.current = null;
-    setPrepared(null);
   }, []);
 
-  const prepare = useCallback(
+  const create = useCallback(
     async (
       values: CheckInDraftValues,
       onCustomDroneCreated?: (drone: DroneOption) => void,
     ): Promise<void> => {
-      if (lock.current || uncertain) return;
+      if (lock.current) return;
+      if (uncertain)
+        throw new Error("Check-in status is uncertain. Refresh status first.");
       if (active)
         throw new Error("End your active check-in before starting another.");
       if (!phone?.trim())
@@ -147,6 +150,7 @@ export const useCheckIns = (
       setError(null);
       invalidatePreview();
       const previewRevision = revision.current;
+      let createStarted = false;
       try {
         let previewValues = values;
         let previewDrones = drones;
@@ -155,12 +159,13 @@ export const useCheckIns = (
             throw new Error("Select a valid flying category.");
           }
           const savedDrone =
-            customDrone.current?.weight === values.weight
+            customDrone.current?.weight === values.weight &&
+            drones.some((drone) => drone.id === customDrone.current?.drone.id)
               ? customDrone.current.drone
               : await createCustomDrone(
                   buildCustomDroneCreateRequest(
                     values.weight,
-                    `TEST-CUSTOM-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`,
+                    `CUSTOM-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`,
                   ),
                 );
           customDrone.current = { weight: values.weight, drone: savedDrone };
@@ -198,13 +203,31 @@ export const useCheckIns = (
         const response = await previewCheckIn(request);
         if (previewRevision !== revision.current) return;
         const receivedAt = Date.now();
-        token.current = { ...response, receivedAt };
-        setPrepared({
-          request,
-          expiresAt: receivedAt + response.expires_in * 1000,
-        });
+        if (!previewIsValid({ ...response, receivedAt }, Date.now())) {
+          throw new Error("Preview expired. Please try again.");
+        }
+        createStarted = true;
+        setMutation("create");
+        const created = await createCheckIn(response.checkin_token);
+        setActive(created);
+        onChanged();
       } catch (caught) {
-        throw new Error(mapCheckInErrorToMessage(caught, "preview"));
+        if (createStarted && isAmbiguousCreateFailure(caught)) {
+          try {
+            const current = await reconcileActive();
+            if (current) {
+              onChanged();
+              return;
+            }
+          } catch {
+            /* status still unknown */
+          }
+          setUncertain(true);
+          throw new Error(
+            "Creation status is uncertain. Check-in status will be checked before trying again.",
+          );
+        }
+        throw new Error(mapCheckInErrorToMessage(caught, createStarted ? "create" : "preview"));
       } finally {
         lock.current = false;
         setMutation(null);
@@ -216,55 +239,18 @@ export const useCheckIns = (
       getFreshCoordinates,
       invalidatePreview,
       missions,
+      onChanged,
       phone,
       privileges,
+      reconcileActive,
       uncertain,
     ],
   );
 
-  const confirm = useCallback(async (): Promise<void> => {
-    if (lock.current || uncertain) return;
-    const currentToken = token.current;
-    if (!currentToken || !previewIsValid(currentToken, Date.now())) {
-      invalidatePreview();
-      throw new Error("Preview expired. Review the flight again.");
-    }
-    lock.current = true;
-    revision.current += 1;
-    setMutation("create");
-    try {
-      const created = await createCheckIn(currentToken.checkin_token);
-      setActive(created);
-      invalidatePreview();
-      onChanged();
-    } catch (caught) {
-      if (isAmbiguousMutationFailure(caught)) {
-        try {
-          const current = await reconcileActive();
-          if (current) {
-            invalidatePreview();
-            onChanged();
-            return;
-          }
-        } catch {
-          /* status still unknown */
-        }
-        setUncertain(true);
-        throw new Error(
-          "Creation status is uncertain. Refresh check-in status before trying again.",
-        );
-      }
-      if (isApiError(caught) && caught.kind === "http" && caught.status === 404)
-        invalidatePreview();
-      throw new Error(mapCheckInErrorToMessage(caught, "create"));
-    } finally {
-      lock.current = false;
-      setMutation(null);
-    }
-  }, [invalidatePreview, onChanged, reconcileActive, uncertain]);
-
   const finish = useCallback(async (): Promise<void> => {
-    if (lock.current || uncertain || !active) return;
+    if (lock.current || !active) return;
+    if (uncertain)
+      throw new Error("Check-in status is uncertain. Refresh status first.");
     lock.current = true;
     revision.current += 1;
     setMutation("end");
@@ -300,7 +286,7 @@ export const useCheckIns = (
 
   return {
     active,
-    confirm,
+    create,
     drones,
     error,
     finish,
@@ -309,8 +295,6 @@ export const useCheckIns = (
     missions,
     mutation,
     phone,
-    prepare,
-    prepared,
     privileges,
     refreshActive,
     uncertain,

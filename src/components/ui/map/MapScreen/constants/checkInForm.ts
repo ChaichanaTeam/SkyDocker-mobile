@@ -20,7 +20,7 @@ export const CHECK_IN_FIELDS: readonly CheckInFormField[] = [
     key: "weight",
     keyboardType: "numeric",
     label: "Weight",
-    placeholder: "<900",
+    placeholder: "1000",
     suffix: "g",
   },
   {
@@ -28,7 +28,7 @@ export const CHECK_IN_FIELDS: readonly CheckInFormField[] = [
     keyboardType: "numeric",
     label: "Height",
     placeholder: "100",
-    suffix: "m AGL",
+    suffix: "m",
   },
   {
     key: "category",
@@ -55,12 +55,14 @@ export const CHECK_IN_FIELDS: readonly CheckInFormField[] = [
 export const CHECK_IN_DROPDOWNS = [
   {
     key: "mission",
-    label: "List of missions",
+    label: "Mission",
+    placeholder: "Mission",
     options: [],
   },
   {
     key: "drone",
-    label: "List of drones",
+    label: "Drone",
+    placeholder: "Drone",
     options: [],
   },
 ] as const satisfies readonly CheckInDropdownField[];
@@ -69,5 +71,5 @@ export const CHECK_IN_CATEGORY_DROPDOWN = {
   key: "category",
   label: "Category",
   options: [],
-  placeholder: "Select category",
+  placeholder: "A1",
 } as const satisfies CheckInDropdownField;

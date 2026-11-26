@@ -11,139 +11,93 @@ import type {
   VerificationPreviewResponse,
   VerificationRequest,
 } from "@app/api/types/pilots";
+import { z } from "zod";
 
-const record = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const string = (value: unknown): value is string => typeof value === "string";
-const number = (value: unknown): value is number =>
-  typeof value === "number" && Number.isFinite(value);
-const nullableString = (value: unknown): value is string | null =>
-  value === null || string(value);
-const optionalNullableString = (value: unknown): value is string | null | undefined =>
-  value === undefined || nullableString(value);
-
-const invalid = (): never => {
-  throw new Error("The server returned an invalid response.");
-};
+const tokenSchema = z.object({ token: z.string(), token_type: z.string() });
+const registerSchema = z.object({
+  access_token: z.string(),
+  refresh_token: z.string(),
+});
+const loginSchema = registerSchema.extend({
+  token_type: z.string(),
+  expires_in: z.number(),
+});
+const countryAtPointSchema = z.object({ country_tag: z.string() });
+const geoZoneFeatureSchema = z.object({
+  type: z.literal("Feature"),
+  geometry: z.object({
+    type: z.literal("Polygon"),
+    coordinates: z.array(z.array(z.tuple([z.number(), z.number()]))),
+  }),
+  properties: z.object({
+    country_id: z.number(),
+    country: z.string(),
+    type: z.string(),
+    tag: z.string(),
+    description_en: z.string().nullish(),
+    description_pl: z.string().nullish(),
+  }),
+});
+const geoZoneCollectionSchema = z.object({
+  type: z.literal("FeatureCollection"),
+  features: z.array(geoZoneFeatureSchema),
+});
+const pilotProfileSchema = z.object({
+  id: z.number(),
+  first_name: z.string().nullable(),
+  last_name: z.string().nullable(),
+  email: z.string(),
+  phone_number: z.string().nullable(),
+  pilot_number: z.string().nullable(),
+  show_to_public: z.boolean(),
+});
+const pilotDocumentSchema = z.object({
+  document_type: z.string(),
+  size: z.number(),
+  uploaded_at: z.string(),
+  url: z.string(),
+});
+const verificationPreviewSchema = z.object({
+  verification_token: z.string(),
+  expires_in: z.number(),
+});
+const verificationRequestSchema = z.object({
+  id: z.number(),
+  pilot_id: z.number(),
+  status: z.string(),
+  first_name: z.string(),
+  last_name: z.string(),
+});
 
 export const parseOtpResponse = (
   value: unknown,
 ): RequestOtpResponse | VerifyOtpResponse =>
-  record(value) && string(value.token) && string(value.token_type)
-    ? { token: value.token, token_type: value.token_type }
-    : invalid();
+  tokenSchema.parse(value);
 
 export const parseRegisterResponse = (value: unknown): RegisterResponse =>
-  record(value) && string(value.access_token) && string(value.refresh_token)
-    ? { access_token: value.access_token, refresh_token: value.refresh_token }
-    : invalid();
+  registerSchema.parse(value);
 
 export const parseLoginResponse = (value: unknown): LoginResponse =>
-  record(value) &&
-  string(value.access_token) &&
-  string(value.refresh_token) &&
-  string(value.token_type) &&
-  number(value.expires_in)
-    ? {
-        access_token: value.access_token,
-        refresh_token: value.refresh_token,
-        token_type: value.token_type,
-        expires_in: value.expires_in,
-      }
-    : invalid();
+  loginSchema.parse(value);
 
 export const parseCountryAtPoint = (value: unknown): CountryAtPoint =>
-  record(value) && string(value.country_tag)
-    ? { country_tag: value.country_tag }
-    : invalid();
-
-const geoZoneFeature = (
-  value: unknown,
-): value is GeoZoneCollection["features"][number] =>
-  record(value) &&
-  value.type === "Feature" &&
-  record(value.geometry) &&
-  value.geometry.type === "Polygon" &&
-  Array.isArray(value.geometry.coordinates) &&
-  value.geometry.coordinates.every(
-    (ring: unknown) =>
-      Array.isArray(ring) &&
-      ring.every(
-        (point: unknown) =>
-          Array.isArray(point) && point.length === 2 && point.every(number),
-      ),
-  ) &&
-  record(value.properties) &&
-  number(value.properties.country_id) &&
-  string(value.properties.country) &&
-  string(value.properties.type) &&
-  string(value.properties.tag) &&
-  optionalNullableString(value.properties.description_en) &&
-  optionalNullableString(value.properties.description_pl);
+  countryAtPointSchema.parse(value);
 
 export const parseGeoZoneCollection = (value: unknown): GeoZoneCollection =>
-  record(value) &&
-  value.type === "FeatureCollection" &&
-  Array.isArray(value.features) &&
-  value.features.every(geoZoneFeature)
-    ? { type: "FeatureCollection", features: value.features }
-    : invalid();
+  geoZoneCollectionSchema.parse(value);
 
 export const parsePilotProfile = (value: unknown): PilotProfile =>
-  record(value) &&
-  number(value.id) &&
-  nullableString(value.first_name) &&
-  nullableString(value.last_name) &&
-  string(value.email) &&
-  nullableString(value.phone_number) &&
-  nullableString(value.pilot_number) &&
-  typeof value.show_to_public === "boolean"
-    ? {
-        id: value.id,
-        first_name: value.first_name,
-        last_name: value.last_name,
-        email: value.email,
-        phone_number: value.phone_number,
-        pilot_number: value.pilot_number,
-        show_to_public: value.show_to_public,
-      }
-    : invalid();
-
-const pilotDocument = (value: unknown): value is PilotDocument =>
-  record(value) &&
-  string(value.document_type) &&
-  number(value.size) &&
-  string(value.uploaded_at) &&
-  string(value.url);
+  pilotProfileSchema.parse(value);
 
 export const parsePilotDocuments = (value: unknown): PilotDocument[] =>
-  Array.isArray(value) && value.every(pilotDocument) ? value : invalid();
+  z.array(pilotDocumentSchema).parse(value);
 
 export const parseVerificationPreview = (
   value: unknown,
 ): VerificationPreviewResponse =>
-  record(value) && string(value.verification_token) && number(value.expires_in)
-    ? {
-        verification_token: value.verification_token,
-        expires_in: value.expires_in,
-      }
-    : invalid();
+  verificationPreviewSchema.parse(value);
 
 export const parseVerificationRequest = (
   value: unknown,
 ): VerificationRequest =>
-  record(value) &&
-  number(value.id) &&
-  number(value.pilot_id) &&
-  string(value.status) &&
-  string(value.first_name) &&
-  string(value.last_name)
-    ? {
-        id: value.id,
-        pilot_id: value.pilot_id,
-        status: value.status,
-        first_name: value.first_name,
-        last_name: value.last_name,
-      }
-    : invalid();
+  verificationRequestSchema.parse(value);

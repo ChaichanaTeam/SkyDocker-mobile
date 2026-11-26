@@ -19,6 +19,9 @@ export const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 12,
   },
+  checkInSheet: {
+    backgroundColor: colors.main1,
+  },
   handle: {
     alignSelf: "center",
     backgroundColor: colors.pressableActive1,
@@ -32,21 +35,6 @@ export const styles = StyleSheet.create({
     zIndex: 2,
   },
 
-  collapsed: {
-    ...StyleSheet.absoluteFillObject,
-    paddingHorizontal: 24,
-    paddingTop: 44,
-  },
-  summaryRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  summaryText: {
-    color: "#000000",
-    fontFamily: typography.interRegular,
-    fontSize: 15,
-    fontWeight: "700",
-  },
   summaryLabel: {
     color: "#6B6B6B",
     fontWeight: "600",
@@ -66,13 +54,21 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 32,
   },
+  checkInExpanded: {
+    paddingHorizontal: 16,
+    paddingTop: 40,
+  },
+  tabsWrapper: {
+    marginTop: 0,
+  },
   formScroll: {
     flex: 1,
-    marginTop: 16,
+    marginTop: 24,
+    overflow: "visible",
   },
   formScrollContent: {
-    flexGrow: 1,
-    paddingBottom: 8,
+    paddingBottom: 16,
+    paddingHorizontal: 8,
   },
   actions: {
     borderColor: colors.main3,

@@ -25,6 +25,7 @@ export const useCheckInMap = () => {
     generation.current += 1;
     if (timer.current) clearTimeout(timer.current);
     timer.current = null;
+    setIsLoading(false);
   }, []);
 
   const refresh = useCallback(() => {
@@ -69,12 +70,10 @@ export const useCheckInMap = () => {
 
   const onRegionChange = useCallback((boundingBox: BoundingBox | null, center?: { lon: number; lat: number }) => {
     invalidate();
-    setMarkers([]);
     viewport.current = boundingBox && center ? { box: boundingBox, center } : null;
     if (!viewport.current) {
       setMarkers([]);
       setError(null);
-      setIsLoading(false);
     } else if (focused.current && isForeground(appState.current)) {
       timer.current = setTimeout(refresh, CHECK_IN_MAP_DEBOUNCE_MS);
     }
@@ -89,7 +88,6 @@ export const useCheckInMap = () => {
       appState.current = nextState;
       if (!isForeground(nextState)) {
         invalidate();
-        setIsLoading(false);
       } else if (!isForeground(previousState)) {
         refresh();
       }

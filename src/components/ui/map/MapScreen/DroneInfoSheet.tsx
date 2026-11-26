@@ -3,11 +3,10 @@ import { TextField } from "@/components/shared/ui/Text/TextField";
 import {
   DRONE_INFO_COLLAPSED_HEIGHT,
   DRONE_INFO_DETAILS_HEIGHT,
-  DRONE_INFO_FORM_MAX_HEIGHT,
   DRONE_INFO_HIDDEN_OFFSET,
-  DRONE_INFO_SNAP_POINTS,
   DRONE_INFO_TOP_GAP,
 } from "@/components/ui/map/MapScreen/constants/droneInfoSheet";
+import { CHECK_IN_CHROME_HEIGHT } from "@/components/ui/map/MapScreen/constants/checkInSheet";
 import { styles } from "@/components/ui/map/MapScreen/styles/DroneInfoSheet.styles";
 import type {
   DroneInfoSheetProps,
@@ -18,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Keyboard,
   KeyboardAvoidingView,
   PanResponder,
   Platform,
@@ -28,14 +28,22 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CheckInForm } from "./CheckInForm";
+import { SheetTabs } from "./SheetTabs";
+import {
+  getAvailableCheckInHeight,
+  getCheckInSheetHeight,
+} from "./utils/checkInSheetHeight";
 
 const EMPTY = "—";
 const withUnit = (value: number | undefined, unit: string) =>
   value === undefined ? EMPTY : `${value}${unit}`;
 
+const SWIPE_SNAP_POINTS = ["expanded", "collapsed"] as const;
+
 export const DroneInfoSheet = ({
   drone,
   isVisible,
+  collapseToken,
   isMutationPending,
   onClose,
   onCheckInPress,
@@ -46,36 +54,53 @@ export const DroneInfoSheet = ({
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [showCheckIn, setShowCheckIn] = useState(false);
+  const [checkInContentHeight, setCheckInContentHeight] = useState(0);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const availableCheckInHeight = getAvailableCheckInHeight({
+    keyboardHeight,
+    topGap: DRONE_INFO_TOP_GAP,
+    topInset: insets.top,
+    windowHeight,
+  });
   const sheetHeight = showCheckIn
-    ? Math.min(
-        windowHeight - insets.top - DRONE_INFO_TOP_GAP,
-        DRONE_INFO_FORM_MAX_HEIGHT,
-      )
+    ? checkInContentHeight > 0
+      ? getCheckInSheetHeight({
+          availableHeight: availableCheckInHeight,
+          chromeHeight: CHECK_IN_CHROME_HEIGHT + Math.max(insets.bottom, 16),
+          contentHeight: checkInContentHeight,
+        })
+      : availableCheckInHeight
     : DRONE_INFO_DETAILS_HEIGHT;
+  const collapsedY = sheetHeight - DRONE_INFO_COLLAPSED_HEIGHT - insets.bottom;
   const snapY: Record<DroneInfoSheetSnap, number> = {
     expanded: 0,
-    collapsed: sheetHeight - DRONE_INFO_COLLAPSED_HEIGHT,
+    collapsed: collapsedY,
     hidden: sheetHeight + DRONE_INFO_HIDDEN_OFFSET,
   };
   const snapYRef = useRef(snapY);
   snapYRef.current = snapY;
-  const previousSheetHeight = useRef(sheetHeight);
-  const translateY = useRef(
-    new Animated.Value(
-      DRONE_INFO_DETAILS_HEIGHT + DRONE_INFO_HIDDEN_OFFSET,
-    ),
-  ).current;
-  const currentY = useRef(
-    DRONE_INFO_DETAILS_HEIGHT + DRONE_INFO_HIDDEN_OFFSET,
-  );
-  const startY = useRef(
-    DRONE_INFO_DETAILS_HEIGHT + DRONE_INFO_HIDDEN_OFFSET,
-  );
-  const snapRef = useRef<DroneInfoSheetSnap>("hidden");
+  const previousCollapsedY = useRef(collapsedY);
+  const translateY = useRef(new Animated.Value(collapsedY)).current;
+  const currentY = useRef(collapsedY);
+  const startY = useRef(collapsedY);
+  const snapRef = useRef<DroneInfoSheetSnap>("collapsed");
   const onCloseRef = useRef(onClose);
-  const [snap, setSnap] = useState<DroneInfoSheetSnap>("hidden");
+  const [snap, setSnap] = useState<DroneInfoSheetSnap>("collapsed");
 
   onCloseRef.current = onClose;
+
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", (event) =>
+      setKeyboardHeight(event.endCoordinates.height),
+    );
+    const hide = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardHeight(0),
+    );
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const id = translateY.addListener(({ value }) => {
@@ -107,13 +132,21 @@ export const DroneInfoSheet = ({
   }, [isVisible, snapTo]);
 
   useEffect(() => {
-    if (previousSheetHeight.current !== sheetHeight) {
-      previousSheetHeight.current = sheetHeight;
+    if (collapseToken === undefined) return;
+    if (snapRef.current !== "hidden") snapTo("collapsed");
+    setShowCheckIn(false);
+  }, [collapseToken, snapTo]);
+
+  useEffect(() => {
+    if (previousCollapsedY.current !== collapsedY) {
+      previousCollapsedY.current = collapsedY;
       if (snapRef.current === "collapsed") {
-        translateY.setValue(snapYRef.current.collapsed);
+        translateY.setValue(collapsedY);
+        currentY.current = collapsedY;
+        startY.current = collapsedY;
       }
     }
-  }, [sheetHeight, translateY]);
+  }, [collapsedY, translateY]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -125,13 +158,13 @@ export const DroneInfoSheet = ({
       onPanResponderMove: (_, { dy }) => {
         const next = Math.min(
           Math.max(startY.current + dy, snapYRef.current.expanded),
-          snapYRef.current.hidden,
+          snapYRef.current.collapsed,
         );
         translateY.setValue(next);
       },
       onPanResponderRelease: (_, { vy }) => {
         const projected = currentY.current + vy * 150;
-        const target = DRONE_INFO_SNAP_POINTS.reduce((best, key) =>
+        const target = SWIPE_SNAP_POINTS.reduce((best, key) =>
           Math.abs(snapYRef.current[key] - projected) <
           Math.abs(snapYRef.current[best] - projected)
             ? key
@@ -142,11 +175,6 @@ export const DroneInfoSheet = ({
     }),
   ).current;
 
-  const collapsedOpacity = translateY.interpolate({
-    extrapolate: "clamp",
-    inputRange: [snapY.expanded, snapY.collapsed],
-    outputRange: [0, 1],
-  });
   const expandedOpacity = translateY.interpolate({
     extrapolate: "clamp",
     inputRange: [snapY.expanded, snapY.collapsed],
@@ -178,6 +206,7 @@ export const DroneInfoSheet = ({
       label: "Check in",
       onPress: () => {
         onCheckInPress();
+        setCheckInContentHeight(0);
         setShowCheckIn(true);
       },
     },
@@ -195,69 +224,70 @@ export const DroneInfoSheet = ({
     >
       <Animated.View
         pointerEvents={snap === "hidden" ? "none" : "auto"}
-        style={[styles.sheet, { height: sheetHeight, transform: [{ translateY }] }]}
+        style={[
+          styles.sheet,
+          showCheckIn && styles.checkInSheet,
+          { height: sheetHeight, transform: [{ translateY }] },
+        ]}
       >
         <View {...panResponder.panHandlers} style={styles.handleTouchArea}>
           <View style={styles.handle} />
         </View>
 
         <Animated.View
-          pointerEvents={snap === "collapsed" ? "auto" : "none"}
-          style={[styles.collapsed, { opacity: collapsedOpacity }]}
-        >
-          <View style={styles.summaryRow}>
-            <TextField style={styles.summaryText}>
-              <TextField style={styles.summaryLabel}>Missions: </TextField>
-              {drone?.missionsCount ?? "None"}
-            </TextField>
-            <TextField style={styles.summaryText}>
-              <TextField style={styles.summaryLabel}>Flight Time: </TextField>
-              {drone?.flightTime ?? "None"}
-            </TextField>
-          </View>
-          <TextField style={styles.droneName}>{droneName}</TextField>
-        </Animated.View>
-
-        <Animated.View
           pointerEvents={snap === "expanded" ? "auto" : "none"}
           style={[
             styles.expanded,
+            showCheckIn && styles.checkInExpanded,
             showCheckIn && { paddingBottom: Math.max(insets.bottom, 16) },
             { opacity: expandedOpacity },
           ]}
         >
-          <View style={styles.actions}>
-            {actions.map((action, index) => (
-              <Button
-                key={action.label}
-                onPress={action.onPress}
-                size="small"
-                style={[styles.action, index > 0 && styles.actionDivider]}
-                variant="text"
-              >
-                <Ionicons
-                  color={
-                    action.label === "Wiki" ? colors.startupLogo : colors.text5
-                  }
-                  name={action.icon}
-                  size={16}
-                />
-                <TextField
-                  style={[
-                    styles.actionText,
-                    action.label === "Wiki" && styles.actionTextEmphasized,
-                  ]}
+          {showCheckIn ? (
+            <View style={styles.tabsWrapper}>
+              <SheetTabs
+                active="checkin"
+                onCheckInPress={onCheckInPress}
+                onWikiPress={onWikiPress}
+                onProfilePress={onProfilePress}
+              />
+            </View>
+          ) : (
+            <View style={styles.actions}>
+              {actions.map((action, index) => (
+                <Button
+                  key={action.label}
+                  onPress={action.onPress}
+                  size="small"
+                  style={[styles.action, index > 0 && styles.actionDivider]}
+                  variant="text"
                 >
-                  {action.label}
-                </TextField>
-              </Button>
-            ))}
-          </View>
+                  <Ionicons
+                    color={
+                      action.label === "Wiki" ? colors.startupLogo : colors.text5
+                    }
+                    name={action.icon}
+                    size={16}
+                  />
+                  <TextField
+                    style={[
+                      styles.actionText,
+                      action.label === "Wiki" && styles.actionTextEmphasized,
+                    ]}
+                  >
+                    {action.label}
+                  </TextField>
+                </Button>
+              ))}
+            </View>
+          )}
 
           {showCheckIn ? (
             <ScrollView
+              automaticallyAdjustKeyboardInsets
               contentContainerStyle={styles.formScrollContent}
               keyboardShouldPersistTaps="handled"
+              onContentSizeChange={(_, height) => setCheckInContentHeight(height)}
               style={styles.formScroll}
             >
               <CheckInForm
@@ -286,13 +316,14 @@ export const DroneInfoSheet = ({
               </View>
 
               <TextField style={styles.currentMission}>
-                <TextField style={styles.summaryLabel}>Current Missions: </TextField>
+                <TextField style={styles.summaryLabel}>
+                  Current Missions:{" "}
+                </TextField>
                 {drone?.currentMission ?? "None"}
               </TextField>
             </>
           )}
         </Animated.View>
-
       </Animated.View>
     </KeyboardAvoidingView>
   );

@@ -24,13 +24,14 @@ export type DroneInfo = {
   heightKm?: number;
   rangeKm?: number;
   missionsCount?: number;
-  flightTime?: string;
+  flightTimeMinutes?: number;
   currentMission?: string;
 };
 
 export type DroneInfoSheetSnap = "hidden" | "collapsed" | "expanded";
 
 export type DroneInfoSheetProps = {
+  collapseToken?: number;
   drone?: DroneInfo | null;
   isVisible: boolean;
   isMutationPending?: boolean;
@@ -78,7 +79,6 @@ export type CheckInFormProps = {
 };
 
 export type ActiveCheckInProps = {
-  active: NonNullable<CheckInSession["active"]>;
   checkIns: CheckInSession;
   error: string | null;
   isMutationPending: boolean;
@@ -96,6 +96,7 @@ export type CheckInTextFieldProps = {
 
 export type CheckInDropdownProps = {
   appearance: MapAppearance;
+  disabled?: boolean;
   field: CheckInDropdownField;
   isCompact: boolean;
   isOpen: boolean;

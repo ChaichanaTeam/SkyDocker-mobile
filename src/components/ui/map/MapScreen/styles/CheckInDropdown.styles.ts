@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { typography } from "@/theme";
+import { colors, typography } from "@/theme";
 
 export const styles = StyleSheet.create({
   dropdownMenu: {
@@ -8,14 +8,16 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     elevation: 8,
     left: 0,
+    marginTop: 8,
+    maxHeight: 220,
     overflow: "hidden",
     position: "absolute",
     right: 0,
-    top: 54,
-    zIndex: 10,
-  },
-  dropdownMenuCompact: {
-    top: 48,
+    top: "100%",
+    shadowColor: colors.checkInShadow,
+    shadowOffset: { height: 4, width: 0 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
   },
   dropdownOption: {
     justifyContent: "center",
@@ -27,36 +29,44 @@ export const styles = StyleSheet.create({
     fontSize: 15,
   },
   dropdownRoot: {
+    position: "relative",
     zIndex: 2,
   },
   dropdownRootOpen: {
+    elevation: 12,
     zIndex: 12,
   },
   dropdownValue: {
+    flex: 1,
     fontFamily: typography.interRegular,
-    fontSize: 16,
-    textAlign: "center",
+    fontSize: 14,
+    textAlign: "left",
   },
   dropdownCategoryValue: {
     fontSize: 14,
+    textAlign: "center",
   },
-  outlinedDropdown: {
-    borderRadius: 8,
-    borderWidth: 1,
+  dropdownTrigger: {
+    alignItems: "center",
+    borderRadius: 10,
+    flexDirection: "row",
+    gap: 8,
     justifyContent: "center",
-    minHeight: 54,
-    paddingHorizontal: 16,
+    minHeight: 48,
+    paddingHorizontal: 8,
+    shadowColor: colors.checkInShadow,
+    shadowOffset: { height: 2, width: 0 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 2,
   },
   outlinedDropdownCompact: {
-    minHeight: 48,
+    minHeight: 44,
   },
-  outlinedLabel: {
+  fieldLabel: {
+    color: colors.checkInLightText,
     fontFamily: typography.interRegular,
     fontSize: 14,
-    left: 12,
-    paddingHorizontal: 4,
-    position: "absolute",
-    top: -11,
-    zIndex: 1,
+    marginBottom: 5,
   },
 });

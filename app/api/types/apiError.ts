@@ -2,6 +2,7 @@ export type ApiErrorKind =
   | "configuration"
   | "network"
   | "timeout"
+  | "cancelled"
   | "http"
   | "invalid-response";
 
@@ -16,6 +17,7 @@ const API_ERROR_KINDS = [
   "configuration",
   "network",
   "timeout",
+  "cancelled",
   "http",
   "invalid-response",
 ] as const satisfies readonly ApiErrorKind[];
