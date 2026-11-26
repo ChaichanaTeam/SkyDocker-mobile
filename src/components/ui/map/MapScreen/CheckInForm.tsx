@@ -23,6 +23,7 @@ export const CheckInForm = ({
   isVisible,
   isMutationPending = false,
   checkIns,
+  onDraftRangeChange,
 }: CheckInFormProps) => {
   const [actionError, setActionError] = useState<string | null>(null);
   const { invalidatePreview } = checkIns;
@@ -71,6 +72,13 @@ export const CheckInForm = ({
       resetTransientState();
     }
   }, [isVisible, resetTransientState]);
+
+  useEffect(() => {
+    if (!onDraftRangeChange) return;
+    const range = Number(formValues.range);
+    onDraftRangeChange(Number.isFinite(range) && range > 0 ? range : null);
+    return () => onDraftRangeChange(null);
+  }, [formValues.range, onDraftRangeChange]);
 
   return (
     <View

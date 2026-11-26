@@ -32,7 +32,7 @@ export const DocumentTypeSelect = ({
         <TextField
           style={value ? styles.selectValue : styles.selectPlaceholder}
         >
-          {value ? DOCUMENT_TYPE_TITLES[value] : "File type"}
+          {value ? DOCUMENT_TYPE_TITLES[value] : "Document type"}
         </TextField>
         {!locked && (
           <Ionicons
