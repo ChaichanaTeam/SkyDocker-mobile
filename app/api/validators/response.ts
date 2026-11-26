@@ -34,9 +34,8 @@ const geoZoneFeatureSchema = z.object({
     country: z.string(),
     type: z.string(),
     tag: z.string(),
-    strength: z.number(),
-    height_agl: z.number(),
-    activity_time: z.string().nullable(),
+    description_en: z.string().nullish(),
+    description_pl: z.string().nullish(),
   }),
 });
 const geoZoneCollectionSchema = z.object({

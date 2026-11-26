@@ -340,7 +340,7 @@ export const MapScreen = () => {
       ) : null}
 
       <GeoZoneInfoSheet
-        zone={zonesAtTap[0] ?? null}
+        zones={zonesAtTap}
         onClose={closeGeoZoneInfoSheet}
       />
     </GestureHandlerRootView>

@@ -34,9 +34,8 @@ export interface GeoZoneProperties {
   country: string;
   type: GeoZoneType;
   tag: string;
-  strength: number;
-  height_agl: number;
-  activity_time: string | null;
+  description_en?: string | null;
+  description_pl?: string | null;
 }
 
 export interface GeoZoneFeature {
