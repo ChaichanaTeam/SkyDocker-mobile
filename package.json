@@ -10,7 +10,13 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
-    "check:endpoint-config": "eslint app/api/endpoints-config.ts app/api/services/checkIn.service.ts"
+    "check:endpoint-config": "eslint app/api/endpoints-config.ts app/api/services/checkIn.service.ts",
+    "graph:build": "node scripts/graphify.mjs build",
+    "graph:update": "node scripts/graphify.mjs update",
+    "graph:query": "node scripts/graphify.mjs query",
+    "graph:explain": "node scripts/graphify.mjs explain",
+    "graph:path": "node scripts/graphify.mjs path",
+    "graph:check": "node scripts/graphify.mjs diagnose multigraph"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",

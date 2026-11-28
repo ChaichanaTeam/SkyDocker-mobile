@@ -48,3 +48,7 @@ app-example
 *PROJECT_OVERVIEW.md
 
 docs
+
+# graphify (local, rebuildable)
+.graphify-venv/
+graphify-out/

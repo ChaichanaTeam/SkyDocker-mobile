@@ -1,0 +1,2 @@
+# Optional development tool; separate from the application's dependencies.
+graphifyy==0.9.96

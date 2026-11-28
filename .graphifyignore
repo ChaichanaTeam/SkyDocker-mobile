@@ -1,0 +1,15 @@
+.git/
+node_modules/
+dist/
+web-build/
+.expo/
+android/
+ios/
+.graphify-venv/
+graphify-out/
+.agents/
+.claude/
+.superpowers/
+.idea/
+package-lock.json
+.env*
