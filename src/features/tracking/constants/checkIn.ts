@@ -2,8 +2,8 @@ import type { CheckInStatus } from "@app/api/types/checkIn";
 import type { CheckInStatusAppearance } from "@features/tracking/types/checkInMap";
 
 export const CHECK_IN_STATUS_CONFIG = {
-  created: { backgroundColor: "#FFFFFF", iconColor: "#1F2937", label: "Mission", visible: true },
-  pending: { backgroundColor: "#FFFFFF", iconColor: "#1F2937", label: "Mission", visible: true },
+  created: { backgroundColor: "#FF7700", iconColor: "#1F2937", label: "Created", visible: true },
+  pending: { backgroundColor: "#2F80ED", iconColor: "#FFFFFF", label: "Pending", visible: true },
   active: { backgroundColor: "#F1F906", iconColor: "#1F2937", label: "Active", visible: true },
   late: { backgroundColor: "#78560E", iconColor: "#FFFFFF", label: "Overdue", visible: true },
   loss_of_control: { backgroundColor: "#7C29E2", iconColor: "#FFFFFF", label: "Must land", visible: true },
@@ -15,3 +15,4 @@ export const CHECK_IN_STATUS_CONFIG = {
 } as const satisfies Record<CheckInStatus, CheckInStatusAppearance>;
 
 export const CHECK_IN_MAP_DEBOUNCE_MS = 300;
+export const CHECK_IN_MAP_REFRESH_MS = 30_000;

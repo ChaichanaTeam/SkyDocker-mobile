@@ -4,7 +4,11 @@ import { AppState, type AppStateStatus } from "react-native";
 
 import { fetchCheckIns, resolveCountry } from "@app/api/services/checkIn.service";
 import type { BoundingBox } from "@app/api/types/geoZone";
-import { CHECK_IN_MAP_DEBOUNCE_MS, CHECK_IN_STATUS_CONFIG } from "@features/tracking/constants/checkIn";
+import {
+  CHECK_IN_MAP_DEBOUNCE_MS,
+  CHECK_IN_MAP_REFRESH_MS,
+  CHECK_IN_STATUS_CONFIG,
+} from "@features/tracking/constants/checkIn";
 import { mapCheckInErrorToMessage } from "@features/tracking/mappers/checkInErrorMapper";
 import type { CheckInMapMarker } from "@features/tracking/types/checkInMap";
 
@@ -83,6 +87,7 @@ export const useCheckInMap = () => {
     focused.current = true;
     appState.current = AppState.currentState;
     refresh();
+    const interval = setInterval(refresh, CHECK_IN_MAP_REFRESH_MS);
     const subscription = AppState.addEventListener("change", nextState => {
       const previousState = appState.current;
       appState.current = nextState;
@@ -94,6 +99,7 @@ export const useCheckInMap = () => {
     });
     return () => {
       focused.current = false;
+      clearInterval(interval);
       invalidate();
       subscription.remove();
     };
